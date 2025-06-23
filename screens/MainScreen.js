@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { StyleSheet, View, Text, Switch } from "react-native";
 
+import MainScreen_Fast from "../components/MainScreen_Fast";
+
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
 
@@ -20,6 +22,7 @@ const MainScreen = () => {
           value={isFast}
         />
       </View>
+      <MainScreen_Fast />
     </View>
   );
 }
@@ -42,6 +45,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
 
     borderColor: 'black',
+    borderWidth: 1,
   },
   switch: {
     marginRight: 20,
