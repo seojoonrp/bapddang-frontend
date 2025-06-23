@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StyleSheet, View, Text, Switch } from "react-native";
 
 import MainScreen_Fast from "../components/MainScreen_Fast";
+import MainScreen_Slow from "../components/MainScreen_Slow";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
@@ -12,7 +13,7 @@ const MainScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.switchWrapper}>
+      <View style={styles.switchContainer}>
         <Switch
           style={styles.switch}
           trackColor={{ false: '#359c21', true: '#e02828' }}
@@ -22,7 +23,7 @@ const MainScreen = () => {
           value={isFast}
         />
       </View>
-      <MainScreen_Fast />
+      {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
     </View>
   );
 }
@@ -37,17 +38,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
-  switchWrapper: {
+  switchContainer: {
+    alignSelf: 'stretch',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    width: '100%',
-    marginTop: 20,
+    marginTop: 16,
+    marginHorizontal: 16,
 
     borderColor: 'black',
     borderWidth: 1,
   },
   switch: {
-    marginRight: 20,
   }
 })
