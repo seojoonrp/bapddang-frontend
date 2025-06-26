@@ -1,12 +1,15 @@
-import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import fastFoodData from '../data/fastFoodData.json';
 import slowFoodData from '../data/slowFoodData.json';
 import ReviewBox from "./ReviewBox";
+
 const { width } = Dimensions.get('window');
 const cardMargin = 16;
+
 const FoodCardNews = ({ mode }) => {
   const [selectedItem, setSelectedItem] = useState(null);
+
   const renderItem = ({ item }) => (
     <View style={styles.cardContainer}>
       <TouchableOpacity onPress={() => setSelectedItem(item)} style={styles.cardImage}>
@@ -18,14 +21,14 @@ const FoodCardNews = ({ mode }) => {
         </View>
       }
       {selectedItem && (
-      <View>
-        <ReviewBox
-          visible={!!selectedItem}
-          onClose={() => setSelectedItem(null)}
-          item={selectedItem}
-        />
-      </View>
-    )}
+        <View>
+          <ReviewBox
+            visible={!!selectedItem}
+            onClose={() => setSelectedItem(null)}
+            item={selectedItem}
+          />
+        </View>
+      )}
     </View>
   );
 
