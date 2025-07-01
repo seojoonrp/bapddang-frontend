@@ -8,17 +8,17 @@ const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
 
   const toggleFast = () => {
-    setIsFast(prev => !prev);
-  }
+    setIsFast((prev) => !prev);
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.switchContainer}>
         <Switch
           style={styles.switch}
-          trackColor={{ false: '#359c21', true: '#e02828' }}
-          ios_backgroundColor='#359c21'
-          thumbColor='#fcfcfc'
+          trackColor={{ false: "#359c21", true: "#e02828" }}
+          ios_backgroundColor="#359c21"
+          thumbColor="#fcfcfc"
           onValueChange={toggleFast}
           value={isFast}
         />
@@ -26,29 +26,28 @@ const MainScreen = () => {
       {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
     </View>
   );
-}
+};
 
 export default MainScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   switchContainer: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
     marginTop: 16,
     marginHorizontal: 16,
 
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
   },
-  switch: {
-  }
-})
+  switch: {},
+});
