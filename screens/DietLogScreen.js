@@ -8,6 +8,10 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+
+import Stick from "../components/svg/Stick";
+import MarshMallow from "../components/svg/Marshmallow";
 
 const DietLogScreen = () => {
   const sheetRef = useRef(null);
@@ -30,7 +34,8 @@ const DietLogScreen = () => {
   const [selectedDay, setSelectedDay] = useState(1);
 
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
+      <MarshMallow />
       <BottomSheet
         ref={sheetRef}
         index={0}
@@ -79,7 +84,7 @@ const DietLogScreen = () => {
           </View>
         </BottomSheetView>
       </BottomSheet>
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -98,7 +103,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
-    height: 250,
+    height: 260,
   },
   innerSheetContainer: {
     width: "100%",
