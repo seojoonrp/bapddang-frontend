@@ -3,36 +3,33 @@ import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from '
 import fastFoodData from '../data/fastFoodData.json';
 import slowFoodData from '../data/slowFoodData.json';
 import InfoBox from "./InfoBox";
+import ReviewBox from "./ReviewBox";
 
 const { width } = Dimensions.get('window');
 const cardMargin = 16;
 
 const FoodCardNews = ({ mode }) => {
   const [selectedItem, setSelectedItem] = useState(null);
+  const [showReview, setShowReview] = useState(false);
+
+  const handleCardPress = (item) => {
+    setSelectedItem(item);
+    setShowReview(false);
+  };
+
+  const handleClose = () => {
+    setSelectedItem(null);
+    setShowReview(false);
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.cardContainer}>
-      <TouchableOpacity onPress={() => setSelectedItem(item)} style={styles.cardImage}>
+      <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.cardImage}>
         <Text style={styles.name}>{item.name}</Text>
       </TouchableOpacity>
-      {mode === 'slow' &&
+      {mode === 'slow' && (
         <View style={styles.calorieBox}>
           <Text style={styles.calorieText}>{item.calorie} cal</Text>
-        </View>
-      }
-      {selectedItem && (
-        <View>
-          <InfoBox
-            item={selectedItem}
-            onLike={() => {
-              console.log('다시 먹고 싶어요:', selectedItem.name);
-              setSelectedItem(null);
-            }}
-            onDislike={() => {
-              console.log('별로였어요:', selectedItem.name);
-              setSelectedItem(null);
-            }}
-          />
         </View>
       )}
     </View>
@@ -50,6 +47,25 @@ const FoodCardNews = ({ mode }) => {
         contentContainerStyle={{ paddingHorizontal: cardMargin }}
         ItemSeparatorComponent={() => <View style={{ width: cardMargin * 2 }} />}
       />
+
+      {selectedItem && !showReview && (
+        <InfoBox
+          visible={true}
+          item={selectedItem}
+          mode={mode}
+          onLike={() => setShowReview(true)}
+          onDislike={handleClose}
+          onClose={handleClose}
+        />
+      )}
+
+      {selectedItem && showReview && (
+        <ReviewBox
+          visible={true}
+          item={selectedItem}
+          onClose={handleClose}
+        />
+      )}
     </View>
   );
 };
@@ -57,8 +73,7 @@ const FoodCardNews = ({ mode }) => {
 export default FoodCardNews;
 
 const styles = StyleSheet.create({
-  container: {
-  },
+  container: {},
   cardContainer: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -68,7 +83,6 @@ const styles = StyleSheet.create({
     height: width - cardMargin * 2 - 2,
     justifyContent: 'center',
     alignItems: 'center',
-
     backgroundColor: '#fcfcfc',
     borderColor: 'black',
     borderWidth: 1,
@@ -81,7 +95,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     marginTop: -20,
     textAlign: 'center',
-
     backgroundColor: 'white',
     borderRadius: 16,
     borderWidth: 1,
@@ -89,5 +102,5 @@ const styles = StyleSheet.create({
   },
   calorieText: {
     fontSize: 25,
-  }
+  },
 });

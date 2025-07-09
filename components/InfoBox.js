@@ -10,30 +10,24 @@ import {
   Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Canvas, Circle, Group, RadialGradient, vec } from '@shopify/react-native-skia';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const { height, width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
-const RadialButton = ({ text, onPress }) => {
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.buttonWrapper}>
-      <Canvas style={styles.canvas}>
-        <Group>
-          <Circle cx={150} cy={30} r={30}>
-            <RadialGradient
-              c={vec(150, 30)}
-              r={45}
-              colors={['#ffffff', '#fbe4c2', '#d49a7b']}
-            />
-          </Circle>
-        </Group>
-      </Canvas>
+const GradientButton = ({ text, onPress }) => (
+  <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.buttonWrapper}>
+    <LinearGradient
+      colors={['#fbe4c2', '#ffffff', '#fbe4c2']}
+      start={{ x: 0.5, y: 1 }}
+      end={{ x: 0.5, y: 0 }}
+      style={styles.buttonGradient}
+    >
       <Text style={styles.buttonText}>{text}</Text>
-    </TouchableOpacity>
-  );
-};
+    </LinearGradient>
+  </TouchableOpacity>
+);
 
-const InfoBox = ({ visible, onClose, item, onLike, onDislike }) => {
+const InfoBox = ({ visible, onClose, item, onLike, onDislike,mode }) => {
   if (!item) return null;
 
   return (
@@ -47,7 +41,6 @@ const InfoBox = ({ visible, onClose, item, onLike, onDislike }) => {
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.boxContainer}>
-              {/* 🔺 아이콘 바 */}
               <View style={styles.iconBar}>
                 <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
                   <Ionicons name="chevron-back" size={22} color="#fff" />
@@ -56,12 +49,10 @@ const InfoBox = ({ visible, onClose, item, onLike, onDislike }) => {
                 <Ionicons name="calendar-outline" size={22} color="#fff" />
               </View>
 
-              {/* 🔻 빨간 헤더 */}
-              <View style={styles.header}>
+              <View style={[styles.header, {backgroundColor: mode === 'fast' ? '#E90C05' : '#00CA80'}]}>
                 <Text style={styles.headerText}>★ {item.name} ★</Text>
               </View>
 
-              {/* ⚪ 흰색 본문 */}
               <View style={styles.contentBox}>
                 <View style={styles.imageContainer}>
                   {item.image ? (
@@ -77,8 +68,8 @@ const InfoBox = ({ visible, onClose, item, onLike, onDislike }) => {
                   {item.brand ? `${item.brand}에서 먹을 수 있어요!` : '알 수 없는 브랜드'}
                 </Text>
 
-                <RadialButton text="다시 먹고 싶어요" onPress={onLike} />
-                <RadialButton text="별로였어요" onPress={onDislike} />
+                <GradientButton text="다시 먹고 싶어요" onPress={onLike} />
+                <GradientButton text="별로였어요" onPress={onDislike} />
               </View>
 
             </View>
@@ -123,7 +114,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   header: {
-    backgroundColor: '#e60000',
     paddingVertical: 10,
     alignItems: 'center',
     borderTopLeftRadius: 20,
@@ -174,21 +164,20 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     width: '90%',
-    height: 60,
-    marginVertical: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: 30,
-    overflow: 'hidden',
-    position: 'relative',
+    marginVertical: 6,
+    shadowColor: '#A94946',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  canvas: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+  buttonGradient: {
+    borderRadius: 30,
+    paddingVertical: 14,
+    alignItems: 'center',
   },
   buttonText: {
-    zIndex: 1,
     color: '#6b1e1e',
     fontWeight: '600',
     fontSize: 16,
