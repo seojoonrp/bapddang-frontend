@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import fastFoodData from '../data/fastFoodData.json';
 import slowFoodData from '../data/slowFoodData.json';
-import ReviewBox from "./ReviewBox";
+import InfoBox from "./InfoBox";
 
 const { width } = Dimensions.get('window');
 const cardMargin = 16;
@@ -22,10 +22,16 @@ const FoodCardNews = ({ mode }) => {
       }
       {selectedItem && (
         <View>
-          <ReviewBox
-            visible={!!selectedItem}
-            onClose={() => setSelectedItem(null)}
+          <InfoBox
             item={selectedItem}
+            onLike={() => {
+              console.log('다시 먹고 싶어요:', selectedItem.name);
+              setSelectedItem(null);
+            }}
+            onDislike={() => {
+              console.log('별로였어요:', selectedItem.name);
+              setSelectedItem(null);
+            }}
           />
         </View>
       )}
