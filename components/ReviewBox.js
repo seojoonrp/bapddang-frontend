@@ -13,9 +13,10 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import keywordMap from '../data/keywordMap.json';
 
-const { height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
+const PADDING_HORIZONTAL = 11;
 
-const ReviewBox = ({ visible, onClose, item }) => {
+const ReviewBox = ({ visible, onClose, item,mode }) => {
   const [tagsReason, setTagsReason] = useState([]);
   const [tagsSituation, setTagsSituation] = useState([]);
   const [selectedReasons, setSelectedReasons] = useState([]);
@@ -55,18 +56,30 @@ const ReviewBox = ({ visible, onClose, item }) => {
   return (
     <Modal
       visible={visible}
-      animationType='none'
+      animationType='fade'
       transparent
       presentationStyle="overFullScreen"
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
-            <View style={styles.modalContainer}>
-              <ScrollView contentContainerStyle={styles.container}>
-                <View style={styles.header}>
-                  <Text style={styles.foodName}>★ {item.name} ★</Text>
-                </View>
+            <View style={styles.boxContainer}>
+              <View style={styles.iconBar}>
+                <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
+                  <Ionicons name="chevron-back" size={22} color="#fff" />
+                  <Text style={styles.iconText}>HOME</Text>
+                </TouchableOpacity>
+                <Ionicons name="calendar-outline" size={22} color="#fff" />
+              </View>
+
+              <View
+                style={[
+                  styles.header,
+                  { backgroundColor: mode === "fast" ? "#E90C05" : "#00CA80" },
+                ]}
+              >
+                <Text style={styles.headerText}>★ {item.name} ★</Text>
+              </View>
 
                 <View style={styles.contentBox}>
                   <Text style={styles.subtitle}>왜 이 음식이 좋았나요?</Text>
@@ -126,7 +139,6 @@ const ReviewBox = ({ visible, onClose, item }) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </ScrollView>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -140,25 +152,44 @@ export default ReviewBox;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContainer: {
-    width: '85%',
-    backgroundColor: 'transparent',
-    maxHeight: height * 0.85,
+  boxContainer: {
+    width: width - PADDING_HORIZONTAL * 2,
+    backgroundColor: "transparent",
   },
-  container: {
-    alignItems: 'center',
+  iconBar: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  iconLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconText: {
+    color: "white",
+    marginLeft: 4,
+    fontWeight: "bold",
+    fontSize: 13,
   },
   header: {
-    backgroundColor: '#e60000',
-    paddingVertical: 10,
-    alignItems: 'center',
+    paddingTop: 27,
+    paddingBottom: 11,
+    alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    width: '100%',
+  },
+  headerText: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 30,
+    color: "white",
   },
   foodName: {
     color: 'white',
@@ -166,12 +197,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   contentBox: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 13,
+    paddingBottom: 76,
+    alignItems: "center",
   },
   subtitle: {
     marginTop: 20,
@@ -188,16 +220,13 @@ const styles = StyleSheet.create({
   },
   tag: {
     borderWidth: 1,
-    borderColor: '#A94946',
+    borderColor: '#D9D9D9',
     backgroundColor: '#fff',
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
     margin: 5,
-    shadowColor: '#A94946',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   tagSelected: {
     backgroundColor: '#fbe4c2',
@@ -207,7 +236,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    width: '100%',
+    textAlign: 'center',
+    width: 280,
     padding: 10,
     marginTop: 10,
     fontSize: 14,

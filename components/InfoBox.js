@@ -16,8 +16,8 @@ import Colors from "../styles/colors";
 const { width, height } = Dimensions.get("window");
 const PADDING_HORIZONTAL = 11;
 
-const InfoBox = ({ visible, onClose, item, onLike, onDislike, mode }) => {
-  if (!item) return null;
+const InfoBox = ({ visible, onClose, item, onLike, mode }) => {
+  if (!visible) return null;
 
   return (
     <Modal

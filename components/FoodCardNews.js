@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import fastFoodData from '../data/fastFoodData.json';
 import slowFoodData from '../data/slowFoodData.json';
-import InfoBox from "./InfoBox";
-import ReviewBox from "./ReviewBox";
+import InfoBox from './InfoBox';
+import ReviewBox from './ReviewBox';
+
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const cardMargin = 16;
@@ -12,19 +26,51 @@ const FoodCardNews = ({ mode }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [showReview, setShowReview] = useState(false);
 
+  // 애니메이션 좌표
+  const infoX = useSharedValue(0);
+  const reviewX = useSharedValue(width); // 오른쪽에서 시작
+
+  const infoStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: infoX.value }],
+  }));
+
+  const reviewStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: reviewX.value }],
+  }));
+
+  // 카드 선택 시 초기화
   const handleCardPress = (item) => {
     setSelectedItem(item);
     setShowReview(false);
+    infoX.value = 0;
+    reviewX.value = width;
   };
 
+  // 종료
   const handleClose = () => {
     setSelectedItem(null);
     setShowReview(false);
   };
 
+  // 좋아요 눌렀을 때 슬라이드 전환
+  const handleLike = () => {
+  console.log('before:', infoX.value, reviewX.value);
+
+  infoX.value = withTiming(-width, { duration: 300 });
+  reviewX.value = withTiming(0, { duration: 300 }, () => {
+    runOnJS(setShowReview)(true);
+    console.log('after:', infoX.value, reviewX.value);
+  });
+};
+
+
+  // 카드 렌더링
   const renderItem = ({ item }) => (
     <View style={styles.cardContainer}>
-      <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.cardImage}>
+      <TouchableOpacity
+        onPress={() => handleCardPress(item)}
+        style={styles.cardImage}
+      >
         <Text style={styles.name}>{item.name}</Text>
       </TouchableOpacity>
       {mode === 'slow' && (
@@ -40,31 +86,37 @@ const FoodCardNews = ({ mode }) => {
       <FlatList
         data={mode === 'fast' ? fastFoodData : slowFoodData}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: cardMargin }}
-        ItemSeparatorComponent={() => <View style={{ width: cardMargin * 2 }} />}
+        ItemSeparatorComponent={() => (
+          <View style={{ width: cardMargin * 2 }} />
+        )}
       />
 
-      {selectedItem && !showReview && (
-        <InfoBox
-          visible={true}
-          item={selectedItem}
-          mode={mode}
-          onLike={() => setShowReview(true)}
-          onDislike={handleClose}
-          onClose={handleClose}
-        />
-      )}
+      {selectedItem && (
+        <>
+          <Animated.View style={[infoStyle, styles.animatedBox]}>
+            <InfoBox
+              visible={!showReview}
+              item={selectedItem}
+              mode={mode}
+              onLike={handleLike}
+              onClose={handleClose}
+            />
+          </Animated.View>
 
-      {selectedItem && showReview && (
-        <ReviewBox
-          visible={true}
-          item={selectedItem}
-          onClose={handleClose}
-        />
+          <Animated.View style={[reviewStyle, styles.animatedBox]}>
+            <ReviewBox
+              visible={showReview}
+              item={selectedItem}
+              mode={mode}
+              onClose={handleClose}
+            />
+          </Animated.View>
+        </>
       )}
     </View>
   );
@@ -73,7 +125,9 @@ const FoodCardNews = ({ mode }) => {
 export default FoodCardNews;
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    flex: 1,
+  },
   cardContainer: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -102,5 +156,10 @@ const styles = StyleSheet.create({
   },
   calorieText: {
     fontSize: 25,
+  },
+  animatedBox: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
 });
