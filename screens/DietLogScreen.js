@@ -10,8 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
-import Stick from "../components/svg/Stick";
-import MarshMallow from "../components/svg/Marshmallow";
+import Colors from "../styles/colors";
+import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 
 const DietLogScreen = () => {
   const sheetRef = useRef(null);
@@ -35,7 +35,7 @@ const DietLogScreen = () => {
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
-      <MarshMallow />
+      <MarshmallowStick />
       <BottomSheet
         ref={sheetRef}
         index={0}
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   sheetTitleText: {
     marginTop: 20,
     fontFamily: "NanumSquareEB",
-    color: "#521210",
+    color: Colors.burn,
   },
   dayContainer: {
     marginTop: 43,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: 21,
   },
   dayText: {
-    color: "#521210",
+    color: Colors.burn,
     fontSize: 36,
     fontFamily: "NanumSquareB",
     marginTop: 2,
