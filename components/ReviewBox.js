@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,19 +9,21 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Dimensions,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import keywordMap from '../data/keywordMap.json';
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+import keywordMap from "../data/keywordMap.json";
+import Colors from "../styles/colors";
 
 const { width, height } = Dimensions.get("window");
 const PADDING_HORIZONTAL = 11;
 
-const ReviewBox = ({ visible, onClose, item,mode }) => {
+const ReviewBox = ({ visible, onClose, item, mode }) => {
   const [tagsReason, setTagsReason] = useState([]);
   const [tagsSituation, setTagsSituation] = useState([]);
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [selectedSituations, setSelectedSituations] = useState([]);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
   useEffect(() => {
@@ -31,32 +33,32 @@ const ReviewBox = ({ visible, onClose, item,mode }) => {
       setTagsReason(tagData.reason || []);
       setTagsSituation(tagData.situation || []);
     } else {
-      setTagsReason(['맛있어요']);
-      setTagsSituation(['혼밥']);
+      setTagsReason(["맛있어요"]);
+      setTagsSituation(["혼밥"]);
     }
   }, [item]);
 
   const toggleTag = (tag, selectedList, setSelectedList) => {
     if (selectedList.includes(tag)) {
-      setSelectedList(selectedList.filter(t => t !== tag));
+      setSelectedList(selectedList.filter((t) => t !== tag));
     } else {
       setSelectedList([...selectedList, tag]);
     }
   };
 
   const handleSubmit = () => {
-    console.log('이유:', selectedReasons);
-    console.log('상황:', selectedSituations);
-    console.log('한줄평:', comment);
-    console.log('별점:', rating);
-    alert('후기가 등록되었습니다!');
+    console.log("이유:", selectedReasons);
+    console.log("상황:", selectedSituations);
+    console.log("한줄평:", comment);
+    console.log("별점:", rating);
+    alert("후기가 등록되었습니다!");
     onClose();
   };
 
   return (
     <Modal
       visible={visible}
-      animationType='fade'
+      animationType="fade"
       transparent
       presentationStyle="overFullScreen"
     >
@@ -81,64 +83,104 @@ const ReviewBox = ({ visible, onClose, item,mode }) => {
                 <Text style={styles.headerText}>★ {item.name} ★</Text>
               </View>
 
-                <View style={styles.contentBox}>
-                  <Text style={styles.subtitle}>왜 이 음식이 좋았나요?</Text>
-                  <View style={styles.tagContainer}>
-                    {tagsReason.map(tag => (
-                      <TouchableOpacity
-                        key={tag}
+              <View style={styles.contentBox}>
+                <Text style={styles.subtitle}>왜 이 음식이 좋았나요?</Text>
+                <View style={styles.tagContainer}>
+                  {tagsReason.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      style={[
+                        styles.tag,
+                        selectedReasons.includes(tag) && styles.tagSelected,
+                      ]}
+                      onPress={() =>
+                        toggleTag(tag, selectedReasons, setSelectedReasons)
+                      }
+                    >
+                      <Text
                         style={[
-                          styles.tag,
-                          selectedReasons.includes(tag) && styles.tagSelected,
+                          styles.tagText,
+                          { opacity: selectedReasons.includes(tag) ? 1 : 0.5 },
                         ]}
-                        onPress={() => toggleTag(tag, selectedReasons, setSelectedReasons)}
                       >
-                        <Text>{tag}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
-                  <View style={styles.tagContainer}>
-                    {tagsSituation.map(tag => (
-                      <TouchableOpacity
-                        key={tag}
-                        style={[
-                          styles.tag,
-                          selectedSituations.includes(tag) && styles.tagSelected,
-                        ]}
-                        onPress={() => toggleTag(tag, selectedSituations, setSelectedSituations)}
-                      >
-                        <Text>{tag}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="후기 남기기..."
-                    value={comment}
-                    onChangeText={setComment}
-                  />
-
-                  <View style={styles.ratingRow}>
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                        <Text style={[styles.star, rating >= i && styles.starSelected]}>★</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-
-                  <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.backButton} onPress={onClose}>
-                      <Text style={styles.backText}>뒤로가기</Text>
+                        {tag}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                      <Text style={styles.submitText}>후기 등록</Text>
-                    </TouchableOpacity>
-                  </View>
+                  ))}
                 </View>
+
+                <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
+                <View style={styles.tagContainer}>
+                  {tagsSituation.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      style={[
+                        styles.tag,
+                        selectedSituations.includes(tag) && styles.tagSelected,
+                      ]}
+                      onPress={() =>
+                        toggleTag(
+                          tag,
+                          selectedSituations,
+                          setSelectedSituations
+                        )
+                      }
+                    >
+                      <Text
+                        style={[
+                          styles.tagText,
+                          {
+                            opacity: selectedSituations.includes(tag) ? 1 : 0.5,
+                          },
+                        ]}
+                      >
+                        {tag}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="후기 남기기..."
+                  value={comment}
+                  onChangeText={setComment}
+                />
+
+                <View style={styles.ratingRow}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                      <Text
+                        style={[
+                          styles.star,
+                          rating >= i && styles.starSelected,
+                        ]}
+                      >
+                        ★
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.bottomButton,
+                      { backgroundColor: "#D9D9D9" },
+                    ]}
+                    onPress={onClose}
+                  >
+                    <Text style={styles.bottomButtonText}>뒤로가기</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.bottomButton}
+                    onPress={handleSubmit}
+                  >
+                    <Text style={styles.bottomButtonText}>후기 등록</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -152,9 +194,9 @@ export default ReviewBox;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   boxContainer: {
     width: width - PADDING_HORIZONTAL * 2,
@@ -192,97 +234,91 @@ const styles = StyleSheet.create({
     color: "white",
   },
   foodName: {
-    color: 'white',
+    color: "white",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   contentBox: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#fff",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 12,
-    paddingTop: 13,
-    paddingBottom: 76,
-    alignItems: "center",
   },
   subtitle: {
-    marginTop: 20,
-    marginBottom: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#5c0a0a',
+    marginBottom: 15,
+    fontFamily: "NanumSquareEB",
+    fontSize: 18,
+    color: Colors.burn,
   },
   tagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginBottom: 35,
+  },
+  tagText: {
+    fontFamily: "NanumSquareB",
+    fontSize: 16,
+    color: Colors.burn,
+    opacity: 0.5,
   },
   tag: {
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    backgroundColor: '#fff',
+    borderWidth: 0.4,
+    borderColor: "#D9D9D9",
+    backgroundColor: "#fff",
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    margin: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    margin: 3,
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   tagSelected: {
-    backgroundColor: '#fbe4c2',
-    borderColor: '#c03c3c',
+    boxShadow:
+      "0px 2px 4px 0px #A94946 inset, 0px 2px 4px 4px rgba(169, 73, 70, 0.30) inset, 0px 2px 6px 4px #FDEDC0 inset",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    textAlign: 'center',
+    textAlign: "center",
     width: 280,
     padding: 10,
     marginTop: 10,
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   ratingRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 16,
   },
   star: {
     fontSize: 30,
-    color: '#aaa',
+    color: "#aaa",
     marginHorizontal: 3,
   },
   starSelected: {
-    color: '#A94946',
+    color: "#A94946",
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 30,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 62,
   },
-  backButton: {
-    flex: 1,
-    backgroundColor: '#ddd',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginRight: 10,
-    alignItems: 'center',
+  bottomButton: {
+    backgroundColor: "#e60000",
+    width: 151,
+    height: 51,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  backText: {
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  submitButton: {
-    flex: 1,
-    backgroundColor: '#e60000',
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginLeft: 10,
-    alignItems: 'center',
-  },
-  submitText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  bottomButtonText: {
+    color: "#fff",
+    fontFamily: "NanumSquareEB",
+    fontSize: 18,
   },
 });

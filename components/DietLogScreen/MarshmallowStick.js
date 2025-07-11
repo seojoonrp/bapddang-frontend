@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 100,
-    paddingVertical: 220,
+    paddingVertical: 200,
   },
   stick: {
     position: "absolute",

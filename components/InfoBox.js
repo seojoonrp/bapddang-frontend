@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   brandText: {
     color: "#a38888",
     fontSize: 14,
-    marginBottom: 20,
+    marginBottom: 103,
   },
   bottomButton: {
     width: "100%",
