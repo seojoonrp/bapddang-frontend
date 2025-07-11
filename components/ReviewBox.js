@@ -77,7 +77,10 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
               <View
                 style={[
                   styles.header,
-                  { backgroundColor: mode === "fast" ? "#E90C05" : "#00CA80" },
+                  {
+                    backgroundColor:
+                      mode === "fast" ? Colors.point_red : "#00CA80",
+                  },
                 ]}
               >
                 <Text style={styles.headerText}>★ {item.name} ★</Text>
@@ -239,13 +242,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   contentBox: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 12,
+    height: 632,
   },
   subtitle: {
     marginBottom: 15,
@@ -281,26 +284,27 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
+    borderColor: "#D9D9D9",
+    borderRadius: 13,
     textAlign: "center",
-    width: 280,
-    padding: 10,
-    marginTop: 10,
-    fontSize: 14,
-    color: "#333",
+    width: 312,
+    height: 51,
+    marginTop: 5,
+    fontFamily: "NanumSquareB",
+    fontSize: 16,
+    color: Colors.light_gray,
   },
   ratingRow: {
     flexDirection: "row",
     marginTop: 16,
   },
   star: {
-    fontSize: 30,
-    color: "#aaa",
-    marginHorizontal: 3,
+    fontSize: 33,
+    color: Colors.light_gray,
+    marginHorizontal: 1,
   },
   starSelected: {
-    color: "#A94946",
+    color: "#E90C05",
   },
   buttonRow: {
     flexDirection: "row",
@@ -309,7 +313,7 @@ const styles = StyleSheet.create({
     marginTop: 62,
   },
   bottomButton: {
-    backgroundColor: "#e60000",
+    backgroundColor: Colors.point_red,
     width: 151,
     height: 51,
     borderRadius: 20,

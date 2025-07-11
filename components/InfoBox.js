@@ -133,13 +133,13 @@ const styles = StyleSheet.create({
     color: "white",
   },
   contentBox: {
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#fff",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 12,
-    paddingTop: 13,
-    paddingBottom: 76,
-    alignItems: "center",
+    height: 632,
   },
   imageContainer: {
     width: 292,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
     borderWidth: 0.4,
-    borderColor: "#D9D9D9",
+    borderColor: Colors.light_gray,
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   buttonText: {
