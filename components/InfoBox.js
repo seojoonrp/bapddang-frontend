@@ -10,13 +10,12 @@ import {
   Dimensions,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
 import Colors from "../styles/colors";
 
 const { width, height } = Dimensions.get("window");
 const PADDING_HORIZONTAL = 11;
 
-const InfoBox = ({ visible, onClose, item, onLike, mode }) => {
+const InfoBox = ({ visible, onClose, item, mode }) => {
   if (!visible) return null;
 
   return (
@@ -64,21 +63,29 @@ const InfoBox = ({ visible, onClose, item, onLike, mode }) => {
                     : "알 수 없는 브랜드"}
                 </Text>
 
-                <TouchableOpacity
-                  style={[styles.bottomButton, { backgroundColor: "white" }]}
-                  onPress={onLike}
-                >
-                  <Text style={styles.buttonText}>다시 먹고 싶어요</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.bottomButton,
-                    { backgroundColor: "#FFFAED", marginTop: 12 },
-                  ]}
-                  onPress={onLike}
-                >
-                  <Text style={styles.buttonText}>별로였어요</Text>
-                </TouchableOpacity>
+                <Text style={styles.infoText}>한식</Text>
+                <Text style={styles.infoText}>칼로리: {item.kcal}kcal</Text>
+                <Text style={styles.infoText}>맵기지수: {item.spicy}</Text>
+                <Text style={styles.infoText}>단맛지수: {item.sweet}</Text>
+                <Text style={styles.infoText}>짠맛지수: {item.salty}</Text>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
+                    onPress={onClose}
+                  >
+                    <Text style={styles.emojiText}>👍</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.emojiButton,
+                      { backgroundColor: "#FFFAED" },
+                    ]}
+                    onPress={onClose}
+                  >
+                    <Text style={styles.emojiText}>👎</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -168,21 +175,29 @@ const styles = StyleSheet.create({
   brandText: {
     color: "#a38888",
     fontSize: 14,
-    marginBottom: 103,
+    marginBottom: 10,
   },
-  bottomButton: {
-    width: "100%",
-    paddingVertical: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
+  infoText: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "60%",
+    marginTop: 28,
+  },
+  emojiButton: {
     borderWidth: 0.4,
-    borderColor: Colors.light_gray,
+    borderColor: "#D9D9D9",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    margin: 1,
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
-  buttonText: {
-    fontFamily: "NanumSquareB",
-    fontSize: 18,
-    color: Colors.burn,
+  emojiText: {
+    fontSize: 24,
   },
 });
