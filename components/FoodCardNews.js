@@ -48,8 +48,8 @@ const FoodCardNews = ({ mode }) => {
 
   // 종료
   const handleClose = () => {
-    setSelectedItem(null);
     setShowReview(false);
+    setTimeout(() => setSelectedItem(null), 300);
   };
 
   // 좋아요 눌렀을 때 슬라이드 전환
