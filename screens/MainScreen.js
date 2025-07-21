@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { StyleSheet, View, Text, Switch } from "react-native";
+import { StyleSheet, View, Text, Switch, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import MainScreen_Fast from "../components/MainScreen_Fast";
 import MainScreen_Slow from "../components/MainScreen_Slow";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
+  const navigation = useNavigation();
 
   const toggleFast = () => {
     setIsFast((prev) => !prev);
@@ -21,6 +23,12 @@ const MainScreen = () => {
           thumbColor="#fcfcfc"
           onValueChange={toggleFast}
           value={isFast}
+        />
+      </View>
+      <View style={styles.switchContainer}>
+        <Button
+          title="로그인/랜딩"
+          onPress={() => navigation.navigate("Landing")}
         />
       </View>
       {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
