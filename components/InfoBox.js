@@ -9,13 +9,23 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../styles/colors";
+import Star from "./svg/Star";
 
 const { width, height } = Dimensions.get("window");
-const PADDING_HORIZONTAL = 11;
+const PADDING_HORIZONTAL = 15;
 
 const InfoBox = ({ visible, onClose, item, mode }) => {
+  const navigation = useNavigation();
+
+  const handleCalendar = () => {
+    onClose();
+    navigation.navigate("식단 기록 화면");
+  };
+
   if (!visible) return null;
 
   return (
@@ -29,21 +39,30 @@ const InfoBox = ({ visible, onClose, item, mode }) => {
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.boxContainer}>
-              <View style={styles.iconBar}>
-                <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-                  <Ionicons name="chevron-back" size={22} color="#fff" />
-                  <Text style={styles.iconText}>HOME</Text>
-                </TouchableOpacity>
-                <Ionicons name="calendar-outline" size={22} color="#fff" />
-              </View>
+              <TouchableWithoutFeedback onPress={onClose}>
+                <View style={styles.iconBar}>
+                  <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
+                    <Ionicons name="chevron-back" size={22} color="#fff" />
+                    <Text style={styles.iconText}>HOME</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleCalendar}>
+                    <Ionicons name="calendar-outline" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
 
               <View
                 style={[
                   styles.header,
-                  { backgroundColor: mode === "fast" ? "#E90C05" : "#00CA80" },
+                  {
+                    backgroundColor:
+                      mode === "fast" ? Colors.point_red : Colors.point_green,
+                  },
                 ]}
               >
-                <Text style={styles.headerText}>★ {item.name} ★</Text>
+                <Star />
+                <Text style={styles.headerText}>{item.name}</Text>
+                <Star />
               </View>
 
               <View style={styles.contentBox}>
@@ -69,23 +88,12 @@ const InfoBox = ({ visible, onClose, item, mode }) => {
                 <Text style={styles.infoText}>단맛지수: {item.sweet}</Text>
                 <Text style={styles.infoText}>짠맛지수: {item.salty}</Text>
 
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity
-                    style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
-                    onPress={onClose}
-                  >
-                    <Text style={styles.emojiText}>👍</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.emojiButton,
-                      { backgroundColor: "#FFFAED" },
-                    ]}
-                    onPress={onClose}
-                  >
-                    <Text style={styles.emojiText}>👎</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
+                  onPress={onClose}
+                >
+                  <Text style={styles.emojiText}>👍</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -128,8 +136,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   header: {
+    flexDirection: "row",
     paddingTop: 27,
     paddingBottom: 11,
+    gap: 8,
+    justifyContent: "center",
     alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -146,7 +157,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     paddingHorizontal: 12,
-    height: 632,
+    paddingVertical: 56,
   },
   imageContainer: {
     width: 292,
@@ -181,12 +192,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 2,
   },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "60%",
-    marginTop: 28,
-  },
   emojiButton: {
     borderWidth: 0.4,
     borderColor: "#D9D9D9",
@@ -194,7 +199,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 18,
     paddingVertical: 16,
-    margin: 1,
+    marginTop: 20,
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   emojiText: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,20 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-} from 'react-native';
-import fastFoodData from '../data/fastFoodData.json';
-import slowFoodData from '../data/slowFoodData.json';
-import InfoBox from './InfoBox';
-import ReviewBox from './ReviewBox';
+} from "react-native";
+import fastFoodData from "../data/fastFoodData.json";
+import slowFoodData from "../data/slowFoodData.json";
+import InfoBox from "./InfoBox";
+import ReviewBox from "./ReviewBox";
 
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   runOnJS,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const cardMargin = 16;
 
 const FoodCardNews = ({ mode }) => {
@@ -50,20 +50,19 @@ const FoodCardNews = ({ mode }) => {
   // 종료
   const handleClose = () => {
     setShowReview(false);
-    setSelectedItem(null);
+    setTimeout(() => setSelectedItem(null), 300);
   };
 
   // 좋아요 눌렀을 때 슬라이드 전환
   const handleLike = () => {
-  console.log('before:', infoX.value, reviewX.value);
+    console.log("before:", infoX.value, reviewX.value);
 
-  infoX.value = withTiming(-width, { duration: 300 });
-  reviewX.value = withTiming(0, { duration: 300 }, () => {
-    runOnJS(setShowReview)(true);
-    console.log('after:', infoX.value, reviewX.value);
-  });
-};
-
+    infoX.value = withTiming(-width, { duration: 300 });
+    reviewX.value = withTiming(0, { duration: 300 }, () => {
+      runOnJS(setShowReview)(true);
+      console.log("after:", infoX.value, reviewX.value);
+    });
+  };
 
   // 카드 렌더링
   const renderItem = ({ item }) => (
@@ -74,7 +73,7 @@ const FoodCardNews = ({ mode }) => {
       >
         <Text style={styles.name}>{item.name}</Text>
       </TouchableOpacity>
-      {mode === 'slow' && (
+      {mode === "slow" && (
         <View style={styles.calorieBox}>
           <Text style={styles.calorieText}>{item.calorie} cal</Text>
         </View>
@@ -85,7 +84,7 @@ const FoodCardNews = ({ mode }) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={mode === 'fast' ? fastFoodData : slowFoodData}
+        data={mode === "fast" ? fastFoodData : slowFoodData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         horizontal
@@ -98,26 +97,15 @@ const FoodCardNews = ({ mode }) => {
       />
 
       {selectedItem && (
-        <>
-          <Animated.View style={[infoStyle, styles.animatedBox]}>
-            <InfoBox
-              visible={!showReview}
-              item={selectedItem}
-              mode={mode}
-              onLike={handleLike}
-              onClose={handleClose}
-            />
-          </Animated.View>
-
-          <Animated.View style={[reviewStyle, styles.animatedBox]}>
-            <ReviewBox
-              visible={showReview}
-              item={selectedItem}
-              mode={mode}
-              onClose={handleClose}
-            />
-          </Animated.View>
-        </>
+        <Animated.View style={[infoStyle, styles.animatedBox]}>
+          <InfoBox
+            visible={!showReview}
+            item={selectedItem}
+            mode={mode}
+            onLike={handleLike}
+            onClose={handleClose}
+          />
+        </Animated.View>
       )}
     </View>
   );
@@ -130,16 +118,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
   },
   cardImage: {
     width: width - cardMargin * 2 - 2,
     height: width - cardMargin * 2 - 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fcfcfc',
-    borderColor: 'black',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fcfcfc",
+    borderColor: "black",
     borderWidth: 1,
   },
   name: {
@@ -149,18 +137,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 40,
     marginTop: -20,
-    textAlign: 'center',
-    backgroundColor: 'white',
+    textAlign: "center",
+    backgroundColor: "white",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: "black",
   },
   calorieText: {
     fontSize: 25,
   },
   animatedBox: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    position: "absolute",
+    width: "100%",
+    height: "100%",
   },
 });
