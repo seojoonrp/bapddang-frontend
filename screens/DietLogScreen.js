@@ -12,11 +12,16 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
+import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
+import ReviewBox from "../components/ReviewBox";
 
 const DietLogScreen = () => {
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => [660], []);
-
+  const [inputValue, setInputValue] = useState("");
+  const [isFoodSelectVisible, setIsFoodSelectVisible] = useState(false);
+  const [isReviewVisible, setIsReviewVisible] = useState(false);
+  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
   const sheetPosition = useSharedValue(0);
   const animatedTextStyle = useAnimatedStyle(() => {
     const fontSize = interpolate(
@@ -59,10 +64,35 @@ const DietLogScreen = () => {
             <Animated.Text style={[styles.sheetTitleText, animatedTextStyle]}>
               주간 식단기록
             </Animated.Text>
+
             <TouchableOpacity
               onPress={() => setIsFoodSelectVisible(true)}
               style={styles.addButton}
-            ></TouchableOpacity>
+            >
+              <Text style={{ color: "black" }}>추가</Text>
+            </TouchableOpacity>
+            {isFoodSelectVisible && (
+              <FoodSelectBox
+                visible={isFoodSelectVisible}
+                onClose={() => setIsFoodSelectVisible(false)}
+                onSelect={(foodName) => {
+                  setIsFoodSelectVisible(false);
+                  setSelectedFoodItem({ name: foodName });
+                  setIsReviewVisible(true);
+                }}
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+              />
+            )}
+
+            {isReviewVisible && (
+              <ReviewBox
+                visible={isReviewVisible}
+                onClose={() => setIsReviewVisible(false)}
+                item={selectedFoodItem}
+                mode="fast"
+              />
+            )}
             <View style={styles.dayContainer}>
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <TouchableOpacity

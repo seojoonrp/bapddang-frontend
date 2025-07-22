@@ -10,7 +10,6 @@ import {
 import fastFoodData from "../data/fastFoodData.json";
 import slowFoodData from "../data/slowFoodData.json";
 import InfoBox from "./InfoBox";
-import ReviewBox from "./ReviewBox";
 
 import Animated, {
   useSharedValue,
@@ -32,10 +31,6 @@ const FoodCardNews = ({ mode }) => {
 
   const infoStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: infoX.value }],
-  }));
-
-  const reviewStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: reviewX.value }],
   }));
 
   // 카드 선택 시 초기화

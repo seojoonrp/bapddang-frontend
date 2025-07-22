@@ -10,7 +10,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 
@@ -21,30 +21,32 @@ const FoodSelectBox = ({ visible, onClose, onSelect, inputValue, setInputValue }
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.modalContainer}>
-              <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="음식 이름을 입력해주세요"
-                value={inputValue}
-                onChangeText={setInputValue}
-              />
+              <View style={styles.outerBox}>
+                <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="음식 이름을 입력해주세요"
+                  value={inputValue}
+                  onChangeText={setInputValue}
+                />
 
-              <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
-              <View style={styles.foodTagContainer}>
-                {recentFoods.map((food) => (
-                  <TouchableOpacity
-                    key={food}
-                    style={styles.foodTag}
-                    onPress={() => setInputValue(food)}
-                  >
-                    <Text style={styles.foodTagText}>{food}</Text>
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
+                <View style={styles.foodTagContainer}>
+                  {recentFoods.map((food) => (
+                    <TouchableOpacity
+                      key={food}
+                      style={styles.foodTag}
+                      onPress={() => setInputValue(food)}
+                    >
+                      <Text style={styles.foodTagText}>{food}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity style={styles.confirmButton} onPress={() => onSelect(inputValue)}>
+                  <Text style={styles.confirmText}>확인</Text>
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity style={styles.confirmButton} onPress={() => onSelect(inputValue)}>
-                <Text style={styles.confirmText}>확인</Text>
-              </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -64,68 +66,99 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: "#fff",
+    width: width - 22,
+    height: height - 200,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    justifyContent: "center",
+    gap: 10,
     borderRadius: 20,
-    padding: 24,
-    width: width - 48,
     alignItems: "center",
+  },
+  outerBox: {
+    display: "flex",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    paddingVertical: 46,
+    paddingHorizontal: 23,
+    borderColor: "#D9D9D9",
+    borderRadius: 13,
+    borderWidth: 1,
+    flexDirection: "column",
+    gap: 25,
+    alignItems: "center",
+    backgroundColor: "white",
+    alignSelf: "stretch",
   },
   question: {
+    fontFamily: "NanumSquareOTF",
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#5B1E1E",
-    marginBottom: 18,
+    color: "#521210",
+    fontWeight: 700,
   },
   input: {
-    width: "100%",
-    height: 48,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 12,
-    textAlign: "center",
-    fontSize: 15,
-    marginBottom: 20,
-  },
-  subTitle: {
-    color: "#8C5B5B",
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  foodTagContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  foodTag: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    margin: 6,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    borderWidth: 0.5,
-    borderColor: "#D9D9D9",
-    shadowColor: "#A94946",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  foodTagText: {
-    color: "#5B1E1E",
-    fontWeight: "500",
-  },
-  confirmButton: {
-    marginTop: 10,
-    width: 120,
-    height: 44,
-    backgroundColor: "#E90C05",
-    borderRadius: 12,
+    height: 51,
+    paddingHorizontal: 84,
     justifyContent: "center",
     alignItems: "center",
-  },
-  confirmText: {
-    color: "#fff",
+    borderWidth: 1,
+    borderColor: "#D9D9D9",
+    borderRadius: 13,
+    alignSelf: "stretch",
+    fontFamily: "NanumSquareOTF",
     fontSize: 16,
-    fontWeight: "bold",
+    textAlign: "center",
+  },
+  subTitle: {
+    color: "#A88786",
+    fontFamily: "NanumSquareOTF",
+    fontSize: 14,
+    fontWeight: 400,
+  },
+  foodTagContainer: {
+    display: "flex",
+    width: 314,
+    alignContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  foodTag: {
+    display: "flex",
+    borderWidth: 0.4,
+    borderColor: "#D9D9D9",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 9,
+    gap: 10,
+    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
+  },
+  foodTagText: {
+    fontFamily: "NanumSquareOTF",
+    fontSize: 16,
+    color: "#521210",
+    opacity: 0.5,
+    fontWeight:700,
+  },
+  confirmButton: {
+  paddingVertical: 16,
+  paddingHorizontal: 30,
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 20,
+  borderWidth: 0.4,
+  borderColor: "#D9D9D9",
+  backgroundColor: "#E90C05", // fallback color
+  gap: 10, // 이건 View 내부에 요소가 여러 개 있을 경우만 의미 있음
+},
+  confirmText: {
+    fontFamily: "NanumSquareOTF",
+    fontSize: 18,
+    fontWeight: 800,
+    color:"#FFF",
   },
 });
