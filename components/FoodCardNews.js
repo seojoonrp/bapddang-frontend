@@ -40,16 +40,17 @@ const FoodCardNews = ({ mode }) => {
 
   // 카드 선택 시 초기화
   const handleCardPress = (item) => {
-    setSelectedItem(item);
     setShowReview(false);
+    setSelectedItem(item);
+    
     infoX.value = 0;
     reviewX.value = width;
   };
 
   // 종료
   const handleClose = () => {
-    setSelectedItem(null);
     setShowReview(false);
+    setSelectedItem(null);
   };
 
   // 좋아요 눌렀을 때 슬라이드 전환

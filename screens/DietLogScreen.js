@@ -59,6 +59,10 @@ const DietLogScreen = () => {
             <Animated.Text style={[styles.sheetTitleText, animatedTextStyle]}>
               주간 식단기록
             </Animated.Text>
+            <TouchableOpacity
+              onPress={() => setIsFoodSelectVisible(true)}
+              style={styles.addButton}
+            ></TouchableOpacity>
             <View style={styles.dayContainer}>
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <TouchableOpacity
