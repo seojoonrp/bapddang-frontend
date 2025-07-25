@@ -10,7 +10,7 @@ export default function LandingScreen({navigation}) {
       <View style={{ height: 10 }} />
       <Button title="회원가입" onPress={() => navigation.navigate('SignUp')} />
       <View style={{ height: 10 }} />
-      <Button title="게스트로 둘러보기" onPress={() => navigation.navigate('Main')} />
+      <Button title="게스트로 둘러보기" onPress={() => navigation.navigate('메인 화면')} />
     </View>
   );
 }

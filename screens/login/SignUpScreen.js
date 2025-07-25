@@ -71,51 +71,156 @@ export default function SignUpEmailScreen({ navigation }) {
   };
 
   return (
-    <View style={{ padding: 40, flex: 1, backgroundColor: 'white' }}>
-      <Text style={{ fontWeight: 'bold', fontSize: 24, marginBottom: 60 }}>회원가입</Text>
-      <Text style={{ fontWeight: 'bold', fontSize: 14, marginBottom: 10 }}>이메일을 입력해주세요.</Text>
-      <TextInput
-        placeholder="이메일"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={{ marginBottom: 40, borderWidth: 1, padding: 10, borderRadius: 5 }}
-      />
-      <Text style={{ fontWeight: 'bold', fontSize: 14, marginBottom: 10 }}>비밀번호를 입력해주세요.</Text>
-      <TextInput
-        placeholder="비밀번호"
-        secureTextEntry
-        value={pw}
-        onChangeText={setPw}
-        autoCapitalize="none"
-        style={{ marginBottom: 10, borderWidth: 1, padding: 10, borderRadius: 5 }}
-      />
-      <TextInput
-        placeholder="비밀번호 재확인"
-        secureTextEntry
-        value={pwConfirm}
-        onChangeText={setPwConfirm}
-        style={{ marginBottom: 10, borderWidth: 1, padding: 10, borderRadius: 10 }}
-      />
+    <View style={{ flex: 1, backgroundColor: 'red', alignItems: 'center' }}>
+      <Text style={{ fontWeight: 'bold', fontSize: 24, marginTop: 60, marginBottom: 60, color: 'white' }}>회원가입</Text>
 
-      <Text style={{ color: pwCondition ? 'green' : 'gray', marginBottom: 5 }}>
-        {pwCondition ? '✅' : '❌'} 대문자, 소문자, 숫자, 특수기호 포함 8자 이상
-      </Text>
-      <Text style={{ color: pwSame ? 'green' : 'gray', marginBottom: 80 }}>
-        {pwSame ? '✅' : '❌'} 비밀번호 일치
-      </Text>
+      <View style={{ width: '100%', maxWidth: 430 }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 14, marginBottom: 6, color: '#BE2C2C', marginLeft: 20 }}>
+          이메일 입력
+        </Text>
+        <View
+          style={{
+            width: 382,
+            padding: 20,
+            borderRadius: 20,
+            backgroundColor: '#FFF',
+            alignSelf: 'center',
+            marginBottom: 24,
+          }}
+        >
+          <TextInput
+            placeholder="이메일을 입력해주세요..."
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            style={{
+              borderWidth: 0,
+              fontSize: 16,
+              backgroundColor: 'transparent',
+              padding: 0,
+              height: 17,
+            }}
+            placeholderTextColor="#aaa"
+          />
+        </View>
 
-      <Button
-        title="이메일 인증"
-        onPress={handleEmailVerifyPress}
-        disabled={!isCompleted}
-        color={!isCompleted ? 'gray' : undefined}
-      />
-      <View style={{ height: 10 }} />
-      <Button title="로그인 하러가기" onPress={() => navigation.navigate('Login')} />
-      {error ? <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text> : null}
-      {success ? <Text style={{ color: 'green', marginTop: 10 }}>{success}</Text> : null}
+        <Text style={{ fontWeight: 'bold', fontSize: 14, marginBottom: 6, color: '#BE2C2C', marginLeft: 20 }}>
+          Password
+        </Text>
+        <View
+          style={{
+            width: 382,
+            paddingTop: 18,
+            paddingBottom: 17,
+            paddingLeft: 24,
+            paddingRight: 24,
+            borderRadius: 20,
+            backgroundColor: '#FFF',
+            alignSelf: 'center',
+            marginBottom: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <TextInput
+            placeholder="비밀번호를 입력해주세요..."
+            secureTextEntry
+            value={pw}
+            onChangeText={setPw}
+            autoCapitalize="none"
+            style={{
+              flex: 1,
+              borderWidth: 0,
+              fontSize: 16,
+              backgroundColor: 'transparent',
+              padding: 0,
+              height: 17,
+            }}
+            placeholderTextColor="#aaa"
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginLeft: 28 }}>
+          <Text style={{ color: pwCondition ? '#4caf50' : '#BE2C2C', fontSize: 13, fontWeight: 'bold', marginRight: 6 }}>
+            {pwCondition ? '✓' : '✗'}
+          </Text>
+          <Text style={{ color: 'white', fontSize: 13 }}>
+            대문자, 소문자, 특수기호 포함 8자 이상
+          </Text>
+        </View>
+
+        <View
+          style={{
+            width: 382,
+            paddingTop: 18,
+            paddingBottom: 17,
+            paddingLeft: 24,
+            paddingRight: 24,
+            borderRadius: 20,
+            backgroundColor: '#FFF',
+            alignSelf: 'center',
+            marginBottom: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <TextInput
+            placeholder="비밀번호를 다시 입력해주세요..."
+            secureTextEntry
+            value={pwConfirm}
+            onChangeText={setPwConfirm}
+            style={{
+              flex: 1,
+              borderWidth: 0,
+              fontSize: 16,
+              backgroundColor: 'transparent',
+              padding: 0,
+              height: 17,
+            }}
+            placeholderTextColor="#aaa"
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 40, marginLeft: 28 }}>
+          <Text style={{
+            color: pwSame ? '#4caf50' : '#BE2C2C',
+            fontSize: 13,
+            fontWeight: 'bold',
+            marginRight: 6
+          }}>
+            {pwSame ? '✓' : '✗'}
+          </Text>
+          <Text style={{
+            color: 'white',
+            fontSize: 13
+          }}>
+            비밀번호 일치
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={{
+            width: 376,
+            height: 51,
+            borderRadius: 24,
+            backgroundColor: isCompleted ? '#FF7873' : '#FFD1D1',
+            alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+            marginBottom: 32,
+          }}
+          onPress={handleEmailVerifyPress}
+          disabled={!isCompleted}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>이메일 인증</Text>
+        </TouchableOpacity>
+
+        <Button title="로그인 하러가기" color="white" onPress={() => navigation.navigate('Login')} />
+
+        {error ? <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text> : null}
+        {success ? <Text style={{ color: 'green', marginTop: 10 }}>{success}</Text> : null}
+      </View>
 
       <Modal
         visible={showTerms}
