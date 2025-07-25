@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+import { fetchTags } from "../api/gptApi";
+
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../styles/colors";
 import Star from "./svg/Star";
@@ -87,6 +89,13 @@ const InfoBox = ({ visible, onClose, item, mode }) => {
                 <Text style={styles.infoText}>맵기지수: {item.spicy}</Text>
                 <Text style={styles.infoText}>단맛지수: {item.sweet}</Text>
                 <Text style={styles.infoText}>짠맛지수: {item.salty}</Text>
+
+                <TouchableOpacity
+                  style={{ width: 100, height: 40, borderWidth: 2 }}
+                  onPress={() => fetchTags(item.name)}
+                >
+                  <Text style={{ fontSize: 16 }}>태그 생성하기</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
