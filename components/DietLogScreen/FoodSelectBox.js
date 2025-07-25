@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import {
   View,
   Text,
@@ -14,7 +14,28 @@ const { width, height } = Dimensions.get("window");
 
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 
-const FoodSelectBox = ({ visible, onClose, onSelect, inputValue, setInputValue }) => {
+const FoodSelectBox = ({ visible, onClose, onSelect }) => {
+  const [inputList, setInputList] = useState([""]);
+
+  const updateInput = (index, value) => {
+    const newInputs = [...inputList];
+    newInputs[index] = value;
+    setInputList(newInputs);
+  };
+
+  const addInput = () => {
+    setInputList([...inputList, ""]);
+  };
+
+  const setFromRecent = (food) => {
+    const lastIndex = inputList.length - 1;
+    updateInput(lastIndex, food);
+  };
+
+  const handleConfirm = () => {
+    const filtered = inputList.filter(item => item.trim() !== "");
+    onSelect(filtered);
+  };
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
@@ -24,12 +45,15 @@ const FoodSelectBox = ({ visible, onClose, onSelect, inputValue, setInputValue }
               <View style={styles.outerBox}>
                 <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
                 <TextInput
+                  key={index}
                   style={styles.input}
                   placeholder="음식 이름을 입력해주세요"
-                  value={inputValue}
-                  onChangeText={setInputValue}
+                  value={input}
+                  onChangeText={(text) => updateInput(index, text)}
                 />
-
+                <TouchableOpacity style={styles.addButton} onPress={addInput}>
+                    <Text style={styles.addButtonText}>+ 추가하기</Text>
+                </TouchableOpacity>
                 <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
                 <View style={styles.foodTagContainer}>
                   {recentFoods.map((food) => (
@@ -99,7 +123,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 51,
-    paddingHorizontal: 84,
+    paddingHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -109,6 +133,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareOTF",
     fontSize: 16,
     textAlign: "center",
+    display: "flex",
   },
   subTitle: {
     color: "#A88786",
