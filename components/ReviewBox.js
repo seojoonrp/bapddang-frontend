@@ -14,26 +14,27 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import keywordMap from "../data/keywordMap.json";
 import Colors from "../styles/colors";
-
+import Star from "./svg/Star";
 const { width, height } = Dimensions.get("window");
 const PADDING_HORIZONTAL = 11;
 
 const ReviewBox = ({ visible, onClose, item, mode }) => {
-  const [tagsReason, setTagsReason] = useState([]);
+  const [tagsTime, setTagsTime] = useState([]);
+  setTagsTime(["아침", "점심", "저녁", "기타"]);
   const [tagsSituation, setTagsSituation] = useState([]);
-  const [selectedReasons, setSelectedReasons] = useState([]);
+  const [selectedTimes, setSelectedTimes] = useState([]);
   const [selectedSituations, setSelectedSituations] = useState([]);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
-
+  const totalCharLength = Array.isArray(item.name)
+  ? item.name.join(" & ").length
+  : item.name.length; // 글자수 계산
   useEffect(() => {
     if (!item?.name) return;
     const tagData = keywordMap[item.name];
     if (tagData) {
-      setTagsReason(tagData.reason || []);
       setTagsSituation(tagData.situation || []);
     } else {
-      setTagsReason(["맛있어요"]);
       setTagsSituation(["혼밥"]);
     }
   }, [item]);
@@ -47,7 +48,7 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
   };
 
   const handleSubmit = () => {
-    console.log("이유:", selectedReasons);
+    console.log("이유:", selectedTimes);
     console.log("상황:", selectedSituations);
     console.log("한줄평:", comment);
     console.log("별점:", rating);
@@ -60,7 +61,6 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
       visible={visible}
       animationType="fade"
       transparent
-      presentationStyle="overFullScreen"
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
@@ -68,10 +68,9 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
             <View style={styles.boxContainer}>
               <View style={styles.iconBar}>
                 <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-                  <Ionicons name="chevron-back" size={22} color="#fff" />
-                  <Text style={styles.iconText}>HOME</Text>
+                  <Ionicons name="chevron-back" size={20} color="#CCC" />
+                  <Text style={styles.iconText}>CALENDAR</Text>
                 </TouchableOpacity>
-                <Ionicons name="calendar-outline" size={22} color="#fff" />
               </View>
 
               <View
@@ -83,27 +82,29 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
                   },
                 ]}
               >
-                <Text style={styles.headerText}>★ {item.name} ★</Text>
+                <Star />
+                <Text style={[styles.headerText,{fontSize: totalCharLength > 11 ? 18 : 30},]}>{item.name.join("&")}</Text>
+                <Star />
               </View>
 
               <View style={styles.contentBox}>
-                <Text style={styles.subtitle}>왜 이 음식이 좋았나요?</Text>
+                <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
                 <View style={styles.tagContainer}>
-                  {tagsReason.map((tag) => (
+                  {tagsTime.map((tag) => (
                     <TouchableOpacity
                       key={tag}
                       style={[
                         styles.tag,
-                        selectedReasons.includes(tag) && styles.tagSelected,
+                        selectedTimes.includes(tag) && styles.tagSelected,
                       ]}
                       onPress={() =>
-                        toggleTag(tag, selectedReasons, setSelectedReasons)
+                        toggleTag(tag, selectedTimes, setSelectedTimes)
                       }
                     >
                       <Text
                         style={[
                           styles.tagText,
-                          { opacity: selectedReasons.includes(tag) ? 1 : 0.5 },
+                          { opacity: selectedTimes.includes(tag) ? 1 : 0.5 },
                         ]}
                       >
                         {tag}
@@ -219,14 +220,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconText: {
-    color: "white",
+    color: "#CCC",
     marginLeft: 4,
     fontWeight: "bold",
-    fontSize: 13,
+    fontSize: 17,
+    fontFamily: "NanumSquareOTF",
+    fontWeight: "600",
   },
   header: {
-    paddingTop: 27,
-    paddingBottom: 11,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    paddingTop: 21,
+    paddingBottom: 17,
     alignItems: "center",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -235,6 +241,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareEB",
     fontSize: 30,
     color: "white",
+    flexShrink: 1,
   },
   foodName: {
     color: "white",

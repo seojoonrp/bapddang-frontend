@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import Colors from "../../styles/colors";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
 
 const { width, height } = Dimensions.get("window");
@@ -43,6 +44,12 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.modalContainer}>
+              <View style={styles.iconBar}>
+                <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
+                  <Ionicons name="chevron-back" size={20} color="#CCC" />
+                  <Text style={styles.iconText}>CALENDAR</Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.outerBox}>
                 <ScrollView
                   contentContainerStyle={styles.scrollContainer}
@@ -63,7 +70,7 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
                   ))}
 
                   <TouchableOpacity style={styles.addButton} onPress={addInput}>
-                    <Text style={styles.addButtonText}>+{"  "}추가하기</Text>
+                    <Text style={styles.addButtonText}>+</Text>
                   </TouchableOpacity>
 
                   <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
@@ -113,26 +120,44 @@ export default FoodSelectBox;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContainer: {
-    backgroundColor: "#fff",
     width: width - 26,
     height: height - 220,
+    marginTop: 60,
+    marginBottom: 99,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    justifyContent: "center",
-    gap: 10,
-    borderRadius: 20,
+    backgroundColor: "transparent",
+  },
+  iconBar: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  iconLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconText: {
+    color: "#CCC",
+    marginLeft: 4,
+    fontWeight: "bold",
+    fontSize: 17,
+    fontFamily: "NanumSquareOTF",
+    fontWeight: "600",
   },
   outerBox: {
     display: "flex",
     flexDirection: "column",
     width: "100%",
-    height: "100%",
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderColor: Colors.light_gray,
@@ -146,20 +171,22 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 10,
     gap: 25,
   },
   question: {
-    fontFamily: "NanumSquareEB",
+    fontFamily: "NanumSquareRoundOTF",
     fontSize: 18,
-    color: Colors.burn,
+    fontWeight: 800,
+    color: Colors.point_red,
   },
   input: {
     width: "100%",
     height: 51,
-    borderWidth: 1,
-    borderColor: Colors.light_gray,
-    borderRadius: 13,
+    borderColor: Colors.point_red,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderRadius: 20,
     color: Colors.burn,
     fontFamily: "NanumSquareR",
     fontSize: 16,
@@ -168,18 +195,21 @@ const styles = StyleSheet.create({
   },
   addButton: {
     width: "100%",
-    height: 51,
+    paddingVertical: 8,
+    width: 72,
     borderWidth: 1,
-    borderColor: Colors.light_gray,
-    borderStyle: "dashed",
-    borderRadius: 13,
+    borderColor: "#FF7873",
+    backgroundColor: "#FFFAED",
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
   },
   addButtonText: {
-    color: "#AAA",
-    fontFamily: "NanumSquareR",
-    fontSize: 16,
+    color: Colors.point_red,
+    textAlign: "center",
+    fontFamily: "NanumSquareOTF",
+    fontSize: 18,
+    fontWeight: 800,
   },
   subTitle: {
     color: Colors.slightly_burn,
