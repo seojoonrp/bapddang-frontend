@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Switch, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
+import { auth } from "../firebase";
 
 import MainScreen_Fast from "../components/MainScreen_Fast";
 import MainScreen_Slow from "../components/MainScreen_Slow";
@@ -12,6 +14,16 @@ const MainScreen = () => {
   const toggleFast = () => {
     setIsFast((prev) => !prev);
   };
+
+  const [email, setEmail] = useState("");
+  useEffect(() => {
+    const curUser = auth.currentUser;
+    if (curUser) {
+      setEmail(curUser.email);
+    } else {
+      setEmail("게스트입니다.");
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -26,6 +38,7 @@ const MainScreen = () => {
         />
       </View>
       <View style={styles.switchContainer}>
+        <Text>{email}</Text>
         <Button
           title="로그인/랜딩"
           onPress={() => navigation.navigate("Landing")}

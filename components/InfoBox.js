@@ -10,8 +10,10 @@ import {
   Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 import { fetchTags } from "../api/gptApi";
+import { db, auth } from "../firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../styles/colors";
@@ -22,6 +24,34 @@ const PADDING_HORIZONTAL = 15;
 
 const InfoBox = ({ visible, onClose, item, mode }) => {
   const navigation = useNavigation();
+
+  const handleLike = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.log("로그인하거라");
+        return;
+      }
+
+      const uid = user.uid;
+      const docRef = doc(db, "userLikes", uid);
+
+      await setDoc(
+        docRef,
+        {
+          likes: arrayUnion({
+            foodName: item.name,
+            timestamp: new Date(),
+          }),
+        },
+        { merge: true }
+      );
+
+      console.log("좋아요 저장 완료");
+    } catch (e) {
+      console.error("좋아요 저장 중 오류:", e);
+    }
+  };
 
   const handleCalendar = () => {
     onClose();
@@ -99,7 +129,7 @@ const InfoBox = ({ visible, onClose, item, mode }) => {
 
                 <TouchableOpacity
                   style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
-                  onPress={onClose}
+                  onPress={handleLike}
                 >
                   <Text style={styles.emojiText}>👍</Text>
                 </TouchableOpacity>
