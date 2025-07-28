@@ -37,7 +37,7 @@ const FoodCardNews = ({ mode }) => {
   const handleCardPress = (item) => {
     setShowReview(false);
     setSelectedItem(item);
-    
+
     infoX.value = 0;
     reviewX.value = width;
   };

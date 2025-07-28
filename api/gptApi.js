@@ -15,8 +15,9 @@ Use a mix of the following types:
 5. Unique features – e.g., "#저탄고지", "#저속노화", "#불향", "#고단백", "#호불호없음"
 
 Hashtags from type 1 and 2 should end in "~해요" or "~요".
-You can use words from the example, but try to create your own hashtags based on this style and tone.
-Avoid reusing food name, or generic terms like "요리", "맛", or "느낌". Keep them short and expressive (under 8 characters if possible).
+You can use words from the example, and also create your own hashtags based on this style and tone.
+Avoid directly reusing parts of the food name, or generic terms like "요리", "맛", or "느낌".
+Keep them short and expressive (under 7 characters if possible).
 
 Food Name: ${foodName}
 
@@ -27,7 +28,7 @@ Return 7 hashtags in Korean, space-separated. No extra text.
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
+        model: "gpt-4",
         messages: [
           {
             role: "user",
@@ -45,7 +46,6 @@ Return 7 hashtags in Korean, space-separated. No extra text.
     );
 
     const result = response.data.choices[0].message.content.trim();
-    console.log("Response from OpenAI:", result);
     const hashtags = result.match(/#\S+/g) || [];
     console.log("Generated tags:", hashtags);
     return hashtags;
