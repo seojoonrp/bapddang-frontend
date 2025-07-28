@@ -41,6 +41,14 @@ const DietLogScreen = () => {
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
       <MarshmallowStick />
+
+      <TouchableOpacity
+        onPress={() => setIsFoodSelectVisible(true)}
+        style={styles.addButton}
+      >
+        <Text style={styles.addButtonText}>추가</Text>
+      </TouchableOpacity>
+
       <BottomSheet
         ref={sheetRef}
         index={0}
@@ -65,12 +73,6 @@ const DietLogScreen = () => {
               주간 식단기록
             </Animated.Text>
 
-            <TouchableOpacity
-              onPress={() => setIsFoodSelectVisible(true)}
-              style={styles.addButton}
-            >
-              <Text style={{ color: "black" }}>추가</Text>
-            </TouchableOpacity>
             {isFoodSelectVisible && (
               <FoodSelectBox
                 visible={isFoodSelectVisible}
@@ -132,6 +134,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     backgroundColor: "#F5F4F2",
+  },
+  addButton: {
+    position: "absolute",
+    top: 30,
+    right: 25,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.burn,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 22,
+    fontFamily: "NanumSquareB",
   },
   sheetContainer: {
     flex: 1,

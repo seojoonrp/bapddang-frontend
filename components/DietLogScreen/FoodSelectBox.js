@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,17 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
+import Colors from "../../styles/colors";
+import { ScrollView } from "react-native-gesture-handler";
+
 const { width, height } = Dimensions.get("window");
 
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
+const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
 
 const FoodSelectBox = ({ visible, onClose, onSelect }) => {
   const [inputList, setInputList] = useState([""]);
+  const [curInputIndex, setCurInputIndex] = useState(0);
 
   const updateInput = (index, value) => {
     const newInputs = [...inputList];
@@ -27,15 +32,11 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
     setInputList([...inputList, ""]);
   };
 
-  const setFromRecent = (food) => {
-    const lastIndex = inputList.length - 1;
-    updateInput(lastIndex, food);
-  };
-
   const handleConfirm = () => {
-    const filtered = inputList.filter(item => item.trim() !== "");
+    const filtered = inputList.filter((item) => item.trim() !== "");
     onSelect(filtered);
   };
+
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
@@ -43,33 +44,61 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
           <TouchableWithoutFeedback>
             <View style={styles.modalContainer}>
               <View style={styles.outerBox}>
-                <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
-                <TextInput
-                  key={index}
-                  style={styles.input}
-                  placeholder="음식 이름을 입력해주세요"
-                  value={input}
-                  onChangeText={(text) => updateInput(index, text)}
-                />
-                <TouchableOpacity style={styles.addButton} onPress={addInput}>
-                    <Text style={styles.addButtonText}>+ 추가하기</Text>
-                </TouchableOpacity>
-                <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
-                <View style={styles.foodTagContainer}>
-                  {recentFoods.map((food) => (
-                    <TouchableOpacity
-                      key={food}
-                      style={styles.foodTag}
-                      onPress={() => setInputValue(food)}
-                    >
-                      <Text style={styles.foodTagText}>{food}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <ScrollView
+                  contentContainerStyle={styles.scrollContainer}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
 
-                <TouchableOpacity style={styles.confirmButton} onPress={() => onSelect(inputValue)}>
-                  <Text style={styles.confirmText}>확인</Text>
-                </TouchableOpacity>
+                  {inputList.map((input, index) => (
+                    <TextInput
+                      key={index}
+                      style={styles.input}
+                      placeholder="음식 이름을 입력해주세요"
+                      value={input}
+                      onChangeText={(text) => updateInput(index, text)}
+                      onFocus={() => setCurInputIndex(index)}
+                    />
+                  ))}
+
+                  <TouchableOpacity style={styles.addButton} onPress={addInput}>
+                    <Text style={styles.addButtonText}>+{"  "}추가하기</Text>
+                  </TouchableOpacity>
+
+                  <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
+                  <View style={styles.foodTagContainer}>
+                    {recentFoods.map((food) => (
+                      <TouchableOpacity
+                        key={food}
+                        style={styles.foodTag}
+                        onPress={() => updateInput(curInputIndex, food)}
+                      >
+                        <Text style={styles.foodTagText}>{food}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <Text style={styles.subTitle}>좋아요한 음식</Text>
+                  <View style={styles.foodTagContainer}>
+                    {likedFoods.map((food) => (
+                      <TouchableOpacity
+                        key={food}
+                        style={styles.foodTag}
+                        onPress={() => updateInput(curInputIndex, food)}
+                      >
+                        <Text style={styles.foodTagText}>{food}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={handleConfirm}
+                  >
+                    <Text style={styles.confirmText}>확인</Text>
+                  </TouchableOpacity>
+                </ScrollView>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -84,14 +113,14 @@ export default FoodSelectBox;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContainer: {
     backgroundColor: "#fff",
-    width: width - 22,
-    height: height - 200,
+    width: width - 26,
+    height: height - 220,
     paddingVertical: 10,
     paddingHorizontal: 10,
     justifyContent: "center",
@@ -101,60 +130,77 @@ const styles = StyleSheet.create({
   },
   outerBox: {
     display: "flex",
+    flexDirection: "column",
     width: "100%",
     height: "100%",
-    justifyContent: "center",
-    paddingVertical: 46,
-    paddingHorizontal: 23,
-    borderColor: "#D9D9D9",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderColor: Colors.light_gray,
     borderRadius: 13,
     borderWidth: 1,
-    flexDirection: "column",
-    gap: 25,
-    alignItems: "center",
     backgroundColor: "white",
-    alignSelf: "stretch",
+  },
+  scrollContainer: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 25,
   },
   question: {
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareEB",
     fontSize: 18,
-    color: "#521210",
-    fontWeight: 700,
+    color: Colors.burn,
   },
   input: {
+    width: "100%",
     height: 51,
-    paddingHorizontal: 10,
-    justifyContent: "center",
-    alignItems: "center",
     borderWidth: 1,
-    borderColor: "#D9D9D9",
+    borderColor: Colors.light_gray,
     borderRadius: 13,
-    alignSelf: "stretch",
-    fontFamily: "NanumSquareOTF",
+    color: Colors.burn,
+    fontFamily: "NanumSquareR",
     fontSize: 16,
     textAlign: "center",
-    display: "flex",
+    marginBottom: -13,
+  },
+  addButton: {
+    width: "100%",
+    height: 51,
+    borderWidth: 1,
+    borderColor: Colors.light_gray,
+    borderStyle: "dashed",
+    borderRadius: 13,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButtonText: {
+    color: "#AAA",
+    fontFamily: "NanumSquareR",
+    fontSize: 16,
   },
   subTitle: {
-    color: "#A88786",
+    color: Colors.slightly_burn,
     fontFamily: "NanumSquareOTF",
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 400,
+    marginBottom: -13,
   },
   foodTagContainer: {
+    width: "100%",
     display: "flex",
-    width: 314,
-    alignContent: "center",
+    flexWrap: "wrap",
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    flexWrap: "wrap",
     justifyContent: "center",
+    gap: 6,
   },
   foodTag: {
     display: "flex",
     borderWidth: 0.4,
-    borderColor: "#D9D9D9",
+    borderColor: Colors.light_gray,
     backgroundColor: "#fff",
     borderRadius: 20,
     paddingHorizontal: 20,
@@ -165,25 +211,24 @@ const styles = StyleSheet.create({
   foodTagText: {
     fontFamily: "NanumSquareOTF",
     fontSize: 16,
-    color: "#521210",
-    opacity: 0.5,
-    fontWeight:700,
+    color: Colors.slightly_burn,
+    fontWeight: 700,
   },
   confirmButton: {
-  paddingVertical: 16,
-  paddingHorizontal: 30,
-  justifyContent: "center",
-  alignItems: "center",
-  borderRadius: 20,
-  borderWidth: 0.4,
-  borderColor: "#D9D9D9",
-  backgroundColor: "#E90C05", // fallback color
-  gap: 10, // 이건 View 내부에 요소가 여러 개 있을 경우만 의미 있음
-},
+    paddingVertical: 16,
+    paddingHorizontal: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+    borderWidth: 0.4,
+    borderColor: Colors.light_gray,
+    backgroundColor: Colors.point_red,
+    marginTop: 15,
+  },
   confirmText: {
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareEB",
     fontSize: 18,
     fontWeight: 800,
-    color:"#FFF",
+    color: "#FFF",
   },
 });
