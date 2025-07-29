@@ -7,10 +7,13 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  Image,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
+//import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import * as ImagePicker from "expo-image-picker";
 import keywordMap from "../data/keywordMap.json";
 import Colors from "../styles/colors";
 import Star from "./svg/Star";
@@ -30,6 +33,54 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
+  const [response, setResponse] = useState("");
+  const [imageUri, setImageUri] = useState(null);
+  
+  const requestPermissions = async () => {
+    const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
+    const mediaStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    return cameraStatus.status === 'granted' && mediaStatus.status === 'granted';
+  };
+  const pickImage = async () => {
+    // 권한 요청
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) {
+      Alert.alert('권한이 필요합니다', '카메라 및 앨범 접근 권한을 허용해주세요.');
+      return;
+    }
+    
+    Alert.alert('사진 선택', '어떤 방식으로 사진을 추가할까요?', [
+
+      {
+        text: '앨범에서 선택',
+        onPress: pickFromLibrary,
+      },
+      {
+        text: '카메라로 촬영',
+        onPress: takePhoto,
+      },
+      { text: '취소', style: 'cancel' },
+    ]);
+  };
+  const pickFromLibrary = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.Images,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.Images,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
   const totalCharLength = Array.isArray(item.name)
     ? item.name.join(" & ").length
     : item.name.length;
@@ -53,7 +104,6 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
 
   const handleSubmit = () => {
     console.log("이유:", selectedTimes);
-    console.log("상황:", selectedSituations);
     console.log("한줄평:", comment);
     console.log("별점:", rating);
     alert("후기가 등록되었습니다!");
@@ -152,6 +202,25 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
                     ))}
                   </View>
 
+                  <View>
+                    <Image
+                      source={
+                        response ? { uri: response.assets[0].uri } : 0
+                      }
+                      style={styles.img}
+                    />
+
+                    <TouchableOpacity onPress={pickImage} style={styles.imageBox}>
+                      {imageUri ? (
+                        <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="cover"/>
+                      ) : (
+                        <View style={styles.placeholder}>
+                          <Ionicons name="camera-outline" size={20} color="#BFA6A1" />
+                          <Text style={styles.placeholderText}>사진을 추가해보세요!</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
                   <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
                   <TextInput
                     style={styles.input}
@@ -314,6 +383,36 @@ const styles = StyleSheet.create({
   tagSelected: {
     boxShadow:
       "0px 2px 4px 0px #A94946 inset, 0px 2px 4px 4px rgba(169, 73, 70, 0.30) inset, 0px 2px 6px 4px #FDEDC0 inset",
+  },
+  imageBox: {
+    display: 'flex',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: Colors.light_gray,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    height:250,
+    width: 314,
+    gap:25,
+    overflow: 'hidden'
+  },
+  placeholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontFamily: "NanumSquareOTF",
+    fontSize: 10,
+    fontWeight: 400,
+    color: Colors.slightly_burn,
+  },
+  imagePreview: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    resizeMode: 'cover',
   },
   input: {
     borderWidth: 1,
