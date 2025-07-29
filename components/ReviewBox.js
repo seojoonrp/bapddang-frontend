@@ -8,34 +8,38 @@ import {
   ScrollView,
   Modal,
   TouchableWithoutFeedback,
-  Dimensions,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 import keywordMap from "../data/keywordMap.json";
 import Colors from "../styles/colors";
 import Star from "./svg/Star";
-const { width, height } = Dimensions.get("window");
-const PADDING_HORIZONTAL = 11;
 
 const ReviewBox = ({ visible, onClose, item, mode }) => {
-  const [tagsTime, setTagsTime] = useState([]);
-  setTagsTime(["아침", "점심", "저녁", "기타"]);
-  const [tagsSituation, setTagsSituation] = useState([]);
+  const [timeOption, setTimeOption] = useState([
+    "아침",
+    "점심",
+    "저녁",
+    "기타",
+  ]);
+  const [tagOption, setTagOption] = useState([]);
+
   const [selectedTimes, setSelectedTimes] = useState([]);
-  const [selectedSituations, setSelectedSituations] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
+
   const totalCharLength = Array.isArray(item.name)
-  ? item.name.join(" & ").length
-  : item.name.length; // 글자수 계산
+    ? item.name.join(" & ").length
+    : item.name.length;
   useEffect(() => {
     if (!item?.name) return;
     const tagData = keywordMap[item.name];
     if (tagData) {
-      setTagsSituation(tagData.situation || []);
+      setTagOption(tagData.situation || []);
     } else {
-      setTagsSituation(["혼밥"]);
+      setTagOption(["혼밥"]);
     }
   }, [item]);
 
@@ -57,15 +61,11 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-    >
+    <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
-            <View style={styles.boxContainer}>
+            <View style={styles.modalContainer}>
               <View style={styles.iconBar}>
                 <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
                   <Ionicons name="chevron-back" size={20} color="#CCC" />
@@ -78,112 +78,121 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
                   styles.header,
                   {
                     backgroundColor:
-                      mode === "fast" ? Colors.point_red : "#00CA80",
+                      mode === "fast" ? Colors.point_red : Colors.point_green,
                   },
                 ]}
               >
                 <Star />
-                <Text style={[styles.headerText,{fontSize: totalCharLength > 11 ? 18 : 30},]}>{item.name.join("&")}</Text>
+                <Text
+                  style={[
+                    styles.headerText,
+                    { fontSize: totalCharLength > 11 ? 18 : 30 },
+                  ]}
+                >
+                  {item.name.join("&")}
+                </Text>
                 <Star />
               </View>
 
               <View style={styles.contentBox}>
-                <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
-                <View style={styles.tagContainer}>
-                  {tagsTime.map((tag) => (
+                <ScrollView
+                  contentContainerStyle={styles.scrollContainer}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
+                  <View style={styles.tagContainer}>
+                    {timeOption.map((tag) => (
+                      <TouchableOpacity
+                        key={tag}
+                        style={[
+                          styles.tag,
+                          selectedTimes.includes(tag) && styles.tagSelected,
+                        ]}
+                        onPress={() =>
+                          toggleTag(tag, selectedTimes, setSelectedTimes)
+                        }
+                      >
+                        <Text
+                          style={[
+                            styles.tagText,
+                            { opacity: selectedTimes.includes(tag) ? 1 : 0.5 },
+                          ]}
+                        >
+                          {tag}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
+                  <View style={styles.tagContainer}>
+                    {tagOption.map((tag) => (
+                      <TouchableOpacity
+                        key={tag}
+                        style={[
+                          styles.tag,
+                          selectedTags.includes(tag) && styles.tagSelected,
+                        ]}
+                        onPress={() =>
+                          toggleTag(tag, selectedTags, setSelectedTags)
+                        }
+                      >
+                        <Text
+                          style={[
+                            styles.tagText,
+                            {
+                              opacity: selectedTags.includes(tag) ? 1 : 0.5,
+                            },
+                          ]}
+                        >
+                          {tag}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="후기 남기기..."
+                    value={comment}
+                    onChangeText={setComment}
+                  />
+
+                  <View style={styles.ratingRow}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                        <Text
+                          style={[
+                            styles.star,
+                            rating >= i && styles.starSelected,
+                          ]}
+                        >
+                          ★
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <View style={styles.buttonRow}>
                     <TouchableOpacity
-                      key={tag}
                       style={[
-                        styles.tag,
-                        selectedTimes.includes(tag) && styles.tagSelected,
+                        styles.bottomButton,
+                        { backgroundColor: "#D9D9D9" },
                       ]}
-                      onPress={() =>
-                        toggleTag(tag, selectedTimes, setSelectedTimes)
-                      }
+                      onPress={onClose}
                     >
-                      <Text
-                        style={[
-                          styles.tagText,
-                          { opacity: selectedTimes.includes(tag) ? 1 : 0.5 },
-                        ]}
-                      >
-                        {tag}
-                      </Text>
+                      <Text style={styles.bottomButtonText}>뒤로가기</Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
-                <View style={styles.tagContainer}>
-                  {tagsSituation.map((tag) => (
                     <TouchableOpacity
-                      key={tag}
-                      style={[
-                        styles.tag,
-                        selectedSituations.includes(tag) && styles.tagSelected,
-                      ]}
-                      onPress={() =>
-                        toggleTag(
-                          tag,
-                          selectedSituations,
-                          setSelectedSituations
-                        )
-                      }
+                      style={styles.bottomButton}
+                      onPress={handleSubmit}
                     >
-                      <Text
-                        style={[
-                          styles.tagText,
-                          {
-                            opacity: selectedSituations.includes(tag) ? 1 : 0.5,
-                          },
-                        ]}
-                      >
-                        {tag}
-                      </Text>
+                      <Text style={styles.bottomButtonText}>후기 등록</Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-
-                <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="후기 남기기..."
-                  value={comment}
-                  onChangeText={setComment}
-                />
-
-                <View style={styles.ratingRow}>
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                      <Text
-                        style={[
-                          styles.star,
-                          rating >= i && styles.starSelected,
-                        ]}
-                      >
-                        ★
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity
-                    style={[
-                      styles.bottomButton,
-                      { backgroundColor: "#D9D9D9" },
-                    ]}
-                    onPress={onClose}
-                  >
-                    <Text style={styles.bottomButtonText}>뒤로가기</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.bottomButton}
-                    onPress={handleSubmit}
-                  >
-                    <Text style={styles.bottomButtonText}>후기 등록</Text>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                </ScrollView>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -202,16 +211,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  boxContainer: {
-    width: width - PADDING_HORIZONTAL * 2,
+  modalContainer: {
+    width: "100%",
+    paddingHorizontal: 14,
     backgroundColor: "transparent",
+    marginBottom: 40,
+
+    borderColor: "#00FF00",
+    borderWidth: 3,
   },
   iconBar: {
     backgroundColor: "transparent",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 4,
     paddingTop: 12,
     paddingBottom: 8,
   },
@@ -228,12 +242,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   header: {
+    width: "100%",
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
-    paddingTop: 21,
-    paddingBottom: 17,
     alignItems: "center",
+    gap: 8,
+    paddingVertical: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -249,13 +263,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   contentBox: {
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
+    display: "flex",
+    flexDirection: "column",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderColor: Colors.light_gray,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    paddingHorizontal: 12,
-    height: 632,
+    borderWidth: 1,
+    maxHeight: 520, // 나도 싫지만 이게 최선인듯
+    backgroundColor: "white",
+  },
+  scrollContainer: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    paddingVertical: 20,
+    gap: 25,
   },
   subtitle: {
     marginBottom: 15,

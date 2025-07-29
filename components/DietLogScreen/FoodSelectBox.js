@@ -6,15 +6,12 @@ import {
   TouchableOpacity,
   Modal,
   StyleSheet,
-  Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
 
 import Colors from "../../styles/colors";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { ScrollView } from "react-native-gesture-handler";
-
-const { width, height } = Dimensions.get("window");
 
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
@@ -50,7 +47,8 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
                   <Text style={styles.iconText}>CALENDAR</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.outerBox}>
+
+              <View style={styles.contentBox}>
                 <ScrollView
                   contentContainerStyle={styles.scrollContainer}
                   showsVerticalScrollIndicator={false}
@@ -125,20 +123,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContainer: {
-    width: width - 26,
-    height: height - 220,
-    marginTop: 60,
-    marginBottom: 99,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    width: "100%",
+    paddingHorizontal: 14,
     backgroundColor: "transparent",
+    height: "70%",
+    marginBottom: 40,
   },
   iconBar: {
     backgroundColor: "transparent",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 4,
     paddingTop: 12,
     paddingBottom: 8,
   },
@@ -154,14 +150,14 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareOTF",
     fontWeight: "600",
   },
-  outerBox: {
+  contentBox: {
     display: "flex",
     flexDirection: "column",
     width: "100%",
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderColor: Colors.light_gray,
-    borderRadius: 13,
+    borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "white",
   },
@@ -171,7 +167,8 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 20,
     gap: 25,
   },
   question: {
