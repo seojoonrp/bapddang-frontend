@@ -45,18 +45,9 @@ const FoodCardNews = ({ mode }) => {
   // 종료
   const handleClose = () => {
     setShowReview(false);
-    setTimeout(() => setSelectedItem(null), 300);
-  };
-
-  // 좋아요 눌렀을 때 슬라이드 전환
-  const handleLike = () => {
-    console.log("before:", infoX.value, reviewX.value);
-
-    infoX.value = withTiming(-width, { duration: 300 });
-    reviewX.value = withTiming(0, { duration: 300 }, () => {
-      runOnJS(setShowReview)(true);
-      console.log("after:", infoX.value, reviewX.value);
-    });
+    requestAnimationFrame(() => {
+    setSelectedItem(null); // 다음 렌더 프레임에서 초기화
+  });
   };
 
   // 카드 렌더링
@@ -94,10 +85,10 @@ const FoodCardNews = ({ mode }) => {
       {selectedItem && (
         <Animated.View style={[infoStyle, styles.animatedBox]}>
           <InfoBox
-            visible={!showReview}
+            key={selectedItem.id}
+            visible={true}
             item={selectedItem}
             mode={mode}
-            onLike={handleLike}
             onClose={handleClose}
           />
         </Animated.View>
