@@ -90,197 +90,86 @@ export default function SignUpEmailScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text
-        style={{
-          fontWeight: "bold",
-          fontSize: 24,
-          color: "white",
-        }}
-      >
-        회원가입
-      </Text>
-
-      <View style={{ width: "100%", maxWidth: 430, paddingHorizontal: 10 }}>
-        <Text
-          style={{
-            fontWeight: "bold",
-            fontSize: 14,
-            marginBottom: 6,
-            color: Colors.point_red,
-            marginLeft: 20,
-          }}
-        >
-          이메일 입력
+              <View style={styles.mainContainer}>
+        <Text style={styles.titleText}>
+          E-mail
         </Text>
-        <View
-          style={{
-            width: "100%",
-            padding: 20,
-            borderRadius: 20,
-            backgroundColor: "#FFF",
-            alignSelf: "center",
-            marginBottom: 24,
-          }}
-        >
+        <View style={styles.inputBg}>
           <TextInput
+            style={styles.inputText}
             placeholder="이메일을 입력해주세요..."
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            style={{
-              borderWidth: 0,
-              fontSize: 16,
-              backgroundColor: "transparent",
-              padding: 0,
-              height: 17,
-            }}
             placeholderTextColor="#aaa"
           />
         </View>
 
-        <Text
-          style={{
-            fontWeight: "bold",
-            fontSize: 14,
-            marginBottom: 6,
-            color: "#BE2C2C",
-            marginLeft: 20,
-          }}
-        >
+        <Text style={styles.titleText}>
           Password
         </Text>
-        <View
-          style={{
-            width: 382,
-            paddingTop: 18,
-            paddingBottom: 17,
-            paddingLeft: 24,
-            paddingRight: 24,
-            borderRadius: 20,
-            backgroundColor: "#FFF",
-            alignSelf: "center",
-            marginBottom: 8,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.inputBg}>
           <TextInput
+            style={styles.inputText}
             placeholder="비밀번호를 입력해주세요..."
             secureTextEntry
             value={pw}
             onChangeText={setPw}
             autoCapitalize="none"
-            style={{
-              flex: 1,
-              borderWidth: 0,
-              fontSize: 16,
-              backgroundColor: "transparent",
-              padding: 0,
-              height: 17,
-            }}
             placeholderTextColor="#aaa"
           />
         </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 8,
-            marginLeft: 28,
-          }}
-        >
+        <View style={styles.descContainer}>
           <Text
-            style={{
-              color: pwCondition ? "#4caf50" : "#BE2C2C",
-              fontSize: 13,
-              fontWeight: "bold",
-              marginRight: 6,
-            }}
+            style={[
+              styles.checkText,
+              { color: pwCondition ? "#4caf50" : "#BE2C2C" }
+            ]}
           >
             {pwCondition ? "✓" : "✗"}
           </Text>
-          <Text style={{ color: "white", fontSize: 13 }}>
+          <Text style={styles.descText}>
             대문자, 소문자, 특수기호 포함 8자 이상
           </Text>
         </View>
 
-        <View
-          style={{
-            width: 382,
-            paddingTop: 18,
-            paddingBottom: 17,
-            paddingHorizontal: 24,
-            borderRadius: 20,
-            backgroundColor: "#FFF",
-            alignSelf: "center",
-            marginBottom: 8,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.inputBg}>
           <TextInput
+            style={styles.inputText}
             placeholder="비밀번호를 다시 입력해주세요..."
             secureTextEntry
             value={pwConfirm}
             onChangeText={setPwConfirm}
-            style={{
-              flex: 1,
-              borderWidth: 0,
-              fontSize: 16,
-              backgroundColor: "transparent",
-              padding: 0,
-              height: 17,
-            }}
             placeholderTextColor="#aaa"
           />
         </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 40,
-            marginLeft: 28,
-          }}
-        >
+        <View style={styles.descContainer}>
           <Text
-            style={{
-              color: pwSame ? "#4caf50" : "#BE2C2C",
-              fontSize: 13,
-              fontWeight: "bold",
-              marginRight: 6,
-            }}
+            style={[
+              styles.checkText,
+              { color: pwSame ? "#4caf50" : "#BE2C2C" }
+            ]}
           >
             {pwSame ? "✓" : "✗"}
           </Text>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 13,
-            }}
-          >
+          <Text style={styles.descText}>
             비밀번호 일치
           </Text>
         </View>
 
         <TouchableOpacity
-          style={{
-            width: 376,
-            height: 51,
-            borderRadius: 24,
-            backgroundColor: isCompleted ? "#FF7873" : "#FFD1D1",
-            alignItems: "center",
-            justifyContent: "center",
-            alignSelf: "center",
-            marginBottom: 32,
-          }}
+          style={[
+            styles.nextButton,
+            {backgroundColor: isCompleted ? "#FF7873" : "#FFD1D1"}
+          ]}
           onPress={handleEmailVerifyPress}
           disabled={!isCompleted}
         >
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-            이메일 인증
+            다음
           </Text>
         </TouchableOpacity>
 
@@ -304,34 +193,13 @@ export default function SignUpEmailScreen({ navigation }) {
         animationType="slide"
         onRequestClose={() => setShowTerms(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              padding: 20,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-            }}
-          >
-            <Text
-              style={{ fontWeight: "bold", fontSize: 16, marginBottom: 20 }}
-            >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
               서비스 이용에 필요한{"\n"}약관에 동의해주세요.
             </Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
+            <View style={styles.checkboxContainer}>
               <CustomCheckBox
                 value={agreedCheck}
                 onValueChange={setAgreedCheck}
@@ -345,7 +213,7 @@ export default function SignUpEmailScreen({ navigation }) {
               disabled={!agreedCheck}
               color={!agreedCheck ? "gray" : undefined}
             />
-            <View style={{ height: 10 }} />
+            <View style={styles.buttonSpacing} />
             <Button title="취소" onPress={() => setShowTerms(false)} />
           </View>
         </View>
@@ -360,5 +228,87 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    maxWidth: 430,
+  },
+  mainContainer: {
+    width: "100%",
+    maxWidth: 430,
+    paddingHorizontal: 10,
+  },
+  titleText: {
+    fontWeight: "bold",
+    fontSize: 14,
+    marginTop: 24,
+    marginBottom: 6,
+    color: "#BE2C2C",
+    marginLeft: 20,
+  },
+  inputBg: {
+    height: 59,
+    width: "100%",
+    padding: 20,
+    marginBottom: 6,
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    alignSelf: "center",
+    justifyContent: "center",
+  },
+  inputText: {
+    borderWidth: 0,
+    fontSize: 14,
+    backgroundColor: "transparent",
+    padding: 0,
+    color: "#000",
+    textAlignVertical: 'center',
+  },
+  descContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 11,
+    marginLeft: 18,
+  },
+  descText: {
+    color: "white",
+    fontSize: 13,
+  },
+  checkText: {
+    fontSize: 13,
+    fontWeight: "bold",
+    marginRight: 6,
+  },
+  nextButton: {
+    width: "100%",
+    height: 51,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 72,
+    marginBottom: 32,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalTitle: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  buttonSpacing: {
+    height: 10,
   },
 });
