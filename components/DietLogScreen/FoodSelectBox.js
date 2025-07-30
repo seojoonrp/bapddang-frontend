@@ -37,7 +37,14 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
   };
 
   return (
-    <Modal visible={true} animationType="fade" transparent>
+    <Modal
+      visible={true}
+      animationType="fade"
+      transparent={true}
+      backdropTransitionOutTiming={0}
+      backdropOpacity={0}
+      hideModalContentWhileAnimating={true}
+    >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
