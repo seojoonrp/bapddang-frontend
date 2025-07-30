@@ -12,13 +12,13 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-//import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import * as ImagePicker from "expo-image-picker";
+
 import keywordMap from "../data/keywordMap.json";
 import Colors from "../styles/colors";
 import Star from "./svg/Star";
 
-const ReviewBox = ({ visible, onClose, item, mode }) => {
+const ReviewBox = ({ onClose, item, mode }) => {
   const [timeOption, setTimeOption] = useState([
     "아침",
     "점심",
@@ -35,31 +35,35 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
 
   const [response, setResponse] = useState("");
   const [imageUri, setImageUri] = useState(null);
-  
+
   const requestPermissions = async () => {
     const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
     const mediaStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    return cameraStatus.status === 'granted' && mediaStatus.status === 'granted';
+    return (
+      cameraStatus.status === "granted" && mediaStatus.status === "granted"
+    );
   };
   const pickImage = async () => {
     // 권한 요청
     const hasPermission = await requestPermissions();
     if (!hasPermission) {
-      Alert.alert('권한이 필요합니다', '카메라 및 앨범 접근 권한을 허용해주세요.');
+      Alert.alert(
+        "권한이 필요합니다",
+        "카메라 및 앨범 접근 권한을 허용해주세요."
+      );
       return;
     }
-    
-    Alert.alert('사진 선택', '어떤 방식으로 사진을 추가할까요?', [
 
+    Alert.alert("사진 선택", "어떤 방식으로 사진을 추가할까요?", [
       {
-        text: '앨범에서 선택',
+        text: "앨범에서 선택",
         onPress: pickFromLibrary,
       },
       {
-        text: '카메라로 촬영',
+        text: "카메라로 촬영",
         onPress: takePhoto,
       },
-      { text: '취소', style: 'cancel' },
+      { text: "취소", style: "cancel" },
     ]);
   };
   const pickFromLibrary = async () => {
@@ -81,6 +85,7 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
       setImageUri(result.assets[0].uri);
     }
   };
+
   const totalCharLength = Array.isArray(item.name)
     ? item.name.join(" & ").length
     : item.name.length;
@@ -111,7 +116,7 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal visible={true} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
@@ -204,19 +209,30 @@ const ReviewBox = ({ visible, onClose, item, mode }) => {
 
                   <View>
                     <Image
-                      source={
-                        response ? { uri: response.assets[0].uri } : 0
-                      }
+                      source={response ? { uri: response.assets[0].uri } : 0}
                       style={styles.img}
                     />
 
-                    <TouchableOpacity onPress={pickImage} style={styles.imageBox}>
+                    <TouchableOpacity
+                      onPress={pickImage}
+                      style={styles.imageBox}
+                    >
                       {imageUri ? (
-                        <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="cover"/>
+                        <Image
+                          source={{ uri: imageUri }}
+                          style={styles.imagePreview}
+                          resizeMode="cover"
+                        />
                       ) : (
                         <View style={styles.placeholder}>
-                          <Ionicons name="camera-outline" size={20} color="#BFA6A1" />
-                          <Text style={styles.placeholderText}>사진을 추가해보세요!</Text>
+                          <Ionicons
+                            name="camera-outline"
+                            size={20}
+                            color="#BFA6A1"
+                          />
+                          <Text style={styles.placeholderText}>
+                            사진을 추가해보세요!
+                          </Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -385,22 +401,22 @@ const styles = StyleSheet.create({
       "0px 2px 4px 0px #A94946 inset, 0px 2px 4px 4px rgba(169, 73, 70, 0.30) inset, 0px 2px 6px 4px #FDEDC0 inset",
   },
   imageBox: {
-    display: 'flex',
+    display: "flex",
     borderWidth: 1.5,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderColor: Colors.light_gray,
     borderRadius: 13,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    height:250,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    height: 250,
     width: 314,
-    gap:25,
-    overflow: 'hidden'
+    gap: 25,
+    overflow: "hidden",
   },
   placeholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   placeholderText: {
     fontFamily: "NanumSquareOTF",
@@ -412,7 +428,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 16,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   input: {
     borderWidth: 1,

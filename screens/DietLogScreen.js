@@ -16,12 +16,15 @@ import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
 import ReviewBox from "../components/ReviewBox";
 
 const DietLogScreen = () => {
+  // 추가버튼 관련
+  const [inputValue, setInputValue] = useState("");
+  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
+
+  const [activeModal, setActiveModal] = useState(null);
+
+  // BottomSheet 관련 설정
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => [660], []);
-  const [inputValue, setInputValue] = useState("");
-  const [isFoodSelectVisible, setIsFoodSelectVisible] = useState(false);
-  const [isReviewVisible, setIsReviewVisible] = useState(false);
-  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
   const sheetPosition = useSharedValue(0);
   const animatedTextStyle = useAnimatedStyle(() => {
     const fontSize = interpolate(
@@ -43,7 +46,7 @@ const DietLogScreen = () => {
       <MarshmallowStick />
 
       <TouchableOpacity
-        onPress={() => setIsFoodSelectVisible(true)}
+        onPress={() => setActiveModal("foodSelect")}
         style={styles.addButton}
       >
         <Text style={styles.addButtonText}>추가</Text>
@@ -73,24 +76,25 @@ const DietLogScreen = () => {
               주간 식단기록
             </Animated.Text>
 
-            {isFoodSelectVisible && (
+            {activeModal === "foodSelect" && (
               <FoodSelectBox
-                visible={isFoodSelectVisible}
-                onClose={() => setIsFoodSelectVisible(false)}
+                onClose={() => setActiveModal(null)}
                 onSelect={(foodName) => {
-                  setIsFoodSelectVisible(false);
-                  setSelectedFoodItem({ name: foodName });
-                  setIsReviewVisible(true);
+                  setActiveModal(null);
+
+                  setTimeout(() => {
+                    setSelectedFoodItem({ name: foodName });
+                    setActiveModal("review");
+                  }, 200);
                 }}
                 inputValue={inputValue}
                 setInputValue={setInputValue}
               />
             )}
 
-            {isReviewVisible && (
+            {activeModal === "review" && (
               <ReviewBox
-                visible={isReviewVisible}
-                onClose={() => setIsReviewVisible(false)}
+                onClose={() => setActiveModal(null)}
                 item={selectedFoodItem}
                 mode="fast"
               />

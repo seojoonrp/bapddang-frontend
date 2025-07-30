@@ -16,7 +16,7 @@ import { ScrollView } from "react-native-gesture-handler";
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
 
-const FoodSelectBox = ({ visible, onClose, onSelect }) => {
+const FoodSelectBox = ({ onClose, onSelect }) => {
   const [inputList, setInputList] = useState([""]);
   const [curInputIndex, setCurInputIndex] = useState(0);
 
@@ -28,6 +28,7 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
 
   const addInput = () => {
     setInputList([...inputList, ""]);
+    setCurInputIndex(inputList.length);
   };
 
   const handleConfirm = () => {
@@ -36,7 +37,7 @@ const FoodSelectBox = ({ visible, onClose, onSelect }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal visible={true} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
