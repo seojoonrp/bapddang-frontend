@@ -66,6 +66,7 @@ const InfoBox = ({ visible, onClose, item, mode }) => {
       animationType="fade"
       transparent
       presentationStyle="overFullScreen"
+      backdropTransitionOutTiming={0}
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
