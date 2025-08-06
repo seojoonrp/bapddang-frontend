@@ -11,12 +11,14 @@ import {
   TouchableWithoutFeedback,
   Alert,
 } from "react-native";
+import { doc, setDoc, arrayUnion, collection, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 
-import keywordMap from "../data/keywordMap.json";
-import Colors from "../styles/colors";
-import Star from "./svg/Star";
+import keywordMap from "../../data/keywordMap.json";
+import Colors from "../../styles/colors";
+import Star from "../svg/Star";
 
 const ReviewBox = ({ onClose, item, mode }) => {
   const [timeOption, setTimeOption] = useState([
@@ -107,12 +109,55 @@ const ReviewBox = ({ onClose, item, mode }) => {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("이유:", selectedTimes);
-    console.log("한줄평:", comment);
-    console.log("별점:", rating);
-    alert("후기가 등록되었습니다!");
-    onClose();
+  const handleSubmit = async () => {
+    if (!item?.name) return;
+
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("로그인이 필요합니다!");
+      return;
+    }
+
+    const uid = user.uid;
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      let day = 1;
+
+      if (userDoc.exists()) {
+        const createdAt = userDoc.data().createdAt?.toDate?.() || new Date(userDoc.data().createdAt);
+
+        const now = new Date();
+        const diffMs = now - createdAt;
+        day = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      }
+
+      const reviewData = {
+        food: item.name.join(", "),
+        times: selectedTimes,
+        situations: selectedTags,
+        comment,
+        rating,
+        imageUri,
+        createdAt: new Date(),
+        day,
+      };
+      const docRef = doc(db, "userReviews", uid);
+
+      await setDoc(
+        docRef,
+        {
+          reviews: arrayUnion(reviewData),
+        },
+        { merge: true }
+      );
+
+      alert("후기가 등록되었습니다!");
+      onClose();
+    } catch (error) {
+      console.error("리뷰 저장 실패: ", error);
+      Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
+    }
   };
 
   return (

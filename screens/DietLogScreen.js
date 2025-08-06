@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView,Image } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Animated, {
   useSharedValue,
@@ -9,11 +9,12 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
-import ReviewBox from "../components/ReviewBox";
+import ReviewBox from "../components/DietLogScreen/ReviewBox";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
@@ -40,6 +41,26 @@ const DietLogScreen = () => {
 
   // 나중에 초기값 받아와서 설정 필요
   const [selectedDay, setSelectedDay] = useState(1);
+
+  // 리뷰 가져오기
+  const [reviews, setReviews] = useState([]);
+  useEffect(() => {
+    const fetchUserReviews = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const docSnap = await getDoc(doc(db, "userReviews", user.uid));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setReviews(data.reviews || []);
+      }
+    };
+
+    fetchUserReviews();
+  }, []);
+  const filteredReviews = reviews.filter((review) => review.day === selectedDay);
+  console.log(selectedDay);
+  
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
@@ -99,6 +120,7 @@ const DietLogScreen = () => {
                 mode="fast"
               />
             )}
+
             <View style={styles.dayContainer}>
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <TouchableOpacity
@@ -121,10 +143,36 @@ const DietLogScreen = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
-    </LinearGradient>
+            <ScrollView>
+              {filteredReviews.map((review, index) => (
+                <View key={index} style={styles.reviewCard}>
+                  <Text style={styles.reviewText}>
+                    {review.times?.join(", ")}에{" "}
+                    <Text style={{ fontWeight: "bold", color: "#521210" }}>{review.food}</Text>을(를) 먹었어요
+                  </Text>
+
+                  <View style={styles.starRow}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Text key={i} style={{ fontSize: 20, color: i <= review.rating ? "#E90C05" : "#ccc" }}>★</Text>
+                    ))}
+                  </View>
+
+                  {review.imageUri && (
+                    <Image source={{ uri: review.imageUri }} style={styles.reviewImage} />
+                  )}
+
+                  <Text style={styles.tagText}>
+                    {review.situations?.map((tag) => `#${tag}`).join(" ")}
+                  </Text>
+
+                  <Text style={styles.commentText}>“{review.comment}”</Text>
+                </View>
+              ))}
+              </ScrollView>
+            </View>
+          </BottomSheetView>
+        </BottomSheet>
+      </LinearGradient>
   );
 };
 
@@ -210,5 +258,42 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: "NanumSquareB",
     marginTop: 2,
+  },
+  reviewCard: {
+    width: "90%",
+    marginTop: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 16,
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  reviewText: {
+    fontSize: 16,
+    marginBottom: 6,
+    textAlign: "center",
+    fontFamily: "NanumSquareB",
+  },
+  starRow: {
+    flexDirection: "row",
+    marginBottom: 12,
+  },
+  reviewImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  tagText: {
+    fontSize: 14,
+    color: "#521210",
+    marginBottom: 6,
+    fontFamily: "NanumSquareB",
+  },
+  commentText: {
+    fontSize: 13,
+    fontStyle: "italic",
+    color: "#666",
   },
 });
