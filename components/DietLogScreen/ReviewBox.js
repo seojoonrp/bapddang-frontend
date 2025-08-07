@@ -19,7 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import keywordMap from "../../data/keywordMap.json";
 import Colors from "../../styles/colors";
 import Star from "../svg/Star";
-
+import ReviewStar from "../svg/ReviewStar";
 const ReviewBox = ({ onClose, item, mode }) => {
   const [timeOption, setTimeOption] = useState([
     "아침",
@@ -126,9 +126,13 @@ const ReviewBox = ({ onClose, item, mode }) => {
 
       if (userDoc.exists()) {
         const createdAt = userDoc.data().createdAt?.toDate?.() || new Date(userDoc.data().createdAt);
-
         const now = new Date();
-        const diffMs = now - createdAt;
+
+        // 날짜 단위로 잘라서 비교
+        const createdAtDate = new Date(createdAt.getFullYear(), createdAt.getMonth(), createdAt.getDate());
+        const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const diffMs = nowDate - createdAtDate;
         day = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
       }
 
@@ -300,14 +304,7 @@ const ReviewBox = ({ onClose, item, mode }) => {
                   <View style={styles.ratingRow}>
                     {[1, 2, 3, 4, 5].map((i) => (
                       <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                        <Text
-                          style={[
-                            styles.star,
-                            rating >= i && styles.starSelected,
-                          ]}
-                        >
-                          ★
-                        </Text>
+                        <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -496,7 +493,7 @@ const styles = StyleSheet.create({
   },
   ratingRow: {
     flexDirection: "row",
-    marginTop: 16,
+    gap: 3,
   },
   star: {
     fontSize: 33,
