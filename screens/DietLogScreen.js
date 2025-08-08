@@ -54,6 +54,9 @@ const DietLogScreen = () => {
   useEffect(() => {
     const fetchUserReviews = async () => {
       const user = auth.currentUser;
+
+      console.log("Fetching user reviews for:", user?.uid);
+
       if (!user) return;
 
       const docSnap = await getDoc(doc(db, "userReviews", user.uid));
@@ -65,10 +68,15 @@ const DietLogScreen = () => {
 
     fetchUserReviews();
   }, []);
+
   const filteredReviews = reviews.filter(
     (review) => review.day === selectedDay
   );
+
   console.log(selectedDay);
+  useEffect(() => {
+    console.log("reviews changed:", reviews);
+  }, [reviews]);
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
@@ -292,13 +300,13 @@ const styles = StyleSheet.create({
   reviewText: {
     fontSize: 18,
     textAlign: "center",
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
     fontWeight: 400,
     color: Colors.slightly_burn,
   },
   foodText: {
     fontSize: 18,
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
     fontWeight: 400,
     color: Colors.burn,
   },
@@ -317,11 +325,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.burn,
     fontWeight: 700,
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
   },
   commentText: {
     fontSize: 13,
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
     fontWeight: 400,
     color: "#BBB",
   },
