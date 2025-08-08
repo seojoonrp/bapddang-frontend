@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  Pressable,
   FlatList,
 } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import Modal from "react-native-modal";
 import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -28,9 +29,11 @@ import ReviewBox from "../components/DietLogScreen/ReviewBox";
 const DietLogScreen = () => {
   // 추가버튼 관련
   const [inputValue, setInputValue] = useState("");
-  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
+  const [selectedFoods, setSelectedFoods] = useState([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null);
+
+  const [activeModal, setActiveModal] = useState("none");
+  const [nextModal, setNextModal] = useState(null);
 
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
@@ -75,6 +78,10 @@ const DietLogScreen = () => {
     (review) => review.day === selectedDay
   );
 
+  const handleCloseModal = () => {
+    setActiveModal("none");
+  };
+
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
       <MarshmallowStick />
@@ -111,29 +118,6 @@ const DietLogScreen = () => {
               주간 식단기록
             </Animated.Text>
 
-            {activeModal === "foodSelect" && (
-              <FoodSelectBox
-                onClose={() => setActiveModal(null)}
-                onSelect={(foodName) => {
-                  setActiveModal(null);
-
-                  setTimeout(() => {
-                    setSelectedFoodItem({ name: foodName });
-                    setActiveModal("review");
-                  }, 200);
-                }}
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-              />
-            )}
-
-            {activeModal === "review" && (
-              <ReviewBox
-                onClose={() => setActiveModal(null)}
-                item={selectedFoodItem}
-                mode="fast"
-              />
-            )}
             <View style={styles.dayContainer}>
               {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                 <TouchableOpacity
@@ -168,6 +152,49 @@ const DietLogScreen = () => {
           </View>
         </BottomSheetView>
       </BottomSheet>
+
+      <Modal
+        isVisible={activeModal === "foodSelect"}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0}
+        onModalHide={() => {
+          if (nextModal) {
+            setActiveModal(nextModal);
+            setNextModal(null);
+          }
+        }}
+        style={{ margin: 0 }}
+      >
+        <Pressable style={styles.backdrop} onPress={handleCloseModal} />
+        <FoodSelectBox
+          onClose={handleCloseModal}
+          onSelect={(foods) => {
+            setSelectedFoods(foods);
+            setNextModal("review");
+            setActiveModal("none");
+          }}
+        />
+      </Modal>
+
+      <Modal
+        isVisible={activeModal === "review"}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0}
+        onModalHide={() => {
+          setActiveModal("none");
+          setSelectedFoods([]);
+        }}
+        style={{ margin: 0 }}
+      >
+        <Pressable style={styles.backdrop} onPress={handleCloseModal} />
+        <ReviewBox
+          onClose={handleCloseModal}
+          foods={selectedFoods}
+          mode="fast"
+        />
+      </Modal>
     </LinearGradient>
   );
 };
@@ -253,5 +280,11 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: "NanumSquareB",
     marginTop: 2,
+  },
+  backdrop: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

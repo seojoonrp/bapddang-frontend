@@ -13,13 +13,6 @@ import fastFoodData from "../data/fastFoodData.json";
 import slowFoodData from "../data/slowFoodData.json";
 import InfoBox from "./InfoBox";
 
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
-
 const { width } = Dimensions.get("window");
 const cardMargin = 16;
 
@@ -73,8 +66,6 @@ const FoodCardNews = ({ mode }) => {
         animationOut="fadeOut"
         backdropOpacity={0}
         onModalHide={() => setSelectedItem(null)}
-        useNativeDriver={true}
-        hideModalContentWhileAnimating={true}
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleClose} />

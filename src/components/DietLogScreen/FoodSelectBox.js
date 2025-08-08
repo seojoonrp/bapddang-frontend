@@ -4,9 +4,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  TouchableWithoutFeedback,
 } from "react-native";
 
 import Colors from "../../styles/colors";
@@ -33,91 +31,82 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
 
   const handleConfirm = () => {
     const filtered = inputList.filter((item) => item.trim() !== "");
-    onSelect(filtered);
+    console.log("Selected food items:", filtered);
+
+    if (filtered.length > 0) {
+      onSelect(filtered);
+    } else {
+      console.log("No food items selected.");
+    }
   };
 
   return (
-    <Modal
-      visible={true}
-      animationType="fade"
-      transparent={true}
-      backdropTransitionOutTiming={0}
-      backdropOpacity={0}
-      hideModalContentWhileAnimating={true}
-    >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
-          <TouchableWithoutFeedback>
-            <View style={styles.modalContainer}>
-              <View style={styles.iconBar}>
-                <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-                  <Ionicons name="chevron-back" size={20} color="#CCC" />
-                  <Text style={styles.iconText}>CALENDAR</Text>
-                </TouchableOpacity>
-              </View>
+    <View style={styles.overlay}>
+      {/* <View style={styles.iconBar}>
+          <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
+            <Ionicons name="chevron-back" size={20} color="#CCC" />
+            <Text style={styles.iconText}>CALENDAR</Text>
+          </TouchableOpacity>
+        </View> */}
 
-              <View style={styles.contentBox}>
-                <ScrollView
-                  contentContainerStyle={styles.scrollContainer}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                >
-                  <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
+      <View style={styles.contentBox}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
 
-                  {inputList.map((input, index) => (
-                    <TextInput
-                      key={index}
-                      style={styles.input}
-                      placeholder="음식 이름을 입력해주세요"
-                      value={input}
-                      onChangeText={(text) => updateInput(index, text)}
-                      onFocus={() => setCurInputIndex(index)}
-                    />
-                  ))}
+          {inputList.map((input, index) => (
+            <TextInput
+              key={index}
+              style={styles.input}
+              placeholder="음식 이름을 입력해주세요"
+              value={input}
+              onChangeText={(text) => updateInput(index, text)}
+              onFocus={() => setCurInputIndex(index)}
+            />
+          ))}
 
-                  <TouchableOpacity style={styles.addButton} onPress={addInput}>
-                    <Text style={styles.addButtonText}>+</Text>
-                  </TouchableOpacity>
+          <TouchableOpacity style={styles.addButton} onPress={addInput}>
+            <Text style={styles.addButtonText}>+</Text>
+          </TouchableOpacity>
 
-                  <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
-                  <View style={styles.foodTagContainer}>
-                    {recentFoods.map((food) => (
-                      <TouchableOpacity
-                        key={food}
-                        style={styles.foodTag}
-                        onPress={() => updateInput(curInputIndex, food)}
-                      >
-                        <Text style={styles.foodTagText}>{food}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+          <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
+          <View style={styles.foodTagContainer}>
+            {recentFoods.map((food) => (
+              <TouchableOpacity
+                key={food}
+                style={styles.foodTag}
+                onPress={() => updateInput(curInputIndex, food)}
+              >
+                <Text style={styles.foodTagText}>{food}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-                  <Text style={styles.subTitle}>좋아요한 음식</Text>
-                  <View style={styles.foodTagContainer}>
-                    {likedFoods.map((food) => (
-                      <TouchableOpacity
-                        key={food}
-                        style={styles.foodTag}
-                        onPress={() => updateInput(curInputIndex, food)}
-                      >
-                        <Text style={styles.foodTagText}>{food}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+          <Text style={styles.subTitle}>좋아요한 음식</Text>
+          <View style={styles.foodTagContainer}>
+            {likedFoods.map((food) => (
+              <TouchableOpacity
+                key={food}
+                style={styles.foodTag}
+                onPress={() => updateInput(curInputIndex, food)}
+              >
+                <Text style={styles.foodTagText}>{food}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-                  <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={handleConfirm}
-                  >
-                    <Text style={styles.confirmText}>확인</Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={handleConfirm}
+          >
+            <Text style={styles.confirmText}>확인</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    </View>
   );
 };
 
@@ -126,9 +115,9 @@ export default FoodSelectBox;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 15,
   },
   modalContainer: {
     width: "100%",
