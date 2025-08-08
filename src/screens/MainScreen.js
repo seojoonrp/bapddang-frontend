@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Switch, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { auth } from "../firebase";
-
+import { signOut } from "firebase/auth";
 import MainScreen_Fast from "../components/MainScreen_Fast";
 import MainScreen_Slow from "../components/MainScreen_Slow";
 
@@ -25,6 +25,15 @@ const MainScreen = () => {
     }
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigation.replace("Landing", { from: "Main" });
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.switchContainer}>
@@ -41,8 +50,10 @@ const MainScreen = () => {
         <Text>{email}</Text>
         <Button
           title="로그인/랜딩"
-          onPress={() => navigation.navigate("Landing")}
+          onPress={() => navigation.navigate("Landing", { from: "Main" })}
         />
+        <Button title="로그아웃" onPress={handleLogout} />
+
       </View>
       {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
     </View>
