@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
+import Modal from "react-native-modal";
 import fastFoodData from "../data/fastFoodData.json";
 import slowFoodData from "../data/slowFoodData.json";
 import InfoBox from "./InfoBox";
@@ -25,32 +27,15 @@ const FoodCardNews = ({ mode }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [showReview, setShowReview] = useState(false);
 
-  // 애니메이션 좌표
-  const infoX = useSharedValue(0);
-  const reviewX = useSharedValue(width); // 오른쪽에서 시작
-
-  const infoStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: infoX.value }],
-  }));
-
-  // 카드 선택 시 초기화
   const handleCardPress = (item) => {
-    setShowReview(false);
     setSelectedItem(item);
-
-    infoX.value = 0;
-    reviewX.value = width;
+    setShowReview(true);
   };
 
-  // 종료
   const handleClose = () => {
     setShowReview(false);
-    requestAnimationFrame(() => {
-    setSelectedItem(null); // 다음 렌더 프레임에서 초기화
-  });
   };
 
-  // 카드 렌더링
   const renderItem = ({ item }) => (
     <View style={styles.cardContainer}>
       <TouchableOpacity
@@ -82,17 +67,21 @@ const FoodCardNews = ({ mode }) => {
         )}
       />
 
-      {selectedItem && (
-        <Animated.View style={[infoStyle, styles.animatedBox]}>
-          <InfoBox
-            key={selectedItem.id}
-            visible={true}
-            item={selectedItem}
-            mode={mode}
-            onClose={handleClose}
-          />
-        </Animated.View>
-      )}
+      <Modal
+        isVisible={showReview}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0}
+        onModalHide={() => setSelectedItem(null)}
+        useNativeDriver={true}
+        hideModalContentWhileAnimating={true}
+        style={{ margin: 0 }}
+      >
+        <Pressable style={styles.backdrop} onPress={handleClose} />
+        {selectedItem && (
+          <InfoBox item={selectedItem} mode={mode} onClose={handleClose} />
+        )}
+      </Modal>
     </View>
   );
 };
@@ -132,9 +121,10 @@ const styles = StyleSheet.create({
   calorieText: {
     fontSize: 25,
   },
-  animatedBox: {
+  backdrop: {
     position: "absolute",
     width: "100%",
     height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

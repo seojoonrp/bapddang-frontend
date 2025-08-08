@@ -14,21 +14,23 @@ const LandingScreen = () => {
     // 로그인 세션 여부 확인
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // 이미 로그인 되어 있음 → 이메일 인증 여부 체크해서 라우팅
+        // 이미 로그인 되어 있으면 이메일 인증 여부 체크해서 라우팅
         if (user.emailVerified) {
           navigation.replace("메인 화면");
         } else {
-          // 미인증이면 인증 안내 화면으로 (화면 이름은 프로젝트에 맞게)
           navigation.replace("EmailVerify");
         }
       } else {
-        // 비로그인 → 랜딩 화면 버튼 노출
         setChecking(false);
       }
     });
 
     return unsub;
-  }, []);
+  }, [navigation]);
+
+  if (checking) {
+    // 로딩화면 띄우면 좋을듯
+  }
 
   return (
     <View style={styles.container}>
