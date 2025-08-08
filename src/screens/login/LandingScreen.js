@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, StyleSheet} from "react-native";
+import { useNavigation,useRoute } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { auth } from "../../firebase";
@@ -8,12 +8,14 @@ import Colors from "../../styles/colors";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    const from = route.params?.from;
     // 로그인 세션 여부 확인
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (!from && user) {
         // 이미 로그인 되어 있으면 이메일 인증 여부 체크해서 라우팅
         if (user.emailVerified) {
           navigation.replace("메인 화면");
@@ -26,7 +28,7 @@ const LandingScreen = () => {
     });
 
     return unsub;
-  }, [navigation]);
+  }, [navigation, route.params]);
 
   if (checking) {
     // 로딩화면 띄우면 좋을듯
