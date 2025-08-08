@@ -9,8 +9,8 @@ const ReviewCard = ({ review }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.reviewText}>
-        {review.times?.join(", ")}으로{" "}
-        <Text style={styles.foodText}>{review.food}</Text>을(를) 먹었어요!
+        {review.time}으로 <Text style={styles.foodText}>{review.food}</Text>
+        을(를) 먹었어요!
       </Text>
 
       <View style={styles.starRow}>
@@ -26,9 +26,9 @@ const ReviewCard = ({ review }) => {
         <Image source={{ uri: review.imageUri }} style={styles.reviewImage} />
       ) : null}
 
-      {review.situations?.length ? (
+      {review.tags?.length ? (
         <Text style={styles.tagText}>
-          {review.situations.map((tag) => `#${tag}`).join(" ")}
+          {review.tags.map((tag) => `#${tag}`).join(" ")}
         </Text>
       ) : null}
 

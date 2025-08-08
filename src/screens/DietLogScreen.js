@@ -28,7 +28,6 @@ import ReviewBox from "../components/DietLogScreen/ReviewBox";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
-  const [inputValue, setInputValue] = useState("");
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 

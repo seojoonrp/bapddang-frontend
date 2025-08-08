@@ -6,18 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Modal,
   Image,
-  TouchableWithoutFeedback,
   Alert,
 } from "react-native";
-import {
-  doc,
-  setDoc,
-  arrayUnion,
-  collection,
-  getDoc,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
@@ -26,6 +18,9 @@ import keywordMap from "../../data/keywordMap.json";
 import Colors from "../../styles/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
+import IconBar from "./IconBar";
+import TagContainer from "../TagContainer";
+
 const ReviewBox = ({ onClose, foods, mode }) => {
   const [timeOption, setTimeOption] = useState([
     "아침",
@@ -35,7 +30,7 @@ const ReviewBox = ({ onClose, foods, mode }) => {
   ]);
   const [tagOption, setTagOption] = useState([]);
 
-  const [selectedTimes, setSelectedTimes] = useState([]);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
 
   const [comment, setComment] = useState("");
@@ -51,6 +46,7 @@ const ReviewBox = ({ onClose, foods, mode }) => {
       cameraStatus.status === "granted" && mediaStatus.status === "granted"
     );
   };
+
   const pickImage = async () => {
     // 권한 요청
     const hasPermission = await requestPermissions();
@@ -94,29 +90,29 @@ const ReviewBox = ({ onClose, foods, mode }) => {
     }
   };
 
+  const handleTagPress = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   const totalCharLength = Array.isArray(foods)
     ? foods.join(" & ").length
     : foods.length;
+
   useEffect(() => {
-    if (!foods?.[0]) return;
+    if (!foods) return;
+
     const tagData = keywordMap[foods[0]];
     if (tagData) {
       setTagOption(tagData.situation || []);
     } else {
-      setTagOption(["혼밥"]);
+      setTagOption(["혼밥", "매콤해요", "건강해요"]);
     }
   }, [foods]);
 
-  const toggleTag = (tag, selectedList, setSelectedList) => {
-    if (selectedList.includes(tag)) {
-      setSelectedList(selectedList.filter((t) => t !== tag));
-    } else {
-      setSelectedList([...selectedList, tag]);
-    }
-  };
-
   const handleSubmit = async () => {
-    if (!item?.name) return;
+    if (!foods) return;
 
     const user = auth.currentUser;
     if (!user) {
@@ -134,28 +130,16 @@ const ReviewBox = ({ onClose, foods, mode }) => {
         const createdAt =
           userDoc.data().createdAt?.toDate?.() ||
           new Date(userDoc.data().createdAt);
+
         const now = new Date();
-
-        // 날짜 단위로 잘라서 비교
-        const createdAtDate = new Date(
-          createdAt.getFullYear(),
-          createdAt.getMonth(),
-          createdAt.getDate()
-        );
-        const nowDate = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-
-        const diffMs = nowDate - createdAtDate;
+        const diffMs = now - createdAt;
         day = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
       }
 
       const reviewData = {
-        food: item.name.join(", "),
-        times: selectedTimes,
-        situations: selectedTags,
+        food: foods.join(", "),
+        time: selectedTime,
+        tags: selectedTags,
         comment,
         rating,
         imageUri,
@@ -182,12 +166,7 @@ const ReviewBox = ({ onClose, foods, mode }) => {
 
   return (
     <View style={styles.overlay}>
-      {/* <View style={styles.iconBar}>
-        <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-          <Ionicons name="chevron-back" size={20} color="#CCC" />
-          <Text style={styles.iconText}>CALENDAR</Text>
-        </TouchableOpacity>
-      </View> */}
+      <IconBar onClose={onClose} />
 
       <View
         style={[
@@ -217,52 +196,22 @@ const ReviewBox = ({ onClose, foods, mode }) => {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
-          <View style={styles.tagContainer}>
-            {timeOption.map((tag) => (
-              <TouchableOpacity
-                key={tag}
-                style={[
-                  styles.tag,
-                  selectedTimes.includes(tag) && styles.tagSelected,
-                ]}
-                onPress={() => toggleTag(tag, selectedTimes, setSelectedTimes)}
-              >
-                <Text
-                  style={[
-                    styles.tagText,
-                    { opacity: selectedTimes.includes(tag) ? 1 : 0.5 },
-                  ]}
-                >
-                  {tag}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TagContainer
+            tags={timeOption}
+            mode="select_single"
+            onPress={(time) => setSelectedTime(time)}
+            selectedTag={selectedTime}
+            containerStyle={{ marginBottom: 20 }}
+          />
 
           <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
-          <View style={styles.tagContainer}>
-            {tagOption.map((tag) => (
-              <TouchableOpacity
-                key={tag}
-                style={[
-                  styles.tag,
-                  selectedTags.includes(tag) && styles.tagSelected,
-                ]}
-                onPress={() => toggleTag(tag, selectedTags, setSelectedTags)}
-              >
-                <Text
-                  style={[
-                    styles.tagText,
-                    {
-                      opacity: selectedTags.includes(tag) ? 1 : 0.5,
-                    },
-                  ]}
-                >
-                  {tag}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TagContainer
+            tags={tagOption}
+            mode="select_multi"
+            onPress={(tag) => handleTagPress(tag)}
+            selectedTags={selectedTags}
+            containerStyle={{ marginBottom: 20 }}
+          />
 
           <View>
             <Image

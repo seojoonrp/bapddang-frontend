@@ -6,6 +6,8 @@ const Colors = {
   light_gray: "#D9D9D9",
   background_yellow: "#FFFAED",
   burn_red: "#BE0A20",
+  light_text_gray: "#F3EFEF",
+  icon_gray: "#CCC",
 };
 
 export default Colors;

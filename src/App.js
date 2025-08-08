@@ -15,6 +15,10 @@ const App = () => {
       NanumSquareB: require("./assets/fonts/NanumSquareB.ttf"),
       NanumSquareR: require("./assets/fonts/NanumSquareR.ttf"),
       NanumSquareL: require("./assets/fonts/NanumSquareL.ttf"),
+      NanumSquareRoundEB: require("./assets/fonts/NanumSquareRoundEB.ttf"),
+      NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundB.ttf"),
+      NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundR.ttf"),
+      NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundL.ttf"),
     }).then(() => setFontsLoaded(true));
   }, []);
 

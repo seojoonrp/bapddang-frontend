@@ -5,11 +5,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
+  LayoutAnimation,
 } from "react-native";
 
 import Colors from "../../styles/colors";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { ScrollView } from "react-native-gesture-handler";
+import IconBar from "./IconBar";
+import TagContainer from "../TagContainer";
 
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
@@ -25,6 +27,9 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
   };
 
   const addInput = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    // 안됨ㅋㅋ
+
     setInputList([...inputList, ""]);
     setCurInputIndex(inputList.length);
   };
@@ -41,13 +46,8 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
   };
 
   return (
-    <View style={styles.overlay}>
-      {/* <View style={styles.iconBar}>
-          <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-            <Ionicons name="chevron-back" size={20} color="#CCC" />
-            <Text style={styles.iconText}>CALENDAR</Text>
-          </TouchableOpacity>
-        </View> */}
+    <View style={styles.container}>
+      <IconBar onClose={onClose} />
 
       <View style={styles.contentBox}>
         <ScrollView
@@ -73,30 +73,20 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
           </TouchableOpacity>
 
           <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
-          <View style={styles.foodTagContainer}>
-            {recentFoods.map((food) => (
-              <TouchableOpacity
-                key={food}
-                style={styles.foodTag}
-                onPress={() => updateInput(curInputIndex, food)}
-              >
-                <Text style={styles.foodTagText}>{food}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TagContainer
+            tags={recentFoods}
+            mode="assign"
+            onPress={(food) => updateInput(curInputIndex, food)}
+            containerStyle={{ marginBottom: 20 }}
+          />
 
           <Text style={styles.subTitle}>좋아요한 음식</Text>
-          <View style={styles.foodTagContainer}>
-            {likedFoods.map((food) => (
-              <TouchableOpacity
-                key={food}
-                style={styles.foodTag}
-                onPress={() => updateInput(curInputIndex, food)}
-              >
-                <Text style={styles.foodTagText}>{food}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <TagContainer
+            tags={likedFoods}
+            mode="assign"
+            onPress={(food) => updateInput(curInputIndex, food)}
+            containerStyle={{ marginBottom: 20 }}
+          />
 
           <TouchableOpacity
             style={styles.confirmButton}
@@ -113,44 +103,17 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
 export default FoodSelectBox;
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 15,
   },
-  modalContainer: {
-    width: "100%",
-    paddingHorizontal: 14,
-    backgroundColor: "transparent",
-    height: "70%",
-    marginBottom: 40,
-  },
-  iconBar: {
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  iconLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconText: {
-    color: "#CCC",
-    marginLeft: 4,
-    fontWeight: "bold",
-    fontSize: 17,
-    fontFamily: "NanumSquareOTF",
-    fontWeight: "600",
-  },
   contentBox: {
     display: "flex",
     flexDirection: "column",
     width: "100%",
+    height: 580,
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderColor: Colors.light_gray,
@@ -166,13 +129,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 5,
     paddingVertical: 20,
-    gap: 25,
   },
   question: {
-    fontFamily: "NanumSquareRoundOTF",
+    color: Colors.point_red,
+    fontFamily: "NanumSquareRoundEB",
     fontSize: 18,
     fontWeight: 800,
-    color: Colors.point_red,
+    marginBottom: 25,
   },
   input: {
     width: "100%",
@@ -185,58 +148,28 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareR",
     fontSize: 16,
     textAlign: "center",
-    marginBottom: -13,
+    marginBottom: 16,
   },
   addButton: {
-    width: "100%",
-    paddingVertical: 8,
     width: 72,
-    borderWidth: 1,
-    borderColor: "#FF7873",
-    backgroundColor: "#FFFAED",
+    height: 38,
+    backgroundColor: Colors.light_text_gray,
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 35,
   },
   addButtonText: {
-    color: Colors.point_red,
+    color: "white",
     textAlign: "center",
-    fontFamily: "NanumSquareOTF",
-    fontSize: 18,
-    fontWeight: 800,
+    fontFamily: "NanumSquareB",
+    fontSize: 20,
   },
   subTitle: {
     color: Colors.slightly_burn,
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
     fontSize: 15,
-    fontWeight: 400,
-    marginBottom: -13,
-  },
-  foodTagContainer: {
-    width: "100%",
-    display: "flex",
-    flexWrap: "wrap",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  foodTag: {
-    display: "flex",
-    borderWidth: 0.4,
-    borderColor: Colors.light_gray,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    gap: 10,
-    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
-  },
-  foodTagText: {
-    fontFamily: "NanumSquareOTF",
-    fontSize: 16,
-    color: Colors.slightly_burn,
-    fontWeight: 700,
+    marginBottom: 10,
   },
   confirmButton: {
     paddingVertical: 16,
