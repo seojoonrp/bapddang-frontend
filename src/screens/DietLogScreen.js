@@ -15,8 +15,10 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { db, auth } from "../firebase";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
@@ -73,10 +75,10 @@ const DietLogScreen = () => {
     (review) => review.day === selectedDay
   );
 
-  console.log(selectedDay);
-  useEffect(() => {
-    console.log("reviews changed:", reviews);
-  }, [reviews]);
+  // console.log(selectedDay);
+  // useEffect(() => {
+  //   console.log("reviews changed:", reviews);
+  // }, [reviews]);
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
