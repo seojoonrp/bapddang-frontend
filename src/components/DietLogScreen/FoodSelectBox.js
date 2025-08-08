@@ -16,8 +16,10 @@ import TagContainer from "../TagContainer";
 const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
 const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
 
-const FoodSelectBox = ({ onClose, onSelect }) => {
-  const [inputList, setInputList] = useState([""]);
+const FoodSelectBox = ({ onClose, onSelect, initialFoods }) => {
+  const [inputList, setInputList] = useState(
+    initialFoods.length === 0 ? [""] : initialFoods
+  );
   const [curInputIndex, setCurInputIndex] = useState(0);
 
   const updateInput = (index, value) => {
@@ -27,9 +29,6 @@ const FoodSelectBox = ({ onClose, onSelect }) => {
   };
 
   const addInput = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    // 안됨ㅋㅋ
-
     setInputList([...inputList, ""]);
     setCurInputIndex(inputList.length);
   };

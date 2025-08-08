@@ -33,6 +33,7 @@ const DietLogScreen = () => {
 
   const [activeModal, setActiveModal] = useState("none");
   const [nextModal, setNextModal] = useState(null);
+  const [back, setBack] = useState(false);
 
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
@@ -79,6 +80,40 @@ const DietLogScreen = () => {
 
   const handleCloseModal = () => {
     setActiveModal("none");
+  };
+
+  const handleBack = () => {
+    setActiveModal("none");
+    setNextModal("foodSelect");
+    setBack(true);
+  };
+
+  const handleHideFoodSelect = () => {
+    if (nextModal) {
+      setActiveModal(nextModal);
+      setNextModal(null);
+    } else {
+      setSelectedFoods([]);
+    }
+  };
+
+  const handleSelectFood = (foods) => {
+    setSelectedFoods(foods);
+    setActiveModal("none");
+    setNextModal("review");
+  };
+
+  const handleHideReview = () => {
+    if (!back) {
+      setSelectedFoods([]);
+      setActiveModal("none");
+    } else {
+      if (nextModal) {
+        setActiveModal(nextModal);
+        setNextModal(null);
+      }
+      setBack(false);
+    }
   };
 
   return (
@@ -157,22 +192,16 @@ const DietLogScreen = () => {
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0}
-        onModalHide={() => {
-          if (nextModal) {
-            setActiveModal(nextModal);
-            setNextModal(null);
-          }
-        }}
+        onModalHide={handleHideFoodSelect}
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
         <FoodSelectBox
           onClose={handleCloseModal}
           onSelect={(foods) => {
-            setSelectedFoods(foods);
-            setNextModal("review");
-            setActiveModal("none");
+            handleSelectFood(foods);
           }}
+          initialFoods={selectedFoods}
         />
       </Modal>
 
@@ -181,15 +210,13 @@ const DietLogScreen = () => {
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0}
-        onModalHide={() => {
-          setActiveModal("none");
-          setSelectedFoods([]);
-        }}
+        onModalHide={handleHideReview}
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
         <ReviewBox
           onClose={handleCloseModal}
+          onBack={handleBack}
           foods={selectedFoods}
           mode="fast"
         />

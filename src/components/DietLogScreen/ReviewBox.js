@@ -21,7 +21,7 @@ import ReviewStar from "../svg/ReviewStar";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const ReviewBox = ({ onClose, foods, mode }) => {
+const ReviewBox = ({ onClose, foods, mode, onBack }) => {
   const [timeOption, setTimeOption] = useState([
     "아침",
     "점심",
@@ -255,7 +255,7 @@ const ReviewBox = ({ onClose, foods, mode }) => {
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
-              onPress={onClose}
+              onPress={onBack}
             >
               <Text style={styles.bottomButtonText}>뒤로가기</Text>
             </TouchableOpacity>
@@ -358,32 +358,6 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareEB",
     fontSize: 18,
     color: Colors.burn,
-  },
-  tagContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginBottom: 35,
-  },
-  tagText: {
-    fontFamily: "NanumSquareB",
-    fontSize: 16,
-    color: Colors.burn,
-    opacity: 0.5,
-  },
-  tag: {
-    borderWidth: 0.4,
-    borderColor: "#D9D9D9",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    margin: 3,
-    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
-  },
-  tagSelected: {
-    boxShadow:
-      "0px 2px 4px 0px #A94946 inset, 0px 2px 4px 4px rgba(169, 73, 70, 0.30) inset, 0px 2px 6px 4px #FDEDC0 inset",
   },
   imageBox: {
     display: "flex",
