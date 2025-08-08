@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
+  FlatList,
 } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Animated, {
@@ -22,8 +22,8 @@ import { db, auth } from "../firebase";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
+import ReviewCard from "../components/DietLogScreen/ReviewCard";
 import ReviewBox from "../components/DietLogScreen/ReviewBox";
-import ReviewStar from "../components/svg/ReviewStar";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
@@ -74,11 +74,6 @@ const DietLogScreen = () => {
   const filteredReviews = reviews.filter(
     (review) => review.day === selectedDay
   );
-
-  // console.log(selectedDay);
-  // useEffect(() => {
-  //   console.log("reviews changed:", reviews);
-  // }, [reviews]);
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
@@ -161,43 +156,15 @@ const DietLogScreen = () => {
                 </TouchableOpacity>
               ))}
             </View>
-            <ScrollView
+
+            <FlatList
+              data={filteredReviews}
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
-            >
-              {isSheetOpen &&
-                filteredReviews.map((review, index) => (
-                  <View key={index} style={styles.reviewCard}>
-                    <Text style={styles.reviewText}>
-                      {review.times?.join(", ")}으로{" "}
-                      <Text style={styles.foodText}>{review.food}</Text>을(를)
-                      먹었어요!
-                    </Text>
-
-                    <View style={styles.starRow}>
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <ReviewStar
-                          key={i}
-                          fill={review.rating >= i ? Colors.point_red : "white"}
-                        />
-                      ))}
-                    </View>
-
-                    {review.imageUri && (
-                      <Image
-                        source={{ uri: review.imageUri }}
-                        style={styles.reviewImage}
-                      />
-                    )}
-
-                    <Text style={styles.tagText}>
-                      {review.situations?.map((tag) => `#${tag}`).join(" ")}
-                    </Text>
-
-                    <Text style={styles.commentText}>“{review.comment}”</Text>
-                  </View>
-                ))}
-            </ScrollView>
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => <ReviewCard review={item} />}
+              showsVerticalScrollIndicator={false}
+            />
           </View>
         </BottomSheetView>
       </BottomSheet>
@@ -263,6 +230,7 @@ const styles = StyleSheet.create({
   },
   dayContainer: {
     marginTop: 43,
+    marginBottom: 10,
     width: "100%",
     height: 52,
     flexDirection: "row",
@@ -285,54 +253,5 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: "NanumSquareB",
     marginTop: 2,
-  },
-  reviewCard: {
-    width: "100%",
-    marginTop: 20,
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: "#D9D9D9",
-    padding: 18,
-    gap: 12,
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    alignSelf: "stretch",
-  },
-  reviewText: {
-    fontSize: 18,
-    textAlign: "center",
-    fontFamily: "NanumSquareB",
-    fontWeight: 400,
-    color: Colors.slightly_burn,
-  },
-  foodText: {
-    fontSize: 18,
-    fontFamily: "NanumSquareB",
-    fontWeight: 400,
-    color: Colors.burn,
-  },
-  starRow: {
-    flexDirection: "row",
-    gap: 3,
-  },
-  reviewImage: {
-    height: 240,
-    gap: 10,
-    borderRadius: 13,
-    margin: 12,
-    alignSelf: "stretch",
-  },
-  tagText: {
-    fontSize: 15,
-    color: Colors.burn,
-    fontWeight: 700,
-    fontFamily: "NanumSquareB",
-  },
-  commentText: {
-    fontSize: 13,
-    fontFamily: "NanumSquareB",
-    fontWeight: 400,
-    color: "#BBB",
   },
 });
