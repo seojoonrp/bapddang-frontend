@@ -1,13 +1,20 @@
 import React, { memo } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet,TouchableOpacity,Ionicons } from "react-native";
 import Colors from "../../styles/colors";
 import ReviewStar from "../svg/ReviewStar";
 
-const ReviewCard = ({ review }) => {
+const ReviewCard = ({ review,index,onEdit }) => {
   if (!review) return null;
 
   return (
     <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.editBtn}
+        onPress={() => onEdit?.(review, index)}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Text>수정</Text>
+      </TouchableOpacity>
       <Text style={styles.reviewText}>
         {review.time}으로 <Text style={styles.foodText}>{review.food}</Text>
         을(를) 먹었어요!
@@ -54,6 +61,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     alignSelf: "stretch",
+  },
+  editBtn: {
+    position: "absolute",
+    top: 12,
+    right: 12,
   },
   reviewText: {
     fontSize: 18,

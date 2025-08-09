@@ -35,6 +35,8 @@ const DietLogScreen = () => {
   const [nextModal, setNextModal] = useState(null);
   const [back, setBack] = useState(false);
 
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => [660], []);
@@ -115,7 +117,11 @@ const DietLogScreen = () => {
       setBack(false);
     }
   };
-
+  const handleEditReview = (review, index) => {
+    setSelectedReview(review);
+    setActiveModal("review");
+    setSelectedIndex(index);
+  };
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
       <MarshmallowStick />
@@ -180,7 +186,8 @@ const DietLogScreen = () => {
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => <ReviewCard review={item} />}
+              renderItem={({ item, index }) =>
+                <ReviewCard review={item} index={index} onEdit={handleEditReview} />}
               showsVerticalScrollIndicator={false}
             />
           </View>
@@ -219,6 +226,9 @@ const DietLogScreen = () => {
           onBack={handleBack}
           foods={selectedFoods}
           mode="fast"
+          intent={selectedReview ? "edit" : "create"}   // ★ 수정 여부
+          reviewIndex={selectedIndex}                   // ★ 배열 인덱스
+          initialReview={selectedReview}
         />
       </Modal>
     </LinearGradient>

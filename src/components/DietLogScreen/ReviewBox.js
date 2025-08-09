@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,8 @@ import ReviewStar from "../svg/ReviewStar";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const ReviewBox = ({ onClose, foods, mode, onBack }) => {
+const ReviewBox = ({ onClose, foods, mode, onBack, intent = "create", reviewIndex = null, initialReview = null }) => {
+  const [foodName, setFoodName] = useState("");
   const [timeOption, setTimeOption] = useState([
     "아침",
     "점심",
@@ -39,6 +40,22 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
   const [response, setResponse] = useState("");
   const [imageUri, setImageUri] = useState(null);
 
+  useEffect(() => {
+    if (intent === "edit" && initialReview) {
+      setFoodName(initialReview.food ?? "");
+      setSelectedTime(initialReview.time ?? null);
+      setSelectedTags(initialReview.tags ?? []);
+      setComment(initialReview.comment ?? "");
+      setRating(initialReview.rating ?? 0);
+      setImageUri(initialReview.imageUri ?? null);
+    }
+  }, [intent, initialReview]);
+  useEffect(() => {
+    if (intent === "create") {
+      if (Array.isArray(foods)) setFoodName(foods.join(" & "));
+      else setFoodName(foods || "");
+    }
+  }, [intent, foods]);
   const requestPermissions = async () => {
     const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
     const mediaStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -95,10 +112,7 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
-
-  const totalCharLength = Array.isArray(foods)
-    ? foods.join(" & ").length
-    : foods.length;
+  const totalCharLength = (foodName || "").length;
 
   useEffect(() => {
     if (!foods) return;
@@ -123,21 +137,67 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
     const uid = user.uid;
 
     try {
-      const userDoc = await getDoc(doc(db, "users", uid));
+      const docRef = doc(db, "userReviews", uid);
+
+      if (intent === "edit") {
+        if (reviewIndex == null) {
+          Alert.alert("수정 오류", "수정할 리뷰 인덱스가 없습니다.");
+          return;
+        }
+        // 1) 기존 문서 조회
+        const snap = await getDoc(docRef);
+        const reviews = snap.exists() ? (snap.data().reviews || []) : [];
+
+        if (!reviews[reviewIndex]) {
+          Alert.alert("수정 오류", "대상 리뷰를 찾지 못했습니다.");
+          return;
+        }
+
+        // 2) 기존 값 보존 + 수정 값 덮어쓰기
+        const prev = reviews[reviewIndex];
+        const updated = {
+          ...prev,
+          food: foodName,
+          time: selectedTime,
+          tags: selectedTags,
+          comment,
+          rating,
+          imageUri,
+          edited: true,
+        };
+
+        const next = [...reviews];
+        next[reviewIndex] = updated;
+
+        // 3) 통째로 set
+        await setDoc(docRef, { reviews: next }, { merge: true });
+        Alert.alert("수정 완료", "후기를 수정했어요!");
+        onClose?.();
+        return;
+      }
+      let createdAt = null;
+
+      if (!createdAt && auth.currentUser?.metadata?.creationTime) {
+        createdAt = new Date(auth.currentUser.metadata.creationTime);
+      }
       let day = 1;
 
-      if (userDoc.exists()) {
-        const createdAt =
-          userDoc.data().createdAt?.toDate?.() ||
-          new Date(userDoc.data().createdAt);
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const toLocalStartOfDay = (d) => {
+        const x = new Date(d);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      };
 
-        const now = new Date();
-        const diffMs = now - createdAt;
-        day = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      if (createdAt instanceof Date && !isNaN(createdAt)) {
+        const startCreated = toLocalStartOfDay(createdAt);
+        const startToday = toLocalStartOfDay(new Date());
+        const diffDays = Math.round((startToday - startCreated) / msPerDay);
+        day = Math.max(1, diffDays + 1);
       }
 
       const reviewData = {
-        food: foods.join(", "),
+        food: foodName,
         time: selectedTime,
         tags: selectedTags,
         comment,
@@ -146,7 +206,6 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
         createdAt: new Date(),
         day,
       };
-      const docRef = doc(db, "userReviews", uid);
 
       await setDoc(
         docRef,
@@ -178,14 +237,14 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
         ]}
       >
         <Star />
-        <Text
+        <TextInput
           style={[
             styles.headerText,
             { fontSize: totalCharLength > 11 ? 18 : 30 },
           ]}
-        >
-          {foods.join(" & ")}
-        </Text>
+          value={foodName}
+          onChangeText={setFoodName}
+        />
         <Star />
       </View>
 
@@ -253,17 +312,19 @@ const ReviewBox = ({ onClose, foods, mode, onBack }) => {
           </View>
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
-              onPress={onBack}
-            >
-              <Text style={styles.bottomButtonText}>뒤로가기</Text>
-            </TouchableOpacity>
+            {intent !== "edit" && (
+              <TouchableOpacity
+                style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
+                onPress={onBack}
+              >
+                <Text style={styles.bottomButtonText}>뒤로가기</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={styles.bottomButton}
               onPress={handleSubmit}
             >
-              <Text style={styles.bottomButtonText}>후기 등록</Text>
+              <Text style={styles.bottomButtonText}>{intent === "edit" ? "수정 저장" : "후기 등록"}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -14,7 +14,7 @@ const MainScreen = () => {
   const toggleFast = () => {
     setIsFast((prev) => !prev);
   };
-
+``
   const [email, setEmail] = useState("");
   useEffect(() => {
     const curUser = auth.currentUser;
