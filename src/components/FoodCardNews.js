@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,26 @@ import {
   Pressable,
 } from "react-native";
 import Modal from "react-native-modal";
-import fastFoodData from "../data/fastFoodData.json";
-import slowFoodData from "../data/slowFoodData.json";
+
+import { fetchFoods } from "../services/food";
 import InfoBox from "./InfoBox";
 
 const { width } = Dimensions.get("window");
 const cardMargin = 16;
 
 const FoodCardNews = ({ mode }) => {
+  const [foodsData, setFoodsData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await fetchFoods();
+      setFoodsData(data);
+      console.log("Fetched foods data:", data);
+    };
+
+    fetchData();
+  }, []);
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [showReview, setShowReview] = useState(false);
 
@@ -48,9 +60,9 @@ const FoodCardNews = ({ mode }) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={mode === "fast" ? fastFoodData : slowFoodData}
+        data={foodsData.filter((item) => item.type === mode)}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.name}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}

@@ -20,33 +20,33 @@ import Star from "./svg/Star";
 const InfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
 
-  const handleLike = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.log("로그인하거라");
-        return;
-      }
+  // const handleLike = async () => {
+  //   try {
+  //     const user = auth.currentUser;
+  //     if (!user) {
+  //       console.log("로그인하거라");
+  //       return;
+  //     }
 
-      const uid = user.uid;
-      const docRef = doc(db, "userLikes", uid);
+  //     const uid = user.uid;
+  //     const docRef = doc(db, "userLikes", uid);
 
-      await setDoc(
-        docRef,
-        {
-          likes: arrayUnion({
-            foodName: item.name,
-            timestamp: new Date(),
-          }),
-        },
-        { merge: true }
-      );
+  //     await setDoc(
+  //       docRef,
+  //       {
+  //         likes: arrayUnion({
+  //           foodName: item.name,
+  //           timestamp: new Date(),
+  //         }),
+  //       },
+  //       { merge: true }
+  //     );
 
-      console.log("좋아요 저장 완료");
-    } catch (e) {
-      console.error("좋아요 저장 중 오류:", e);
-    }
-  };
+  //     console.log("좋아요 저장 완료");
+  //   } catch (e) {
+  //     console.error("좋아요 저장 중 오류:", e);
+  //   }
+  // };
 
   const handleCalendar = () => {
     onClose();
@@ -77,33 +77,11 @@ const InfoBox = ({ item, mode, onClose }) => {
         ]}
       >
         <Star />
-        <Text style={styles.headerText}>{item?.name}</Text>
+        <Text style={styles.headerText}>{item.name}</Text>
         <Star />
       </View>
 
       <View style={styles.contentBox}>
-        <View style={styles.imageContainer}>
-          {item?.image ? (
-            <Image source={{ uri: item?.image }} style={styles.image} />
-          ) : (
-            <View style={styles.placeholder}>
-              <Text style={styles.placeholderText}>사진</Text>
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.brandText}>
-          {item?.brand
-            ? `${item?.brand}에서 먹을 수 있어요!`
-            : "알 수 없는 브랜드"}
-        </Text>
-
-        <Text style={styles.infoText}>한식</Text>
-        <Text style={styles.infoText}>칼로리: {item?.kcal}kcal</Text>
-        <Text style={styles.infoText}>맵기지수: {item?.spicy}</Text>
-        <Text style={styles.infoText}>단맛지수: {item?.sweet}</Text>
-        <Text style={styles.infoText}>짠맛지수: {item?.salty}</Text>
-
         <TouchableOpacity
           style={{ width: 100, height: 40, borderWidth: 2 }}
           onPress={() => fetchTags(item?.name)}
@@ -113,7 +91,7 @@ const InfoBox = ({ item, mode, onClose }) => {
 
         <TouchableOpacity
           style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
-          onPress={handleLike}
+          // onPress={handleLike}
         >
           <Text style={styles.emojiText}>👍</Text>
         </TouchableOpacity>

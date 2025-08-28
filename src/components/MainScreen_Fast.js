@@ -12,39 +12,39 @@ const MainScreen_Fast = () => {
         <Text style={styles.curStreakText}>연속 0일차</Text>
         <TouchableOpacity
           style={styles.dietLogButton}
-          onPress={() => navigation.navigate('식단 기록 화면')}
+          onPress={() => navigation.navigate("식단 기록 화면")}
         >
           <Text>주간 식단 기록 화면 가기</Text>
         </TouchableOpacity>
       </View>
-      <FoodCardNews mode='fast' />
+      <FoodCardNews mode="fast" />
     </View>
   );
-}
+};
 
 export default MainScreen_Fast;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "center",
     marginTop: 10,
 
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
   },
   curStatusContainer: {
-    alignSelf: 'stretch',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    alignSelf: "stretch",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-end",
     marginTop: 180,
     marginBottom: 10,
     marginHorizontal: 16,
 
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
   },
   curStreakText: {
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     padding: 5,
     marginTop: 5,
 
-    borderColor: 'black',
+    borderColor: "black",
     borderWidth: 1,
-  }
+  },
 });

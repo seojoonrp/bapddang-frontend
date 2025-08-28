@@ -6,31 +6,19 @@ import { auth } from "../../services/firebase";
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleLogin = async () => {
     setError("");
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pw);
       if (!userCredential.user.emailVerified) {
-        setError("이메일 인증을 완료해주세요.");
+        console.log("이메일 인증을 완료해주세요.");
         return;
-      }
-      setSuccess("✅ 이메일 인증이 완료되었습니다!");
-      setTimeout(() => {
-        navigation.navigate("메인 화면");
-      }, 1500);
-    } catch (e) {
-      if (
-        e.code === "auth/user-not-found" ||
-        e.code === "auth/wrong-password" ||
-        e.code === "auth/invalid-credential"
-      ) {
-        setError("아이디 또는 비밀번호가 틀립니다.");
       } else {
-        setError(e.message);
+        navigation.navigate("메인 화면", { replace: true });
       }
+    } catch (e) {
+      console.log("Error:", e.message);
     }
   };
 
@@ -76,12 +64,6 @@ export default function LoginScreen({ navigation }) {
         title="회원가입 하러가기"
         onPress={() => navigation.navigate("SignUp")}
       />
-      {error ? (
-        <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>
-      ) : null}
-      {success ? (
-        <Text style={{ color: "green", marginTop: 10 }}>{success}</Text>
-      ) : null}
     </View>
   );
 }

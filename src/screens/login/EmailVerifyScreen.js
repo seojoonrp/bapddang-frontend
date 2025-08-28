@@ -26,7 +26,7 @@ const EmailVerifyScreen = () => {
 
         await createUserDocument(currentUser);
         setTimeout(() => {
-          navigation.replace("메인 화면");
+          navigation.replace("메인 화면", { replace: true });
         }, 500);
       }
     } catch (e) {
