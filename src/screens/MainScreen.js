@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, Switch, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { auth } from "../firebase";
+import { auth } from "../services/firebase";
 import { signOut } from "firebase/auth";
 import MainScreen_Fast from "../components/MainScreen_Fast";
 import MainScreen_Slow from "../components/MainScreen_Slow";
@@ -14,7 +14,7 @@ const MainScreen = () => {
   const toggleFast = () => {
     setIsFast((prev) => !prev);
   };
-``
+  ``;
   const [email, setEmail] = useState("");
   useEffect(() => {
     const curUser = auth.currentUser;
@@ -53,7 +53,6 @@ const MainScreen = () => {
           onPress={() => navigation.navigate("Landing", { from: "Main" })}
         />
         <Button title="로그아웃" onPress={handleLogout} />
-
       </View>
       {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
     </View>

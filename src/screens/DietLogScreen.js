@@ -19,7 +19,7 @@ import Modal from "react-native-modal";
 import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { db, auth } from "../firebase";
+import { db, auth } from "../services/firebase";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
@@ -186,8 +186,13 @@ const DietLogScreen = () => {
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) =>
-                <ReviewCard review={item} index={index} onEdit={handleEditReview} />}
+              renderItem={({ item, index }) => (
+                <ReviewCard
+                  review={item}
+                  index={index}
+                  onEdit={handleEditReview}
+                />
+              )}
               showsVerticalScrollIndicator={false}
             />
           </View>
@@ -226,8 +231,8 @@ const DietLogScreen = () => {
           onBack={handleBack}
           foods={selectedFoods}
           mode="fast"
-          intent={selectedReview ? "edit" : "create"}   // ★ 수정 여부
-          reviewIndex={selectedIndex}                   // ★ 배열 인덱스
+          intent={selectedReview ? "edit" : "create"} // ★ 수정 여부
+          reviewIndex={selectedIndex} // ★ 배열 인덱스
           initialReview={selectedReview}
         />
       </Modal>

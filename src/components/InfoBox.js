@@ -11,7 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 import { fetchTags } from "../api/gptApi";
-import { db, auth } from "../firebase";
+import { db, auth } from "../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../styles/colors";

@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { doc, setDoc, getDoc, arrayUnion } from "firebase/firestore";
-import { auth, db } from "../../firebase";
+import { auth, db } from "../../services/firebase";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 
@@ -21,7 +21,15 @@ import ReviewStar from "../svg/ReviewStar";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const ReviewBox = ({ onClose, foods, mode, onBack, intent = "create", reviewIndex = null, initialReview = null }) => {
+const ReviewBox = ({
+  onClose,
+  foods,
+  mode,
+  onBack,
+  intent = "create",
+  reviewIndex = null,
+  initialReview = null,
+}) => {
   const [foodName, setFoodName] = useState("");
   const [timeOption, setTimeOption] = useState([
     "아침",
@@ -146,14 +154,13 @@ const ReviewBox = ({ onClose, foods, mode, onBack, intent = "create", reviewInde
         }
         // 1) 기존 문서 조회
         const snap = await getDoc(docRef);
-        const reviews = snap.exists() ? (snap.data().reviews || []) : [];
+        const reviews = snap.exists() ? snap.data().reviews || [] : [];
 
         if (!reviews[reviewIndex]) {
           Alert.alert("수정 오류", "대상 리뷰를 찾지 못했습니다.");
           return;
         }
 
-        // 2) 기존 값 보존 + 수정 값 덮어쓰기
         const prev = reviews[reviewIndex];
         const updated = {
           ...prev,
@@ -169,7 +176,6 @@ const ReviewBox = ({ onClose, foods, mode, onBack, intent = "create", reviewInde
         const next = [...reviews];
         next[reviewIndex] = updated;
 
-        // 3) 통째로 set
         await setDoc(docRef, { reviews: next }, { merge: true });
         Alert.alert("수정 완료", "후기를 수정했어요!");
         onClose?.();
@@ -324,7 +330,9 @@ const ReviewBox = ({ onClose, foods, mode, onBack, intent = "create", reviewInde
               style={styles.bottomButton}
               onPress={handleSubmit}
             >
-              <Text style={styles.bottomButtonText}>{intent === "edit" ? "수정 저장" : "후기 등록"}</Text>
+              <Text style={styles.bottomButtonText}>
+                {intent === "edit" ? "수정 저장" : "후기 등록"}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

@@ -2,17 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
-  Button,
   Text,
-  Modal,
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
-import { auth } from "../../firebase";
+import { useNavigation } from "@react-navigation/native";
+import Modal from "react-native-modal";
+import { signUpUser } from "../../services/user";
 
 import Colors from "../../styles/colors";
 
@@ -32,17 +28,19 @@ function CustomCheckBox({ value, onValueChange }) {
   );
 }
 
-export default function SignUpEmailScreen({ navigation }) {
+const SignUpEmailScreen = () => {
+  const navigation = useNavigation();
+
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+
   const [pwConfirm, setPwConfirm] = useState("");
   const [pwCondition, setPwCondition] = useState(false);
   const [pwSame, setPwSame] = useState(false);
   const isCompleted = pwCondition && pwSame && email.length > 0;
+
   const [showTerms, setShowTerms] = useState(false);
   const [agreedCheck, setAgreedCheck] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const regex =
@@ -50,33 +48,6 @@ export default function SignUpEmailScreen({ navigation }) {
     setPwCondition(regex.test(pw));
     setPwSame(pw === pwConfirm && pw.length > 0);
   }, [pw, pwConfirm]);
-
-  const handleSignUp = async () => {
-    setError("");
-    setSuccess("");
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        pw
-      );
-      await sendEmailVerification(userCredential.user);
-      setSuccess("회원가입 성공! 이메일 인증을 완료해주세요.");
-      navigation.navigate("EmailVerify", { expected: email });
-    } catch (e) {
-      if (e.code === "auth/email-already-in-use") {
-        setError("이미 사용 중인 이메일입니다.");
-      } else if (e.code === "auth/weak-password") {
-        setError("비밀번호는 6자 이상이어야 합니다.");
-      } else if (e.code === "auth/missing-email") {
-        setError("이메일을 입력해주세요.");
-      } else if (e.code === "auth/invalid-email") {
-        setError("유효하지 않은 이메일 형식입니다.");
-      } else {
-        setError(e.message);
-      }
-    }
-  };
 
   const handleEmailVerifyPress = () => {
     setAgreedCheck(false);
@@ -88,12 +59,21 @@ export default function SignUpEmailScreen({ navigation }) {
     handleSignUp();
   };
 
+  const handleSignUp = async () => {
+    const result = await signUpUser(email, pw);
+
+    if (result.success) {
+      console.log("회원가입 성공:", result.user);
+      navigation.navigate("EmailVerify");
+    } else {
+      console.log("회원가입 실패:", result.error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-              <View style={styles.mainContainer}>
-        <Text style={styles.titleText}>
-          E-mail
-        </Text>
+      <View style={styles.mainContainer}>
+        <Text style={styles.titleText}>E-mail</Text>
         <View style={styles.inputBg}>
           <TextInput
             style={styles.inputText}
@@ -106,9 +86,7 @@ export default function SignUpEmailScreen({ navigation }) {
           />
         </View>
 
-        <Text style={styles.titleText}>
-          Password
-        </Text>
+        <Text style={styles.titleText}>Password</Text>
         <View style={styles.inputBg}>
           <TextInput
             style={styles.inputText}
@@ -125,7 +103,7 @@ export default function SignUpEmailScreen({ navigation }) {
           <Text
             style={[
               styles.checkText,
-              { color: pwCondition ? "#4caf50" : "#BE2C2C" }
+              { color: pwCondition ? "#4caf50" : "#BE2C2C" },
             ]}
           >
             {pwCondition ? "✓" : "✗"}
@@ -150,20 +128,18 @@ export default function SignUpEmailScreen({ navigation }) {
           <Text
             style={[
               styles.checkText,
-              { color: pwSame ? "#4caf50" : "#BE2C2C" }
+              { color: pwSame ? "#4caf50" : "#BE2C2C" },
             ]}
           >
             {pwSame ? "✓" : "✗"}
           </Text>
-          <Text style={styles.descText}>
-            비밀번호 일치
-          </Text>
+          <Text style={styles.descText}>비밀번호 일치</Text>
         </View>
 
         <TouchableOpacity
           style={[
             styles.nextButton,
-            {backgroundColor: isCompleted ? "#FF7873" : "#FFD1D1"}
+            { backgroundColor: isCompleted ? "#FF7873" : "#FFD1D1" },
           ]}
           onPress={handleEmailVerifyPress}
           disabled={!isCompleted}
@@ -173,54 +149,56 @@ export default function SignUpEmailScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <Button
-          title="로그인 하러가기"
-          color="white"
-          onPress={() => navigation.navigate("Login")}
-        />
-
-        {error ? (
-          <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>
-        ) : null}
-        {success ? (
-          <Text style={{ color: "green", marginTop: 10 }}>{success}</Text>
-        ) : null}
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text>로그인 하러가기</Text>
+        </TouchableOpacity>
       </View>
 
       <Modal
-        visible={showTerms}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowTerms(false)}
+        isVisible={showTerms}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0.5}
+        onBackdropPress={() => setShowTerms(false)}
+        style={{ margin: 0 }}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              서비스 이용에 필요한{"\n"}약관에 동의해주세요.
-            </Text>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>
+            서비스 이용에 필요한{"\n"}약관에 동의해주세요.
+          </Text>
 
-            <View style={styles.checkboxContainer}>
-              <CustomCheckBox
-                value={agreedCheck}
-                onValueChange={setAgreedCheck}
-              />
-              <Text>[필수] 동의</Text>
-            </View>
-
-            <Button
-              title="동의 후 인증메일 받기"
-              onPress={handleAgree}
-              disabled={!agreedCheck}
-              color={!agreedCheck ? "gray" : undefined}
+          <View style={styles.checkboxContainer}>
+            <CustomCheckBox
+              value={agreedCheck}
+              onValueChange={setAgreedCheck}
             />
-            <View style={styles.buttonSpacing} />
-            <Button title="취소" onPress={() => setShowTerms(false)} />
+            <Text>[필수] 동의</Text>
           </View>
+
+          <TouchableOpacity
+            style={[
+              styles.modalNextButton,
+              { backgroundColor: agreedCheck ? Colors.point_red : "#c8c8c8ff" },
+            ]}
+            onPress={handleAgree}
+            disabled={!agreedCheck}
+          >
+            <Text style={styles.modalNextButtonText}>인증메일 받기</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.modalNextButton, { backgroundColor: "#c8c8c8ff" }]}
+            onPress={() => setShowTerms(false)}
+          >
+            <Text style={styles.modalNextButtonText}>취소</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
   );
-}
+};
+
+export default SignUpEmailScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -260,7 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     padding: 0,
     color: "#000",
-    textAlignVertical: 'center',
+    textAlignVertical: "center",
   },
   descContainer: {
     flexDirection: "row",
@@ -287,16 +265,15 @@ const styles = StyleSheet.create({
     marginTop: 72,
     marginBottom: 32,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
   modalContent: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "white",
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    marginHorizontal: 20,
+    padding: 25,
+    borderRadius: 20,
   },
   modalTitle: {
     fontWeight: "bold",
@@ -304,11 +281,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   checkboxContainer: {
+    width: "100%",
+    display: "flex",
     flexDirection: "row",
+    justifyContent: "flex-start",
     alignItems: "center",
     marginBottom: 20,
   },
-  buttonSpacing: {
-    height: 10,
+  modalNextButton: {
+    width: "100%",
+    height: 51,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 12,
+    backgroundColor: Colors.point_red,
+  },
+  modalNextButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

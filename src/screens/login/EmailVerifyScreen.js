@@ -1,39 +1,37 @@
 import React, { useState } from "react";
-import { View, Text, Button } from "react-native";
-import { auth } from "../../firebase";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { auth } from "../../services/firebase";
 
-export default function EmailVerifyScreen({ route, navigation }) {
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { expected } = route.params;
+import { createUserDocument } from "../../services/user";
+
+const EmailVerifyScreen = () => {
+  const navigation = useNavigation();
 
   const checkVerification = async () => {
-    setLoading(true);
-    setStatus("");
+    if (!auth.currentUser) {
+      console.log("No user is currently signed in.");
+      setLoading(false);
+      return;
+    }
 
     try {
       await auth.currentUser.reload();
       const currentUser = auth.currentUser;
-      ``;
-      if (!currentUser) {
-        setStatus("❌ 로그인된 사용자가 없습니다.");
-      } else if (currentUser.email !== expected) {
-        setStatus(
-          "❌ 인증된 이메일이 다릅니다.\n현재: ${currentUser.email}\n기대: ${expected}"
-        );
-      } else if (!currentUser.emailVerified) {
-        setStatus("❌ 아직 이메일 인증이 완료되지 않았습니다.");
+
+      if (!currentUser.emailVerified) {
+        console.log("Email not verified yet.");
       } else {
-        setStatus("✅ 이메일 인증이 완료되었습니다!");
+        console.log("이메일 인증이 완료되었습니다!");
+
+        await createUserDocument(currentUser);
         setTimeout(() => {
           navigation.replace("메인 화면");
-        }, 1500);
+        }, 500);
       }
     } catch (e) {
-      setStatus(e.message);
+      console.log("Error:", e.message);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -46,27 +44,23 @@ export default function EmailVerifyScreen({ route, navigation }) {
           marginBottom: 20,
         }}
       >
-        이메일에서 링크를 클릭하여{"\n"}인증을 완료해주세요.
+        이메일에서 인증 후{"\n"}인증 완료를 눌러주세요!
       </Text>
+
       <Text
         style={{
           fontSize: 16,
-          marginBottom: 80,
-          borderWidth: 1,
-          padding: 10,
-          borderRadius: 5,
+          marginBottom: 60,
         }}
       >
-        {expected}
+        {auth.currentUser?.email}
       </Text>
-      <Button
-        title="인증 완료"
-        onPress={checkVerification}
-        disabled={loading}
-      />
-      {status !== "" && (
-        <Text style={{ marginTop: 20, lineHeight: 22 }}>{status}</Text>
-      )}
+
+      <TouchableOpacity onPress={checkVerification}>
+        <Text>인증 완료</Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default EmailVerifyScreen;

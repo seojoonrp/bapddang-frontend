@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet} from "react-native";
-import { useNavigation,useRoute } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "../../firebase";
+import { auth } from "../../services/firebase";
 import Colors from "../../styles/colors";
 
 const LandingScreen = () => {
