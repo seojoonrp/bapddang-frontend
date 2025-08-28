@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
-
 import { auth } from "../../services/firebase";
 import Colors from "../../styles/colors";
 
@@ -67,10 +66,11 @@ const styles = StyleSheet.create({
   container: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-end",
     alignItems: "center",
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
+    paddingBottom: 57,
     backgroundColor: Colors.point_red,
   },
   logo: {
@@ -103,9 +103,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.slightly_burn,
     borderWidth: 1,
     borderRadius: 24,
-    marginBottom: 90,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 90,
   },
   signUpButtonText: {
     color: Colors.burn,
@@ -117,6 +117,6 @@ const styles = StyleSheet.create({
     color: "#FF7873",
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 17,
+    fontSize: 15,
   },
 });

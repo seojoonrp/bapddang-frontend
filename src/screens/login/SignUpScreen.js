@@ -139,18 +139,18 @@ const SignUpEmailScreen = () => {
         <TouchableOpacity
           style={[
             styles.nextButton,
-            { backgroundColor: isCompleted ? "#FF7873" : "#FFD1D1" },
+            { backgroundColor: isCompleted ? Colors.background_yellow : Colors.slightly_burn },
           ]}
           onPress={handleEmailVerifyPress}
           disabled={!isCompleted}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+          <Text style={styles.nextButtonText}>
             다음
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text>로그인 하러가기</Text>
+          <Text style={styles.backToLoginText}>로그인 하러가기</Text>
         </TouchableOpacity>
       </View>
 
@@ -164,7 +164,7 @@ const SignUpEmailScreen = () => {
       >
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>
-            서비스 이용에 필요한{"\n"}약관에 동의해주세요.
+            서비스 이용에 필요한 약관에 동의해주세요.
           </Text>
 
           <View style={styles.checkboxContainer}>
@@ -172,22 +172,29 @@ const SignUpEmailScreen = () => {
               value={agreedCheck}
               onValueChange={setAgreedCheck}
             />
-            <Text>[필수] 동의</Text>
+            <Text style={styles.termsText}>[필수] 동의</Text>
           </View>
 
           <TouchableOpacity
             style={[
               styles.modalNextButton,
-              { backgroundColor: agreedCheck ? Colors.point_red : "#c8c8c8ff" },
+              { backgroundColor: agreedCheck ? Colors.point_red : Colors.text_gray },
+              { borderColor: agreedCheck ? Colors.burn_red : Colors.slightly_burn },
             ]}
             onPress={handleAgree}
             disabled={!agreedCheck}
           >
-            <Text style={styles.modalNextButtonText}>인증메일 받기</Text>
+            <Text style={[
+              styles.modalNextButtonText,
+              { color: agreedCheck ? Colors.background_yellow : Colors.burn },
+            ]}>
+              인증메일 받기
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.modalNextButton, { backgroundColor: "#c8c8c8ff" }]}
+            style={[styles.modalNextButton,
+            { backgroundColor: Colors.text_gray }]}
             onPress={() => setShowTerms(false)}
           >
             <Text style={styles.modalNextButtonText}>취소</Text>
@@ -204,26 +211,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "red",
-    justifyContent: "center",
+    justifyContent: "flex-end",
     alignItems: "center",
     width: "100%",
-    maxWidth: 430,
+    paddingHorizontal: 10,
+    paddingBottom: 57,
   },
   mainContainer: {
     width: "100%",
-    maxWidth: 430,
-    paddingHorizontal: 10,
   },
   titleText: {
-    fontWeight: "bold",
-    fontSize: 14,
+    fontFamily: "NanumSquareRoundEB",
+    fontSize: 17,
     marginTop: 24,
     marginBottom: 6,
-    color: "#BE2C2C",
+    color: Colors.signup_desc,
     marginLeft: 20,
   },
   inputBg: {
-    height: 59,
     width: "100%",
     padding: 20,
     marginBottom: 6,
@@ -234,7 +239,8 @@ const styles = StyleSheet.create({
   },
   inputText: {
     borderWidth: 0,
-    fontSize: 14,
+    fontSize: 17,
+    fontFamily: "NanumSquareB",
     backgroundColor: "transparent",
     padding: 0,
     color: "#000",
@@ -247,8 +253,9 @@ const styles = StyleSheet.create({
     marginLeft: 18,
   },
   descText: {
-    color: "white",
+    color: Colors.background_yellow,
     fontSize: 13,
+    fontFamily: "NanumSquareRoundB",
   },
   checkText: {
     fontSize: 13,
@@ -257,13 +264,19 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     width: "100%",
-    height: 51,
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
     marginTop: 72,
-    marginBottom: 32,
+    marginBottom: 90,
+    paddingVertical: 16,
+    borderWidth: 1,
+  },
+  nextButtonText: {
+    fontSize: 17,
+    fontFamily: "NanumSquareB",
+    color: Colors.burn,
   },
   modalContent: {
     display: "flex",
@@ -272,13 +285,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     marginHorizontal: 20,
-    padding: 25,
+    paddingHorizontal: 25,
+    paddingVertical: 30,
     borderRadius: 20,
   },
   modalTitle: {
-    fontWeight: "bold",
+    fontFamily: "NanumSquareEB",
     fontSize: 16,
-    marginBottom: 20,
+    color: Colors.signup_desc,
+    marginBottom: 30,
   },
   checkboxContainer: {
     width: "100%",
@@ -286,21 +301,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingLeft: 12,
+  },
+  termsText: {
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 15,
+    color: Colors.burn,
   },
   modalNextButton: {
     width: "100%",
-    height: 51,
+    padding: 16,
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
     marginTop: 12,
-    backgroundColor: Colors.point_red,
+    borderWidth: 1,
   },
   modalNextButtonText: {
-    color: "#fff",
+    color: Colors.burn,
     fontWeight: "bold",
     fontSize: 16,
+    fontFamily: "NanumSquareB",
   },
+  backToLoginText: {
+    color: Colors.signup_desc,
+    fontFamily: "NanumSquareB",
+    alignSelf: "center",
+    fontSize: 15,
+  }
 });
