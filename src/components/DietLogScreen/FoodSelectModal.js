@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,29 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  LayoutAnimation,
 } from "react-native";
+
+import { auth } from "../../services/firebase";
+import { fetchLikedFoodNames } from "../../services/user";
 
 import Colors from "../../styles/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const recentFoods = ["로제떡볶이", "삼계탕", "마라상궈", "고추바사삭", "라면"];
-const likedFoods = ["김치찌개", "된장찌개", "비빔밥", "불고기", "떡볶이"];
+const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
+  const [likedFoods, setLikedFoods] = useState([]);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-const FoodSelectBox = ({ onClose, onSelect, initialFoods }) => {
+    const fetchData = async () => {
+      const likedFoods = await fetchLikedFoodNames(user.uid);
+      setLikedFoods(likedFoods);
+    };
+
+    fetchData();
+  }, []);
+
   const [inputList, setInputList] = useState(
     initialFoods.length === 0 ? [""] : initialFoods
   );
@@ -71,14 +83,6 @@ const FoodSelectBox = ({ onClose, onSelect, initialFoods }) => {
             <Text style={styles.addButtonText}>+</Text>
           </TouchableOpacity>
 
-          <Text style={styles.subTitle}>최근 자주 먹은 음식</Text>
-          <TagContainer
-            tags={recentFoods}
-            mode="assign"
-            onPress={(food) => updateInput(curInputIndex, food)}
-            containerStyle={{ marginBottom: 20 }}
-          />
-
           <Text style={styles.subTitle}>좋아요한 음식</Text>
           <TagContainer
             tags={likedFoods}
@@ -99,7 +103,7 @@ const FoodSelectBox = ({ onClose, onSelect, initialFoods }) => {
   );
 };
 
-export default FoodSelectBox;
+export default FoodSelectModal;
 
 const styles = StyleSheet.create({
   container: {

@@ -8,9 +8,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
-import { fetchTags } from "../api/gptApi";
+import { userLikeFood } from "../services/user";
+import { fetchTags } from "../services/gptApi";
 import { db, auth } from "../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -20,33 +20,16 @@ import Star from "./svg/Star";
 const InfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
 
-  // const handleLike = async () => {
-  //   try {
-  //     const user = auth.currentUser;
-  //     if (!user) {
-  //       console.log("로그인하거라");
-  //       return;
-  //     }
+  const handleLike = () => {
+    const user = auth.currentUser;
+    if (!user) {
+      console.log("로그인하거라");
+      return;
+    }
 
-  //     const uid = user.uid;
-  //     const docRef = doc(db, "userLikes", uid);
-
-  //     await setDoc(
-  //       docRef,
-  //       {
-  //         likes: arrayUnion({
-  //           foodName: item.name,
-  //           timestamp: new Date(),
-  //         }),
-  //       },
-  //       { merge: true }
-  //     );
-
-  //     console.log("좋아요 저장 완료");
-  //   } catch (e) {
-  //     console.error("좋아요 저장 중 오류:", e);
-  //   }
-  // };
+    const uid = user.uid;
+    userLikeFood(uid, item.id);
+  };
 
   const handleCalendar = () => {
     onClose();
@@ -91,10 +74,13 @@ const InfoBox = ({ item, mode, onClose }) => {
 
         <TouchableOpacity
           style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
-          // onPress={handleLike}
+          onPress={handleLike}
         >
           <Text style={styles.emojiText}>👍</Text>
         </TouchableOpacity>
+        <Text>좋아요 개수: {item.likeCount}</Text>
+        <Text>리뷰 개수: {item.reviewCount}</Text>
+        <Text>칼로리: {item.calories}</Text>
       </View>
     </View>
   );

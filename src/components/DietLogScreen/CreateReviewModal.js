@@ -21,7 +21,7 @@ import ReviewStar from "../svg/ReviewStar";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const ReviewBox = ({
+const CreateReviewModal = ({
   onClose,
   foods,
   mode,
@@ -341,7 +341,7 @@ const ReviewBox = ({
   );
 };
 
-export default ReviewBox;
+export default CreateReviewModal;
 
 const styles = StyleSheet.create({
   overlay: {

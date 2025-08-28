@@ -22,9 +22,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { db, auth } from "../services/firebase";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
-import FoodSelectBox from "../components/DietLogScreen/FoodSelectBox";
+import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
-import ReviewBox from "../components/DietLogScreen/ReviewBox";
+import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
@@ -208,7 +208,7 @@ const DietLogScreen = () => {
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
-        <FoodSelectBox
+        <FoodSelectModal
           onClose={handleCloseModal}
           onSelect={(foods) => {
             handleSelectFood(foods);
@@ -226,7 +226,7 @@ const DietLogScreen = () => {
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
-        <ReviewBox
+        <CreateReviewModal
           onClose={handleCloseModal}
           onBack={handleBack}
           foods={selectedFoods}

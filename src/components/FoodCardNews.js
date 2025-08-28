@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Pressable,
+  Image,
 } from "react-native";
 import Modal from "react-native-modal";
 
@@ -47,13 +48,12 @@ const FoodCardNews = ({ mode }) => {
         onPress={() => handleCardPress(item)}
         style={styles.cardImage}
       >
-        <Text style={styles.name}>{item.name}</Text>
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
       </TouchableOpacity>
-      {mode === "slow" && (
-        <View style={styles.calorieBox}>
-          <Text style={styles.calorieText}>{item.calorie} cal</Text>
-        </View>
-      )}
     </View>
   );
 
@@ -108,21 +108,12 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderWidth: 1,
   },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
   name: {
     fontSize: 50,
-  },
-  calorieBox: {
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    marginTop: -20,
-    textAlign: "center",
-    backgroundColor: "white",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "black",
-  },
-  calorieText: {
-    fontSize: 25,
   },
   backdrop: {
     position: "absolute",
