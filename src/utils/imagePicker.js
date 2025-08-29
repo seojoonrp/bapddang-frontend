@@ -10,6 +10,7 @@ const requestPermissions = async () => {
 const pickFromLibrary = async ({ setImageUrl }) => {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.Images,
+    allowsEditing: true,
     quality: 1,
   });
   if (!result.canceled && result.assets.length > 0) {
@@ -20,6 +21,7 @@ const pickFromLibrary = async ({ setImageUrl }) => {
 const takePhoto = async ({ setImageUrl }) => {
   const result = await ImagePicker.launchCameraAsync({
     mediaTypes: ImagePicker.Images,
+    allowsEditing: true,
     quality: 1,
   });
   if (!result.canceled && result.assets.length > 0) {

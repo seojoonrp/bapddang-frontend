@@ -1,7 +1,7 @@
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Alert } from "react-native";
-import { auth, db, storage } from "./firebase";
-import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import { storage } from "@react-native-firebase/storage";
 
 export const createReview = async ({
   foodId,
@@ -94,20 +94,34 @@ export const fetchReviews = async (day) => {
   }
 };
 
-const uploadImageAndGetURL = async (uri, userId) => {
+export const uploadImageAndGetURL = async (uri, userId) => {
   try {
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    const { base64 } = await manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }], // 필요시 800~1280 사이로 조절
+      { compress: 0.65, format: SaveFormat.JPEG, base64: true }
+    );
 
-    const fileName = `reviews/${userId}_${Date.now()}.jpg`;
-    const storageRef = ref(storage, fileName);
+    if (!base64) throw new Error("manipulateAsync did not return base64");
 
-    await uploadBytes(storageRef, blob);
+    const path = `reviews/${userId}_${Date.now()}.jpg`;
+    const storageRef = ref(storage, path);
 
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
-  } catch (error) {
-    console.error("Error uploading image:", error);
+    // 핵심: data_url 문자열로 업로드 (Expo Go에서 가장 안전)
+    await uploadString(
+      storageRef,
+      `data:image/jpeg;base64,${base64}`,
+      "data_url"
+    );
+
+    return await getDownloadURL(storageRef);
+  } catch (e) {
+    console.log(
+      "Storage error:",
+      e.code,
+      e.message,
+      e.customData?.serverResponse
+    );
     return null;
   }
 };
