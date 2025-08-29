@@ -12,7 +12,7 @@ import {
 import Modal from "react-native-modal";
 
 import { fetchFoods } from "../services/food";
-import InfoBox from "./InfoBox";
+import FoodInfoBox from "./FoodInfoBox";
 
 const { width } = Dimensions.get("window");
 const cardMargin = 16;
@@ -46,13 +46,15 @@ const FoodCardNews = ({ mode }) => {
     <View style={styles.cardContainer}>
       <TouchableOpacity
         onPress={() => handleCardPress(item)}
-        style={styles.cardImage}
+        activeOpacity={0.7}
+        style={styles.foodButtonContainer}
       >
         <Image
           source={{ uri: item.imageUrl }}
-          style={styles.image}
+          style={styles.foodImage}
           resizeMode="cover"
         />
+        <Text style={styles.foodText}>{item.name}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -82,7 +84,7 @@ const FoodCardNews = ({ mode }) => {
       >
         <Pressable style={styles.backdrop} onPress={handleClose} />
         {selectedItem && (
-          <InfoBox item={selectedItem} mode={mode} onClose={handleClose} />
+          <FoodInfoBox item={selectedItem} mode={mode} onClose={handleClose} />
         )}
       </Modal>
     </View>
@@ -96,10 +98,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardContainer: {
+    display: "flex",
     flexDirection: "column",
     alignItems: "center",
   },
-  cardImage: {
+  foodButtonContainer: {
     width: width - cardMargin * 2 - 2,
     height: width - cardMargin * 2 - 2,
     justifyContent: "center",
@@ -108,9 +111,17 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderWidth: 1,
   },
-  image: {
+  foodImage: {
     width: "100%",
     height: "100%",
+  },
+  foodText: {
+    position: "absolute",
+    color: "white",
+    backgroundColor: "black",
+    fontSize: 18,
+    padding: 5,
+    bottom: 12,
   },
   name: {
     fontSize: 50,

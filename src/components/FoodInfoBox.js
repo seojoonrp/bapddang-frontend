@@ -17,7 +17,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../styles/colors";
 import Star from "./svg/Star";
 
-const InfoBox = ({ item, mode, onClose }) => {
+const FoodInfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
 
   const handleLike = () => {
@@ -86,7 +86,7 @@ const InfoBox = ({ item, mode, onClose }) => {
   );
 };
 
-export default InfoBox;
+export default FoodInfoBox;
 
 const styles = StyleSheet.create({
   container: {

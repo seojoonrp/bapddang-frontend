@@ -9,10 +9,11 @@ import {
   Image,
   Alert,
 } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { doc, setDoc, getDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import * as ImagePicker from "expo-image-picker";
+import { createReview } from "../../services/review";
+import { pickImage } from "../../utils/imagePicker";
 
 import keywordMap from "../../data/keywordMap.json";
 import Colors from "../../styles/colors";
@@ -41,12 +42,9 @@ const CreateReviewModal = ({
 
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
-
+  const [imageUrl, setImageUrl] = useState(null);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
-
-  const [response, setResponse] = useState("");
-  const [imageUri, setImageUri] = useState(null);
 
   useEffect(() => {
     if (intent === "edit" && initialReview) {
@@ -55,64 +53,19 @@ const CreateReviewModal = ({
       setSelectedTags(initialReview.tags ?? []);
       setComment(initialReview.comment ?? "");
       setRating(initialReview.rating ?? 0);
-      setImageUri(initialReview.imageUri ?? null);
+      setImageUrl(initialReview.imageUrl ?? null);
     }
   }, [intent, initialReview]);
+
   useEffect(() => {
     if (intent === "create") {
       if (Array.isArray(foods)) setFoodName(foods.join(" & "));
       else setFoodName(foods || "");
     }
   }, [intent, foods]);
-  const requestPermissions = async () => {
-    const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
-    const mediaStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    return (
-      cameraStatus.status === "granted" && mediaStatus.status === "granted"
-    );
-  };
 
-  const pickImage = async () => {
-    // 권한 요청
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) {
-      Alert.alert(
-        "권한이 필요합니다",
-        "카메라 및 앨범 접근 권한을 허용해주세요."
-      );
-      return;
-    }
-
-    Alert.alert("사진 선택", "어떤 방식으로 사진을 추가할까요?", [
-      {
-        text: "앨범에서 선택",
-        onPress: pickFromLibrary,
-      },
-      {
-        text: "카메라로 촬영",
-        onPress: takePhoto,
-      },
-      { text: "취소", style: "cancel" },
-    ]);
-  };
-  const pickFromLibrary = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.Images,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets.length > 0) {
-      setImageUri(result.assets[0].uri);
-    }
-  };
-
-  const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.Images,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets.length > 0) {
-      setImageUri(result.assets[0].uri);
-    }
+  const handlePickImage = () => {
+    pickImage({ setImageUrl: setImageUrl });
   };
 
   const handleTagPress = (tag) => {
@@ -169,7 +122,7 @@ const CreateReviewModal = ({
           tags: selectedTags,
           comment,
           rating,
-          imageUri,
+          imageUrl,
           edited: true,
         };
 
@@ -181,47 +134,16 @@ const CreateReviewModal = ({
         onClose?.();
         return;
       }
-      let createdAt = null;
 
-      if (!createdAt && auth.currentUser?.metadata?.creationTime) {
-        createdAt = new Date(auth.currentUser.metadata.creationTime);
-      }
-      let day = 1;
-
-      const msPerDay = 1000 * 60 * 60 * 24;
-      const toLocalStartOfDay = (d) => {
-        const x = new Date(d);
-        x.setHours(0, 0, 0, 0);
-        return x;
-      };
-
-      if (createdAt instanceof Date && !isNaN(createdAt)) {
-        const startCreated = toLocalStartOfDay(createdAt);
-        const startToday = toLocalStartOfDay(new Date());
-        const diffDays = Math.round((startToday - startCreated) / msPerDay);
-        day = Math.max(1, diffDays + 1);
-      }
-
-      const reviewData = {
-        food: foodName,
+      createReview({
+        foodId: "food_0001",
         time: selectedTime,
         tags: selectedTags,
+        imageUrl,
         comment,
         rating,
-        imageUri,
-        createdAt: new Date(),
-        day,
-      };
+      });
 
-      await setDoc(
-        docRef,
-        {
-          reviews: arrayUnion(reviewData),
-        },
-        { merge: true }
-      );
-
-      alert("후기가 등록되었습니다!");
       onClose();
     } catch (error) {
       console.error("리뷰 저장 실패: ", error);
@@ -279,15 +201,10 @@ const CreateReviewModal = ({
           />
 
           <View>
-            <Image
-              source={response ? { uri: response.assets[0].uri } : 0}
-              style={styles.img}
-            />
-
-            <TouchableOpacity onPress={pickImage} style={styles.imageBox}>
-              {imageUri ? (
+            <TouchableOpacity onPress={handlePickImage} style={styles.imageBox}>
+              {imageUrl ? (
                 <Image
-                  source={{ uri: imageUri }}
+                  source={{ uri: imageUrl }}
                   style={styles.imagePreview}
                   resizeMode="cover"
                 />
