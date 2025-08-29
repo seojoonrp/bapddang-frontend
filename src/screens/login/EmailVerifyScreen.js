@@ -37,22 +37,15 @@ const EmailVerifyScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text
-        style={styles.noticeText}
-      >
+      <Text style={styles.noticeText}>
         이메일에서 인증 후{"\n"}인증 완료를 눌러주세요!
       </Text>
 
       <View style={styles.emailContainer}>
-        <Text style={styles.emailText}>
-          {auth.currentUser?.email}
-        </Text>
+        <Text style={styles.emailText}>{auth.currentUser?.email}</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.finishButton}
-        onPress={checkVerification}
-      >
+      <TouchableOpacity style={styles.finishButton} onPress={checkVerification}>
         <Text style={styles.finishButtonText}>인증 완료</Text>
       </TouchableOpacity>
     </View>

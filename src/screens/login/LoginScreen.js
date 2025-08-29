@@ -12,7 +12,6 @@ export default function LoginScreen({ navigation }) {
   const isCompleted = pwCondition && email.length > 0;
 
   const handleLogin = async () => {
-    setError("");
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pw);
       if (!userCredential.user.emailVerified) {
@@ -75,14 +74,16 @@ export default function LoginScreen({ navigation }) {
       <TouchableOpacity
         style={[
           styles.loginButton,
-          { backgroundColor: isCompleted ? Colors.background_yellow : Colors.slightly_burn },
+          {
+            backgroundColor: isCompleted
+              ? Colors.background_yellow
+              : Colors.slightly_burn,
+          },
         ]}
         onPress={handleLogin}
         disabled={!isCompleted}
       >
-        <Text style={styles.loginButtonText}>
-          로그인
-        </Text>
+        <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
