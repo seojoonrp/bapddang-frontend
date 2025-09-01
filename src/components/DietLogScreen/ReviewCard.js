@@ -1,10 +1,29 @@
-import React, { memo } from "react";
-import { View, Text, Image, StyleSheet,TouchableOpacity,Ionicons } from "react-native";
+import React, { useState, useEffect, memo } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Ionicons,
+} from "react-native";
+
+import { fetchFoodById } from "../../services/food";
 import Colors from "../../styles/colors";
 import ReviewStar from "../svg/ReviewStar";
 
-const ReviewCard = ({ review,index,onEdit }) => {
+const ReviewCard = ({ review, index, onEdit }) => {
   if (!review) return null;
+
+  const [food, setFood] = useState(null);
+  useEffect(() => {
+    const fetchFood = async () => {
+      const foodData = await fetchFoodById(review.foodId);
+      setFood(foodData);
+    };
+
+    fetchFood();
+  }, [review.foodId]);
 
   return (
     <View style={styles.card}>
@@ -15,8 +34,9 @@ const ReviewCard = ({ review,index,onEdit }) => {
       >
         <Text>수정</Text>
       </TouchableOpacity>
+
       <Text style={styles.reviewText}>
-        {review.time}으로 <Text style={styles.foodText}>{review.food}</Text>
+        {review.time}으로 <Text style={styles.foodText}>{food?.name}</Text>
         을(를) 먹었어요!
       </Text>
 
@@ -29,8 +49,8 @@ const ReviewCard = ({ review,index,onEdit }) => {
         ))}
       </View>
 
-      {review.imageUri ? (
-        <Image source={{ uri: review.imageUri }} style={styles.reviewImage} />
+      {review.imageUrl ? (
+        <Image source={{ uri: review.imageUrl }} style={styles.reviewImage} />
       ) : null}
 
       {review.tags?.length ? (

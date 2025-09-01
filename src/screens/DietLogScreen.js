@@ -20,6 +20,7 @@ import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { db, auth } from "../services/firebase";
+import { fetchReviews } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -59,26 +60,8 @@ const DietLogScreen = () => {
   // 리뷰 가져오기
   const [reviews, setReviews] = useState([]);
   useEffect(() => {
-    const fetchUserReviews = async () => {
-      const user = auth.currentUser;
-
-      console.log("Fetching user reviews for:", user?.uid);
-
-      if (!user) return;
-
-      const docSnap = await getDoc(doc(db, "userReviews", user.uid));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setReviews(data.reviews || []);
-      }
-    };
-
-    fetchUserReviews();
-  }, []);
-
-  const filteredReviews = reviews.filter(
-    (review) => review.day === selectedDay
-  );
+    fetchReviews(selectedDay).then(setReviews);
+  }, [selectedDay]);
 
   const handleCloseModal = () => {
     setActiveModal("none");
@@ -182,7 +165,7 @@ const DietLogScreen = () => {
             </View>
 
             <FlatList
-              data={filteredReviews}
+              data={reviews}
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}

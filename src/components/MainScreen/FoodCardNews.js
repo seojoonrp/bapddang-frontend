@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 
-import { fetchFoods } from "../services/food";
+import { fetchFoods } from "../../services/food";
 import FoodInfoBox from "./FoodInfoBox";
 
 const { width } = Dimensions.get("window");

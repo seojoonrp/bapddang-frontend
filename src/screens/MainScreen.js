@@ -4,8 +4,8 @@ import { useNavigation } from "@react-navigation/native";
 
 import { auth } from "../services/firebase";
 import { signOut } from "firebase/auth";
-import MainScreen_Fast from "../components/MainScreen_Fast";
-import MainScreen_Slow from "../components/MainScreen_Slow";
+import MainScreen_Fast from "../components/MainScreen/MainScreen_Fast";
+import MainScreen_Slow from "../components/MainScreen/MainScreen_Slow";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);

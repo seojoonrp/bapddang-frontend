@@ -9,13 +9,13 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { userLikeFood } from "../services/user";
-import { fetchTags } from "../services/gptApi";
-import { db, auth } from "../services/firebase";
+import { userLikeFood } from "../../services/user";
+import { fetchTags } from "../../services/gptApi";
+import { db, auth } from "../../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Colors from "../styles/colors";
-import Star from "./svg/Star";
+import Colors from "../../styles/colors";
+import Star from "../svg/Star";
 
 const FoodInfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();

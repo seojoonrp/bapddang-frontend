@@ -1,5 +1,12 @@
 import { Alert, Platform } from "react-native";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { auth, db, storage } from "./firebase";
 
 export const createReview = async ({
@@ -41,20 +48,12 @@ export const createReview = async ({
   try {
     let finalImageUrl = null;
 
-    if (imageUrl) {
-      const uploadedUrl = await uploadImageAndGetURL(imageUrl, user.uid);
-      if (!uploadedUrl) {
-        console.log("이미지 업로드 실패");
-      }
-      finalImageUrl = uploadedUrl;
-    }
-
     const reviewData = {
       userId: user.uid,
       foodId,
       time,
       tags,
-      imageUrl: finalImageUrl,
+      imageUrl,
       comment,
       rating,
       day, // TODO : day 계산 맞는지 체크
@@ -91,17 +90,4 @@ export const fetchReviews = async (day) => {
     console.error("리뷰 가져오기 중 오류 발생:", error);
     return [];
   }
-};
-
-export const uploadImageAndGetURL = async (uri, userId) => {
-  const fileNameArray = uri.split("/");
-  const fileName = fileNameArray[fileNameArray.length - 1];
-  console.log("uploadImageAndGetURL:", fileName);
-
-  const putResult = await storage()
-    .ref(fileName)
-    .putFile(Platform.OS === "ios" ? uri.replace("file://", "") : uri);
-  console.log(putResult);
-
-  return putResult;
 };

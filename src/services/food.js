@@ -1,4 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 export const fetchFoods = async () => {
@@ -14,5 +14,22 @@ export const fetchFoods = async () => {
   } catch (error) {
     console.error("Error fetching foods:", error);
     return [];
+  }
+};
+
+export const fetchFoodById = async (foodId) => {
+  try {
+    const docRef = doc(db, "foods", foodId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.error("Food not found");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching food by ID:", error);
+    return null;
   }
 };
