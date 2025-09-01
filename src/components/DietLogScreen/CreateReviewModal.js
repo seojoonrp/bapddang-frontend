@@ -12,7 +12,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
-import { createReview } from "../../services/review";
+import { createReview, editReview } from "../../services/review";
 import { pickImage } from "../../utils/imagePicker";
 
 import keywordMap from "../../data/keywordMap.json";
@@ -28,7 +28,7 @@ const CreateReviewModal = ({
   mode,
   onBack,
   intent = "create",
-  reviewIndex = null,
+  reviewId = null,
   initialReview = null,
 }) => {
   const [foodName, setFoodName] = useState("");
@@ -73,6 +73,7 @@ const CreateReviewModal = ({
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
+
   const totalCharLength = (foodName || "").length;
 
   useEffect(() => {
@@ -98,51 +99,27 @@ const CreateReviewModal = ({
     const uid = user.uid;
 
     try {
-      const docRef = doc(db, "userReviews", uid);
+      const docRef = doc(db, "reviews", uid);
 
-      if (intent === "edit") {
-        if (reviewIndex == null) {
-          Alert.alert("수정 오류", "수정할 리뷰 인덱스가 없습니다.");
-          return;
-        }
-        // 1) 기존 문서 조회
-        const snap = await getDoc(docRef);
-        const reviews = snap.exists() ? snap.data().reviews || [] : [];
-
-        if (!reviews[reviewIndex]) {
-          Alert.alert("수정 오류", "대상 리뷰를 찾지 못했습니다.");
-          return;
-        }
-
-        const prev = reviews[reviewIndex];
-        const updated = {
-          ...prev,
-          food: foodName,
+      if (intent == "edit") {
+        editReview(docRef.id, {
+          foodId: "food_0001",
           time: selectedTime,
           tags: selectedTags,
+          imageUrl,
           comment,
           rating,
+        });
+      } else if (intent == "create") {
+        createReview({
+          foodId: "food_0001",
+          time: selectedTime,
+          tags: selectedTags,
           imageUrl,
-          edited: true,
-        };
-
-        const next = [...reviews];
-        next[reviewIndex] = updated;
-
-        await setDoc(docRef, { reviews: next }, { merge: true });
-        Alert.alert("수정 완료", "후기를 수정했어요!");
-        onClose?.();
-        return;
+          comment,
+          rating,
+        });
       }
-
-      createReview({
-        foodId: "food_0001",
-        time: selectedTime,
-        tags: selectedTags,
-        imageUrl,
-        comment,
-        rating,
-      });
 
       onClose();
     } catch (error) {

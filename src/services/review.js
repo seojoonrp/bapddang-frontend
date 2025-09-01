@@ -6,6 +6,8 @@ import {
   query,
   where,
   getDocs,
+  doc,
+  setDoc,
 } from "firebase/firestore";
 import { auth, db, storage } from "./firebase";
 
@@ -70,7 +72,21 @@ export const createReview = async ({
 };
 
 export const editReview = async (reviewId, updatedData) => {
-  // 어쩌고저쩌고
+  const user = auth.currentUser;
+
+  if (!user) {
+    Alert.alert("로그인하거라");
+    return;
+  }
+
+  try {
+    const reviewRef = doc(db, "reviews", reviewId);
+
+    await setDoc(reviewRef, updatedData, { merge: true });
+    Alert.alert("리뷰가 수정되었습니다!");
+  } catch (error) {
+    console.error("리뷰 수정 중 오류 발생:", error);
+  }
 };
 
 export const fetchReviews = async (day) => {

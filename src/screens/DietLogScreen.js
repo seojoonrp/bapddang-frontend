@@ -100,11 +100,13 @@ const DietLogScreen = () => {
       setBack(false);
     }
   };
+
   const handleEditReview = (review, index) => {
     setSelectedReview(review);
     setActiveModal("review");
     setSelectedIndex(index);
   };
+
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
       <MarshmallowStick />
@@ -214,8 +216,8 @@ const DietLogScreen = () => {
           onBack={handleBack}
           foods={selectedFoods}
           mode="fast"
-          intent={selectedReview ? "edit" : "create"} // ★ 수정 여부
-          reviewIndex={selectedIndex} // ★ 배열 인덱스
+          intent={selectedReview ? "edit" : "create"}
+          reviewIndex={selectedIndex}
           initialReview={selectedReview}
         />
       </Modal>
