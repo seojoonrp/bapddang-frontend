@@ -1,8 +1,10 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 
 import FoodCardNews from "./FoodCardNews";
+import StatusBanner from "./StatusBanner";
+import RecentZzim from "./RecentZzim";
 
-const MainScreen_Slow = () => {
+const MainScreen_Slow = ({ isFast, onToggle }) => {
   return (
     <View style={styles.container}>
       <View style={styles.curStatusContainer}>
@@ -14,6 +16,8 @@ const MainScreen_Slow = () => {
           <Text>주간 식단 기록 화면 가기</Text>
         </TouchableOpacity>
       </View>
+      <StatusBanner isFast={isFast} onToggle={onToggle} />
+      <RecentZzim />
       <FoodCardNews mode="slow" />
     </View>
   );

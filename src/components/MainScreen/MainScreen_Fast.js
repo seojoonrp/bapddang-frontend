@@ -1,22 +1,17 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
+import StatusBanner from "./StatusBanner";
 import FoodCardNews from "./FoodCardNews";
+import RecentZzim from "./RecentZzim";
 
-const MainScreen_Fast = () => {
+const MainScreen_Fast = ({ isFast, onToggle }) => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <View style={styles.curStatusContainer}>
-        <Text style={styles.curStreakText}>연속 0일차</Text>
-        <TouchableOpacity
-          style={styles.dietLogButton}
-          onPress={() => navigation.navigate("식단 기록 화면")}
-        >
-          <Text>주간 식단 기록 화면 가기</Text>
-        </TouchableOpacity>
-      </View>
+      <StatusBanner isFast={isFast} onToggle={onToggle} />
+      <RecentZzim />
       <FoodCardNews mode="fast" />
     </View>
   );
@@ -31,28 +26,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     marginTop: 10,
-
-    borderColor: "black",
-    borderWidth: 1,
-  },
-  curStatusContainer: {
-    alignSelf: "stretch",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "flex-end",
-    marginTop: 180,
-    marginBottom: 10,
-    marginHorizontal: 16,
-
-    borderColor: "black",
-    borderWidth: 1,
-  },
-  curStreakText: {
-    fontSize: 20,
-  },
-  dietLogButton: {
-    padding: 5,
-    marginTop: 5,
 
     borderColor: "black",
     borderWidth: 1,

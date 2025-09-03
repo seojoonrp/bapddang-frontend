@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Switch, Button } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import { auth } from "../services/firebase";
 import { signOut } from "firebase/auth";
+import Colors from "../styles/colors";
 import MainScreen_Fast from "../components/MainScreen/MainScreen_Fast";
 import MainScreen_Slow from "../components/MainScreen/MainScreen_Slow";
+import UserDrawer from "../components/MainScreen/UserDrawer";
+import Bell from "../components/svg/Bell";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
@@ -16,6 +19,11 @@ const MainScreen = () => {
   };
   ``;
   const [email, setEmail] = useState("");
+
+  const [isDrawerVisible, setDrawerVisible] = useState(false);
+  const openDrawer = () => setDrawerVisible(true);
+  const closeDrawer = () => setDrawerVisible(false);
+
   useEffect(() => {
     const curUser = auth.currentUser;
     if (curUser) {
@@ -36,16 +44,19 @@ const MainScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.switchContainer}>
-        <Switch
-          style={styles.switch}
-          trackColor={{ false: "#359c21", true: "#e02828" }}
-          ios_backgroundColor="#359c21"
-          thumbColor="#fcfcfc"
-          onValueChange={toggleFast}
-          value={isFast}
-        />
+      <View style={styles.topContainer}>
+        <Text style={styles.logo}>로고임</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <TouchableOpacity>
+            <Bell />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={openDrawer}>
+            <View style={styles.userIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* 기존 로그인/로그아웃 UI
       <View style={styles.switchContainer}>
         <Text>{email}</Text>
         <Button
@@ -54,7 +65,27 @@ const MainScreen = () => {
         />
         <Button title="로그아웃" onPress={handleLogout} />
       </View>
-      {isFast ? <MainScreen_Fast /> : <MainScreen_Slow />}
+      */}
+
+      {isFast ? (
+        <MainScreen_Fast isFast={isFast} onToggle={toggleFast} />
+      ) : (
+        <MainScreen_Slow isFast={isFast} onToggle={toggleFast} />
+      )}
+
+      <UserDrawer
+        isVisible={isDrawerVisible}
+        onClose={closeDrawer}
+        email={email}
+        onNavigateToLanding={() => {
+          closeDrawer();
+          navigation.navigate("Landing", { from: "Main" });
+        }}
+        onLogout={() => {
+          closeDrawer();
+          handleLogout();
+        }}
+      />
     </View>
   );
 };
@@ -69,16 +100,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
-  switchContainer: {
+  topContainer: {
     alignSelf: "stretch",
     flexDirection: "row",
-    justifyContent: "flex-end",
     alignItems: "center",
-    marginTop: 16,
-    marginHorizontal: 16,
+    justifyContent: "space-between",
+    padding: 10,
 
     borderColor: "black",
     borderWidth: 1,
   },
-  switch: {},
+  logo: {
+    color: "black",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  userIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.point_red,
+  },
 });
