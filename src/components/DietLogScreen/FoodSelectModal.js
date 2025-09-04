@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderRadius: 20,
+    backgroundColor: "white",
     color: Colors.burn,
     fontFamily: "NanumSquareR",
     fontSize: 16,

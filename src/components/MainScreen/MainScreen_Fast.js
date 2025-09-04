@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text,ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import StatusBanner from "./StatusBanner";
