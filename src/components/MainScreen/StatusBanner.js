@@ -2,7 +2,8 @@ import { View, StyleSheet, TouchableOpacity, Text, Switch } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../styles/colors";
 import Favorite from "../svg/Favorite";
-import TEMP_Character from "../svg/TEMP_Character";
+import Edit from "../svg/Edit";
+import Character from "../svg/Character";
 
 const StatusBanner = ({ isFast, onToggle }) => { 
   const navigation = useNavigation();
@@ -11,29 +12,26 @@ const StatusBanner = ({ isFast, onToggle }) => {
     <View style={styles.container}>
       <View style={styles.topContainer}>
         <Text style={styles.curStreakText}>고속노화 Day 3</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <TouchableOpacity>
-            <Favorite />
-          </TouchableOpacity>
-          <Switch
-            style={{ transform: [{ scale: 0.8 }] }}
-            trackColor={{ false: "#359c21", true: "#e02828" }}
-            ios_backgroundColor="#359c21"
-            thumbColor="#fcfcfc"
-            onValueChange={onToggle}
-            value={isFast}
-          />
-        </View>
+        <Switch
+          style={{ transform: [{ scale: 0.8 }] }}
+          trackColor={{ false: "#359c21", true: "#e02828" }}
+          ios_backgroundColor="#359c21"
+          thumbColor="#fcfcfc"
+          onValueChange={onToggle}
+          value={isFast}
+        />
       </View>
-      <TouchableOpacity
-        style={styles.dietLogButton}
-        onPress={() => navigation.navigate("식단 기록 화면")}
-      >
-        <View style={styles.characterContainer}>
-          <TEMP_Character />
-        </View>
-        <Text style={styles.dietLogText}>식단기록하러 가기 &gt;&gt;</Text>
-      </TouchableOpacity>
+      <View style={styles.characterContainer}>
+        <Character width={118.9614} height={123.28672} />
+      </View>
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate("식단 기록 화면")}>
+          <Edit />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Favorite />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -57,7 +55,8 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 8,
     marginBottom: 10,
   },
   characterContainer: {},
@@ -66,10 +65,11 @@ const styles = StyleSheet.create({
     color: Colors.background_yellow,
     fontFamily: "NanumSquareRoundB",
   },
-  dietLogText: {
-    fontSize: 17,
-    color: Colors.background_yellow,
-    fontFamily: "NanumSquareRoundB",
-    alignSelf: "flex-end",
+  bottomContainer: {
+    alignSelf: "stretch",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 8,
   },
 });
