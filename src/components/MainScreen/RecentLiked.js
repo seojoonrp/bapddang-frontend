@@ -4,12 +4,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../styles/colors";
-
-// listenToLikedFoods 함수를 import
 import { listenToLikedFoods } from "../../services/user";
 import { auth } from "../../services/firebase";
 
-// 컴포넌트 이름을 RecentLiked로 수정했습니다. (이전 답변 참고)
 const RecentLiked = ({ isFast }) => {
   const navigation = useNavigation();
   const [animValue] = useState(new Animated.Value(isFast ? 1 : 0));
@@ -35,7 +32,7 @@ const RecentLiked = ({ isFast }) => {
       setLikedFoods(foods.slice(0, 4));
       if (isLoading) setIsLoading(false);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
