@@ -1,15 +1,37 @@
-import { View, StyleSheet, TouchableOpacity, Text, Switch } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Switch,
+  Animated,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../styles/colors";
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
 import Character from "../svg/Character";
 
-const StatusBanner = ({ isFast, onToggle }) => { 
+const StatusBanner = ({ isFast, onToggle }) => {
   const navigation = useNavigation();
+  const [animValue] = useState(new Animated.Value(isFast ? 1 : 0));
+
+  useEffect(() => {
+    Animated.timing(animValue, {
+      toValue: isFast ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isFast, animValue]);
+
+  const backgroundColor = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Colors.point_green, Colors.point_red],
+  });
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { backgroundColor }]}>
       <View style={styles.topContainer}>
         <Text style={styles.curStreakText}>고속노화 Day 3</Text>
         <Switch
@@ -32,7 +54,7 @@ const StatusBanner = ({ isFast, onToggle }) => {
           <Favorite />
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -49,7 +71,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 16,
-    backgroundColor: Colors.point_red,
   },
   topContainer: {
     alignSelf: "stretch",

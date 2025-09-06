@@ -5,9 +5,10 @@ import { useNavigation } from "@react-navigation/native";
 import { auth } from "../services/firebase";
 import { signOut } from "firebase/auth";
 import Colors from "../styles/colors";
-import MainScreen_Fast from "../components/MainScreen/MainScreen_Fast";
-import MainScreen_Slow from "../components/MainScreen/MainScreen_Slow";
 import UserDrawer from "../components/MainScreen/UserDrawer";
+import StatusBanner from "../components/MainScreen/StatusBanner";
+import RecentFav from "../components/MainScreen/RecentFav";
+import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import Bell from "../components/svg/Bell";
 
 const MainScreen = () => {
@@ -67,11 +68,9 @@ const MainScreen = () => {
       </View>
       */}
 
-      {isFast ? (
-        <MainScreen_Fast isFast={isFast} onToggle={toggleFast} />
-      ) : (
-        <MainScreen_Slow isFast={isFast} onToggle={toggleFast} />
-      )}
+      <StatusBanner isFast={isFast} onToggle={toggleFast} />
+      <RecentFav isFast={isFast} />
+      <FoodCardNews mode={isFast?"fast":"slow"} />
 
       <UserDrawer
         isVisible={isDrawerVisible}
@@ -122,3 +121,42 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.point_red,
   },
 });
+
+
+/* 기존 MainScreen_Fast
+
+import { View, StyleSheet, TouchableOpacity, Text,ScrollView } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
+import StatusBanner from "./StatusBanner";
+import FoodCardNews from "./FoodCardNews";
+import RecentFav from "./RecentFav";
+
+const MainScreen_Fast = ({ isFast, onToggle }) => {
+  const navigation = useNavigation();
+
+  return (
+    <View style={styles.container}>
+      <StatusBanner isFast={isFast} onToggle={onToggle} />
+      <RecentFav />
+      <FoodCardNews mode="fast" />
+    </View>
+  );
+};
+
+export default MainScreen_Fast;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    marginTop: 10,
+
+    borderColor: "black",
+    borderWidth: 1,
+  },
+});
+
+*/

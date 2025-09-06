@@ -1,13 +1,30 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../styles/colors";
 
-const RecentZzim = () => {
+const RecentFav = ({ isFast }) => {
   const navigation = useNavigation();
+  const [animValue] = useState(new Animated.Value(isFast ? 1 : 0));
+
+  useEffect(() => {
+    Animated.timing(animValue, {
+      toValue: isFast ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isFast, animValue]);
+
+  const textColor = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Colors.point_green, Colors.burn_red],
+  });
 
   return (
     <View style={styles.container}>
-      <Text style={styles.zzimText}>최근 찜한 음식들</Text>
+      <Animated.Text style={[styles.favText, { color: textColor }]}>
+        최근 좋아요한 음식들
+      </Animated.Text>
       <View style={styles.foodContainer}>
         <TouchableOpacity style={styles.food} />
         <TouchableOpacity style={styles.food} />
@@ -21,7 +38,7 @@ const RecentZzim = () => {
   );
 };
 
-export default RecentZzim;
+export default RecentFav;
 
 const styles = StyleSheet.create({
   container: {
@@ -30,10 +47,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 18,
     marginBottom: 12,
   },
-  zzimText: {
+  favText: {
     fontSize: 15,
     fontFamily: "NanumSquareRoundB",
-    color: Colors.burn_red,
     marginBottom: 6,
     marginLeft: 4,
   },
