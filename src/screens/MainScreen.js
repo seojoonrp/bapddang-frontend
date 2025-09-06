@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import Colors from "../styles/colors";
 import UserDrawer from "../components/MainScreen/UserDrawer";
 import StatusBanner from "../components/MainScreen/StatusBanner";
-import RecentFav from "../components/MainScreen/RecentFav";
+import RecentLiked from "../components/MainScreen/RecentLiked";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import Bell from "../components/svg/Bell";
 
@@ -69,7 +69,7 @@ const MainScreen = () => {
       */}
 
       <StatusBanner isFast={isFast} onToggle={toggleFast} />
-      <RecentFav isFast={isFast} />
+      <RecentLiked isFast={isFast} />
       <FoodCardNews mode={isFast?"fast":"slow"} />
 
       <UserDrawer
