@@ -38,8 +38,16 @@ const TagContainer = ({
               selectedTags.includes(tag) && styles.buttonSelected,
             ]}
             onPress={() => onPress(tag)}
+            activeOpacity={0.7}
           >
-            <Text style={styles.buttonText}>{tag}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                selectedTags.includes(tag) && styles.buttonTextSelected,
+              ]}
+            >
+              {tag}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -57,8 +65,16 @@ const TagContainer = ({
               selectedTag === tag && styles.buttonSelected,
             ]}
             onPress={() => onPress(tag)}
+            activeOpacity={0.7}
           >
-            <Text style={styles.buttonText}>{tag}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                selectedTag === tag && styles.buttonTextSelected,
+              ]}
+            >
+              {tag}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -92,13 +108,16 @@ const styles = StyleSheet.create({
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   buttonSelected: {
-    boxShadow:
-      "0px 2px 4px 0px #A94946 inset, 0px 2px 4px 4px rgba(169, 73, 70, 0.30) inset, 0px 2px 6px 4px #FDEDC0 inset",
+    backgroundColor: Colors.pressed_button,
+    boxShadow: "",
   },
   buttonText: {
     fontFamily: "NanumSquareEB",
     fontSize: 16,
     color: Colors.slightly_burn,
     fontWeight: 700,
+  },
+  buttonTextSelected: {
+    color: Colors.background_yellow,
   },
 });

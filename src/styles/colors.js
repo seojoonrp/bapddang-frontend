@@ -10,6 +10,7 @@ const Colors = {
   light_text_gray: "#F3EFEF",
   icon_gray: "#CCC",
   signup_desc: "#FF7873",
+  pressed_button: "#A94946",
 };
 
 export default Colors;
