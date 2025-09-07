@@ -10,17 +10,17 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth, db } from "../../services/firebase";
-import { createReview, editReview } from "../../services/review";
-import { pickImage } from "../../utils/imagePicker";
 
+import { createReview, editReview, fetchReview } from "../../services/review";
+import { fetchFoodById } from "../../services/food";
+import { pickImage } from "../../utils/imagePicker";
 import keywordMap from "../../data/keywordMap.json";
+import IconBar from "./IconBar";
+import TagContainer from "../TagContainer";
+
 import Colors from "../../styles/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
-import IconBar from "./IconBar";
-import TagContainer from "../TagContainer";
 
 const CreateReviewModal = ({
   onClose,
@@ -29,15 +29,10 @@ const CreateReviewModal = ({
   onBack,
   intent = "create",
   reviewId = null,
-  initialReview = null,
 }) => {
   const [foodName, setFoodName] = useState("");
-  const [timeOption, setTimeOption] = useState([
-    "아침",
-    "점심",
-    "저녁",
-    "기타",
-  ]);
+
+  const timeOption = ["아침", "점심", "저녁", "기타"];
   const [tagOption, setTagOption] = useState([]);
 
   const [selectedTime, setSelectedTime] = useState(null);
@@ -47,15 +42,21 @@ const CreateReviewModal = ({
   const [rating, setRating] = useState(0);
 
   useEffect(() => {
-    if (intent === "edit" && initialReview) {
-      setFoodName(initialReview.food ?? "");
-      setSelectedTime(initialReview.time ?? null);
-      setSelectedTags(initialReview.tags ?? []);
-      setComment(initialReview.comment ?? "");
-      setRating(initialReview.rating ?? 0);
-      setImageUrl(initialReview.imageUrl ?? null);
+    if (intent === "edit" && reviewId) {
+      const fetchData = async () => {
+        const reviewData = await fetchReview(reviewId);
+        const foodData = await fetchFoodById(reviewData.foodId);
+        setFoodName(foodData.name ?? "");
+        setSelectedTime(reviewData.time ?? null);
+        setSelectedTags(reviewData.tags ?? []);
+        setImageUrl(reviewData.imageUrl ?? null);
+        setComment(reviewData.comment ?? "");
+        setRating(reviewData.rating ?? 0);
+      };
+
+      fetchData();
     }
-  }, [intent, initialReview]);
+  }, [intent, reviewId]);
 
   useEffect(() => {
     if (intent === "create") {
@@ -90,19 +91,9 @@ const CreateReviewModal = ({
   const handleSubmit = async () => {
     if (!foods) return;
 
-    const user = auth.currentUser;
-    if (!user) {
-      Alert.alert("로그인이 필요합니다!");
-      return;
-    }
-
-    const uid = user.uid;
-
     try {
-      const docRef = doc(db, "reviews", uid);
-
       if (intent == "edit") {
-        editReview(docRef.id, {
+        editReview(reviewId, {
           foodId: "food_0001",
           time: selectedTime,
           tags: selectedTags,
@@ -168,7 +159,7 @@ const CreateReviewModal = ({
             containerStyle={{ marginBottom: 20 }}
           />
 
-          <Text style={styles.subtitle}>어떤 상황에서 먹었나요?</Text>
+          <Text style={styles.subtitle}>음식에 어울리는 태그를 골라보세요</Text>
           <TagContainer
             tags={tagOption}
             mode="select_multi"

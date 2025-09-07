@@ -8,14 +8,26 @@ import {
   Ionicons,
 } from "react-native";
 
+import { fetchReview } from "../../services/review";
 import { fetchFoodById } from "../../services/food";
 import Colors from "../../styles/colors";
 import ReviewStar from "../svg/ReviewStar";
 
-const ReviewCard = ({ review, index, onEdit }) => {
-  if (!review) return null;
+const ReviewCard = ({ reviewId, onEdit }) => {
+  if (!reviewId) return null;
 
+  const [review, setReview] = useState(null);
   const [food, setFood] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const reviewData = await fetchReview(reviewId);
+      setReview(reviewData);
+    };
+
+    fetchData();
+  }, [reviewId]);
+
   useEffect(() => {
     const fetchFood = async () => {
       const foodData = await fetchFoodById(review.foodId);
@@ -23,13 +35,15 @@ const ReviewCard = ({ review, index, onEdit }) => {
     };
 
     fetchFood();
-  }, [review.foodId]);
+  }, [review]);
+
+  if (!review || !food) return null;
 
   return (
     <View style={styles.card}>
       <TouchableOpacity
         style={styles.editBtn}
-        onPress={() => onEdit?.(review, index)}
+        onPress={() => onEdit?.(reviewId)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
         <Text>수정</Text>

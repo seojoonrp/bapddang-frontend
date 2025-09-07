@@ -20,7 +20,7 @@ import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { db, auth } from "../services/firebase";
-import { fetchReviews } from "../services/review";
+import { fetchReviewIdsByDay } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -36,8 +36,6 @@ const DietLogScreen = () => {
   const [nextModal, setNextModal] = useState(null);
   const [back, setBack] = useState(false);
 
-  const [selectedReview, setSelectedReview] = useState(null);
-  const [selectedIndex, setSelectedIndex] = useState(null);
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
   const snapPoints = useMemo(() => [660], []);
@@ -58,9 +56,16 @@ const DietLogScreen = () => {
   const [selectedDay, setSelectedDay] = useState(1);
 
   // 리뷰 가져오기
-  const [reviews, setReviews] = useState([]);
+  const [reviewIds, setReviewIds] = useState([]);
+  const [selectedReviewId, setSelectedReviewId] = useState(null);
+
   useEffect(() => {
-    fetchReviews(selectedDay).then(setReviews);
+    const fetchData = async () => {
+      const ids = await fetchReviewIdsByDay(selectedDay);
+      setReviewIds(ids);
+    };
+
+    fetchData();
   }, [selectedDay]);
 
   const handleCloseModal = () => {
@@ -101,10 +106,9 @@ const DietLogScreen = () => {
     }
   };
 
-  const handleEditReview = (review, index) => {
-    setSelectedReview(review);
+  const handleEditReview = (reviewId) => {
+    setSelectedReviewId(reviewId);
     setActiveModal("review");
-    setSelectedIndex(index);
   };
 
   return (
@@ -167,16 +171,12 @@ const DietLogScreen = () => {
             </View>
 
             <FlatList
-              data={reviews}
+              data={reviewIds}
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item, index }) => (
-                <ReviewCard
-                  review={item}
-                  index={index}
-                  onEdit={handleEditReview}
-                />
+                <ReviewCard reviewId={item} onEdit={handleEditReview} />
               )}
               showsVerticalScrollIndicator={false}
             />
@@ -216,9 +216,8 @@ const DietLogScreen = () => {
           onBack={handleBack}
           foods={selectedFoods}
           mode="fast"
-          intent={selectedReview ? "edit" : "create"}
-          reviewIndex={selectedIndex}
-          initialReview={selectedReview}
+          intent={selectedReviewId ? "edit" : "create"}
+          reviewId={selectedReviewId}
         />
       </Modal>
     </LinearGradient>

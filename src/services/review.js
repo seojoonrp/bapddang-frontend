@@ -3,9 +3,11 @@ import {
   collection,
   addDoc,
   serverTimestamp,
+  getDoc,
+  getDocs,
   query,
   where,
-  getDocs,
+  orderBy,
   doc,
   setDoc,
 } from "firebase/firestore";
@@ -89,21 +91,36 @@ export const editReview = async (reviewId, updatedData) => {
   }
 };
 
-export const fetchReviews = async (day) => {
+export const fetchReview = async (reviewId) => {
+  try {
+    const reviewRef = doc(db, "reviews", reviewId);
+    const reviewSnap = await getDoc(reviewRef);
+
+    if (reviewSnap.exists()) {
+      return { id: reviewSnap.id, ...reviewSnap.data() };
+    }
+  } catch (error) {
+    console.error(`리뷰 ${reviewId} 가져오기 중 오류 발생:`, error);
+    return null;
+  }
+};
+
+export const fetchReviewIdsByDay = async (day) => {
   try {
     const reviewsRef = collection(db, "reviews");
-    const q = query(reviewsRef, where("day", "==", day));
+
+    const q = query(
+      reviewsRef,
+      where("userId", "==", auth.currentUser.uid),
+      where("day", "==", day),
+      orderBy("createdAt", "desc")
+    );
     const querySnapshot = await getDocs(q);
+    const reviewIds = querySnapshot.docs.map((doc) => doc.id);
 
-    const reviews = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    console.log(`Fetched ${reviews.length} reviews for day ${day}`);
-    return reviews;
+    return reviewIds;
   } catch (error) {
-    console.error("리뷰 가져오기 중 오류 발생:", error);
-    return [];
+    console.error(`${day}일 리뷰 가져오기 중 오류 발생:`, error);
+    return null;
   }
 };
