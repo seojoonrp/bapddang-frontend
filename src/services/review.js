@@ -30,25 +30,26 @@ export const createReview = async ({
 
   let day = 1;
 
-  // let createdAt = null;
-  // if (!createdAt && auth.currentUser?.metadata?.creationTime) {
-  //   createdAt = new Date(auth.currentUser.metadata.creationTime);
-  // }
+  let createdAt = null;
+  if (!createdAt && auth.currentUser?.metadata?.creationTime) {
+    createdAt = new Date(auth.currentUser.metadata.creationTime);
+  }
 
-  // const msPerDay = 1000 * 60 * 60 * 24;
-  // const toLocalStartOfDay = (d) => {
-  //   const x = new Date(d);
-  //   x.setHours(0, 0, 0, 0);
-  //   return x;
-  // };
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const toLocalStartOfDay = (d) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  };
 
-  // if (createdAt instanceof Date && !isNaN(createdAt)) {
-  //   const startCreated = toLocalStartOfDay(createdAt);
-  //   const startToday = toLocalStartOfDay(new Date());
-  //   const diffDays = Math.round((startToday - startCreated) / msPerDay);
-  //   day = Math.max(1, diffDays + 1);
-  // }
-
+  if (createdAt instanceof Date && !isNaN(createdAt)) {
+    const startCreated = toLocalStartOfDay(createdAt);
+    const startToday = toLocalStartOfDay(new Date());
+    const diffDays = Math.round((startToday - startCreated) / msPerDay);
+    day = Math.max(1, diffDays + 1);
+  }
+  const week=Math.ceil(day / 7);
+  const weekDay=day % 7 === 0 ? 7 : day % 7;
   try {
     let finalImageUrl = null;
 
@@ -61,6 +62,8 @@ export const createReview = async ({
       comment,
       rating,
       day, // TODO : day 계산 맞는지 체크
+      week,
+      weekDay,
       createdAt: serverTimestamp(),
     };
 
@@ -107,11 +110,29 @@ export const fetchReview = async (reviewId) => {
 
 export const fetchReviewIdsByDay = async (day) => {
   try {
+    // 현재 주차 계산 로직 현재는 week, weekDay로 나눠둔 상태
+    // const user = auth.currentUser;
+    // if (!user) return [];
+
+    // const createdAtRaw = user.metadata?.creationTime
+    //   ? new Date(user.metadata.creationTime)
+    //   : null;
+    // if (!(createdAtRaw instanceof Date) || isNaN(createdAtRaw)) return [];
+
+    // const toStart = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+    // const createdStart = toStart(createdAtRaw);
+    // const todayStart = toStart(new Date());
+    // const msPerDay = 1000 * 60 * 60 * 24;
+    // const diffDays = Math.floor((todayStart - createdStart) / msPerDay);
+    // const currentWeek = Math.floor(diffDays / 7) + 1;
+    // console.log("Current week:", currentWeek);
+
     const reviewsRef = collection(db, "reviews");
 
     const q = query(
       reviewsRef,
       where("userId", "==", auth.currentUser.uid),
+      //where("week", "==", currentWeek),
       where("day", "==", day),
       orderBy("createdAt", "desc")
     );
