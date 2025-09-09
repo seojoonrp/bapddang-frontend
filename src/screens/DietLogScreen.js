@@ -16,11 +16,9 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import Modal from "react-native-modal";
-import { getDoc, doc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { db, auth } from "../services/firebase";
-import { fetchReviewIdsByDay } from "../services/review";
+import { fetchReviewIdsByWeek } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -54,6 +52,7 @@ const DietLogScreen = () => {
 
   // 나중에 초기값 받아와서 설정 필요
   const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState(1);
 
   // 리뷰 가져오기
   const [reviewIds, setReviewIds] = useState([]);
@@ -61,12 +60,12 @@ const DietLogScreen = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const ids = await fetchReviewIdsByDay(selectedDay);
+      const ids = await fetchReviewIdsByWeek(selectedWeek);
       setReviewIds(ids);
     };
 
     fetchData();
-  }, [selectedDay]);
+  }, [selectedWeek]);
 
   const handleCloseModal = () => {
     setActiveModal("none");
@@ -214,7 +213,7 @@ const DietLogScreen = () => {
         <CreateReviewModal
           onClose={handleCloseModal}
           onBack={handleBack}
-          foods={selectedFoods}
+          foodNames={selectedFoods}
           mode="fast"
           intent={selectedReviewId ? "edit" : "create"}
           reviewId={selectedReviewId}

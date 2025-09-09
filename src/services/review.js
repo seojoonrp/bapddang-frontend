@@ -1,4 +1,4 @@
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import {
   collection,
   addDoc,
@@ -14,7 +14,8 @@ import {
 import { auth, db } from "./firebase";
 
 export const createReview = async ({
-  foodIds,
+  name,
+  foods,
   time,
   tags,
   imageUrl,
@@ -48,18 +49,24 @@ export const createReview = async ({
     const diffDays = Math.round((startToday - startCreated) / msPerDay);
     day = Math.max(1, diffDays + 1);
   }
-  const week=Math.ceil(day / 7);
-  const weekDay=day % 7 === 0 ? 7 : day % 7;
+
+  // 테스트할때 day 너무 커지니까 불편해서 그냥 1~7에서 랜덤생성되게 해둠ㅋㅋ
+  day = Math.floor(Math.random() * 7) + 1;
+
+  const week = Math.ceil(day / 7);
+  const weekDay = day % 7 === 0 ? 7 : day % 7;
+
   try {
     const reviewData = {
       userId: user.uid,
-      foodIds,
+      name,
+      foods,
       time,
       tags,
       imageUrl,
       comment,
       rating,
-      day, // TODO : day 계산 맞는지 체크
+      day,
       week,
       weekDay,
       createdAt: serverTimestamp(),
@@ -106,7 +113,7 @@ export const fetchReview = async (reviewId) => {
   }
 };
 
-export const fetchReviewIdsByDay = async (day) => {
+export const fetchReviewIdsByWeek = async (week) => {
   try {
     // 현재 주차 계산 로직 현재는 week, weekDay로 나눠둔 상태
     // const user = auth.currentUser;
@@ -130,8 +137,7 @@ export const fetchReviewIdsByDay = async (day) => {
     const q = query(
       reviewsRef,
       where("userId", "==", auth.currentUser.uid),
-      //where("week", "==", currentWeek),
-      where("day", "==", day),
+      where("week", "==", week),
       orderBy("createdAt", "desc")
     );
     const querySnapshot = await getDocs(q);

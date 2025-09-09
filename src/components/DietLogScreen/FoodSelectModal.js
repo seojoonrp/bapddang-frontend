@@ -17,6 +17,7 @@ import TagContainer from "../TagContainer";
 
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [likedFoods, setLikedFoods] = useState([]);
+
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) return;

@@ -12,9 +12,9 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { createReview, editReview, fetchReview } from "../../services/review";
-import { fetchFoodById } from "../../services/food";
+import { classifyFoodNameArray, fetchFoodById } from "../../services/food";
 import { pickImage } from "../../utils/imagePicker";
-import keywordMap from "../../data/keywordMap.json";
+
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
@@ -24,16 +24,22 @@ import ReviewStar from "../svg/ReviewStar";
 
 const CreateReviewModal = ({
   onClose,
-  foods,
+  foodNames,
   mode,
   onBack,
   intent = "create",
   reviewId = null,
 }) => {
-  const [foodName, setFoodName] = useState("");
+  const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
-  const [tagOption, setTagOption] = useState([]);
+  const [tagOption, setTagOption] = useState([
+    "혼밥",
+    "매콤해요",
+    "건강해요",
+    "푸짐해요",
+    "가성비 좋아요",
+  ]);
 
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
@@ -46,7 +52,8 @@ const CreateReviewModal = ({
       const fetchData = async () => {
         const reviewData = await fetchReview(reviewId);
         const foodData = await fetchFoodById(reviewData.foodId);
-        setFoodName(foodData.name ?? "");
+
+        setName(foodData.name ?? "");
         setSelectedTime(reviewData.time ?? null);
         setSelectedTags(reviewData.tags ?? []);
         setImageUrl(reviewData.imageUrl ?? null);
@@ -60,14 +67,9 @@ const CreateReviewModal = ({
 
   useEffect(() => {
     if (intent === "create") {
-      if (Array.isArray(foods)) setFoodName(foods.join(" & "));
-      else setFoodName(foods || "");
+      setName(foodNames.join("&"));
     }
-  }, [intent, foods]);
-
-  const handlePickImage = () => {
-    pickImage({ setImageUrl: setImageUrl });
-  };
+  }, [intent, foodNames]);
 
   const handleTagPress = (tag) => {
     setSelectedTags((prev) =>
@@ -75,26 +77,18 @@ const CreateReviewModal = ({
     );
   };
 
-  const totalCharLength = (foodName || "").length;
-
-  useEffect(() => {
-    if (!foods) return;
-
-    const tagData = keywordMap[foods[0]];
-    if (tagData) {
-      setTagOption(tagData.situation || []);
-    } else {
-      setTagOption(["혼밥", "매콤해요", "건강해요"]);
-    }
-  }, [foods]);
+  /* TODO: 태그 생성 */
 
   const handleSubmit = async () => {
-    if (!foods) return;
+    if (!foodNames) return;
+
+    const foods = await classifyFoodNameArray(foodNames);
 
     try {
       if (intent == "edit") {
         editReview(reviewId, {
-          foodId: "food_0001",
+          name,
+          foods,
           time: selectedTime,
           tags: selectedTags,
           imageUrl,
@@ -103,7 +97,8 @@ const CreateReviewModal = ({
         });
       } else if (intent == "create") {
         createReview({
-          foodId: "food_0001",
+          name,
+          foods,
           time: selectedTime,
           tags: selectedTags,
           imageUrl,
@@ -134,12 +129,9 @@ const CreateReviewModal = ({
       >
         <Star />
         <TextInput
-          style={[
-            styles.headerText,
-            { fontSize: totalCharLength > 11 ? 18 : 30 },
-          ]}
-          value={foodName}
-          onChangeText={setFoodName}
+          style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 30 }]}
+          value={name}
+          onChangeText={setName}
         />
         <Star />
       </View>
@@ -150,6 +142,7 @@ const CreateReviewModal = ({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* 시간대 선택 */}
           <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
           <TagContainer
             tags={timeOption}
@@ -159,6 +152,7 @@ const CreateReviewModal = ({
             containerStyle={{ marginBottom: 20 }}
           />
 
+          {/* 태그 선택 */}
           <Text style={styles.subtitle}>음식에 어울리는 태그를 골라보세요</Text>
           <TagContainer
             tags={tagOption}
@@ -168,8 +162,12 @@ const CreateReviewModal = ({
             containerStyle={{ marginBottom: 20 }}
           />
 
+          {/* 이미지 선택 */}
           <View>
-            <TouchableOpacity onPress={handlePickImage} style={styles.imageBox}>
+            <TouchableOpacity
+              onPress={() => pickImage({ setImageUrl })}
+              style={styles.imageBox}
+            >
               {imageUrl ? (
                 <Image
                   source={{ uri: imageUrl }}
@@ -186,6 +184,8 @@ const CreateReviewModal = ({
               )}
             </TouchableOpacity>
           </View>
+
+          {/* 한줄평 및 별점 */}
           <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
           <TextInput
             style={styles.input}
@@ -193,7 +193,6 @@ const CreateReviewModal = ({
             value={comment}
             onChangeText={setComment}
           />
-
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((i) => (
               <TouchableOpacity key={i} onPress={() => setRating(i)}>
@@ -353,6 +352,9 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontFamily: "NanumSquareB",
     fontSize: 16,
+    color: Colors.burn,
+  },
+  inputPlaceholder: {
     color: Colors.light_gray,
   },
   ratingRow: {
