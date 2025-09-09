@@ -11,10 +11,10 @@ import {
   doc,
   setDoc,
 } from "firebase/firestore";
-import { auth, db, storage } from "./firebase";
+import { auth, db } from "./firebase";
 
 export const createReview = async ({
-  foodId,
+  foodIds,
   time,
   tags,
   imageUrl,
@@ -50,11 +50,9 @@ export const createReview = async ({
   // }
 
   try {
-    let finalImageUrl = null;
-
     const reviewData = {
       userId: user.uid,
-      foodId,
+      foodIds,
       time,
       tags,
       imageUrl,
