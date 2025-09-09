@@ -18,7 +18,7 @@ import Animated, {
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { fetchReviewIdsByWeek } from "../services/review";
+import { fetchReviewsByWeek } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -55,13 +55,14 @@ const DietLogScreen = () => {
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   // 리뷰 가져오기
-  const [reviewIds, setReviewIds] = useState([]);
+  const [weekReviews, setWeekReviews] = useState([]);
   const [selectedReviewId, setSelectedReviewId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const ids = await fetchReviewIdsByWeek(selectedWeek);
-      setReviewIds(ids);
+      const reviews = await fetchReviewsByWeek(selectedWeek);
+      setWeekReviews(reviews);
+      console.log("Fetched reviews for week", selectedWeek, reviews);
     };
 
     fetchData();
@@ -170,12 +171,12 @@ const DietLogScreen = () => {
             </View>
 
             <FlatList
-              data={reviewIds}
+              data={weekReviews?.filter((r) => r.day === selectedDay)}
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item, index }) => (
-                <ReviewCard reviewId={item} onEdit={handleEditReview} />
+                <ReviewCard review={item} onEdit={handleEditReview} />
               )}
               showsVerticalScrollIndicator={false}
             />

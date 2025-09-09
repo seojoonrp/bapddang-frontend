@@ -99,7 +99,7 @@ export const editReview = async (reviewId, updatedData) => {
   }
 };
 
-export const fetchReview = async (reviewId) => {
+export const fetchReviewById = async (reviewId) => {
   try {
     const reviewRef = doc(db, "reviews", reviewId);
     const reviewSnap = await getDoc(reviewRef);
@@ -113,7 +113,14 @@ export const fetchReview = async (reviewId) => {
   }
 };
 
-export const fetchReviewIdsByWeek = async (week) => {
+export const fetchReviewsByWeek = async (week) => {
+  const user = auth.currentUser;
+
+  if (!user) {
+    Alert.alert("로그인하거라");
+    return;
+  }
+
   try {
     // 현재 주차 계산 로직 현재는 week, weekDay로 나눠둔 상태
     // const user = auth.currentUser;
@@ -136,16 +143,19 @@ export const fetchReviewIdsByWeek = async (week) => {
 
     const q = query(
       reviewsRef,
-      where("userId", "==", auth.currentUser.uid),
+      where("userId", "==", user.uid),
       where("week", "==", week),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "asc")
     );
     const querySnapshot = await getDocs(q);
-    const reviewIds = querySnapshot.docs.map((doc) => doc.id);
+    const reviews = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-    return reviewIds;
+    return reviews;
   } catch (error) {
-    console.error(`${day}일 리뷰 가져오기 중 오류 발생:`, error);
+    console.error(`리뷰 가져오기 중 오류 발생:`, error);
     return null;
   }
 };

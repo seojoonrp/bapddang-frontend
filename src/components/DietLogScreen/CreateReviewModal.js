@@ -11,8 +11,12 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-import { createReview, editReview, fetchReview } from "../../services/review";
-import { classifyFoodNameArray, fetchFoodById } from "../../services/food";
+import {
+  createReview,
+  editReview,
+  fetchReviewById,
+} from "../../services/review";
+import { classifyFoodNameArray } from "../../services/food";
 import { pickImage } from "../../utils/imagePicker";
 
 import IconBar from "./IconBar";
@@ -50,10 +54,9 @@ const CreateReviewModal = ({
   useEffect(() => {
     if (intent === "edit" && reviewId) {
       const fetchData = async () => {
-        const reviewData = await fetchReview(reviewId);
-        const foodData = await fetchFoodById(reviewData.foodId);
+        const reviewData = await fetchReviewById(reviewId);
 
-        setName(foodData.name ?? "");
+        setName(reviewData.name ?? "");
         setSelectedTime(reviewData.time ?? null);
         setSelectedTags(reviewData.tags ?? []);
         setImageUrl(reviewData.imageUrl ?? null);

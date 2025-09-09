@@ -8,66 +8,43 @@ import {
   Ionicons,
 } from "react-native";
 
-import { fetchReview } from "../../services/review";
-import { fetchFoodById } from "../../services/food";
 import Colors from "../../styles/colors";
 import ReviewStar from "../svg/ReviewStar";
 
-const ReviewCard = ({ reviewId, onEdit }) => {
-  if (!reviewId) return null;
-
-  const [review, setReview] = useState(null);
-  const [food, setFood] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const reviewData = await fetchReview(reviewId);
-      setReview(reviewData);
-    };
-
-    fetchData();
-  }, [reviewId]);
-
-  useEffect(() => {
-    const fetchFood = async () => {
-      const foodData = await fetchFoodById(review.foodId);
-      setFood(foodData);
-    };
-
-    fetchFood();
-  }, [review]);
-
-  if (!review || !food) return null;
+const ReviewCard = ({ review, onEdit }) => {
+  if (!review) return null;
 
   return (
     <View style={styles.card}>
       <TouchableOpacity
         style={styles.editBtn}
-        onPress={() => onEdit?.(reviewId)}
+        onPress={() => onEdit(review.id)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
         <Text>수정</Text>
       </TouchableOpacity>
 
       <Text style={styles.reviewText}>
-        {review.time}으로 <Text style={styles.foodText}>{food?.name}</Text>
+        {review.time}으로 <Text style={styles.foodText}>{review.name}</Text>
         을(를) 먹었어요!
       </Text>
 
-      <View style={styles.starRow}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <ReviewStar
-            key={i}
-            fill={review.rating >= i ? Colors.point_red : "white"}
-          />
-        ))}
-      </View>
+      {review.rating ? (
+        <View style={styles.starRow}>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <ReviewStar
+              key={i}
+              fill={review.rating >= i ? Colors.point_red : "white"}
+            />
+          ))}
+        </View>
+      ) : null}
 
       {review.imageUrl ? (
         <Image source={{ uri: review.imageUrl }} style={styles.reviewImage} />
       ) : null}
 
-      {review.tags?.length ? (
+      {review.tags ? (
         <Text style={styles.tagText}>
           {review.tags.map((tag) => `#${tag}`).join(" ")}
         </Text>
