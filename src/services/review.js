@@ -51,7 +51,8 @@ export const createReview = async ({
   }
 
   // 테스트할때 day 너무 커지니까 불편해서 그냥 1~7에서 랜덤생성되게 해둠ㅋㅋ
-  day = Math.floor(Math.random() * 7) + 1;
+  //day = Math.floor(Math.random() * 7) + 1;
+  day=100;
 
   const week = Math.ceil(day / 7);
   const weekDay = day % 7 === 0 ? 7 : day % 7;

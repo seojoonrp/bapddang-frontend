@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useEffect, useRef, useMemo, useState,useCallback } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,11 @@ import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
+
+//weekandday 동기화
+import { useFocusEffect } from "@react-navigation/native";
+import { auth } from "../services/firebase";
+import { syncUserWeekAndDay,getUserWeek } from "../services/user";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
@@ -57,6 +62,36 @@ const DietLogScreen = () => {
   // 리뷰 가져오기
   const [weekReviews, setWeekReviews] = useState([]);
   const [selectedReviewId, setSelectedReviewId] = useState(null);
+
+  // 이 부분 좀 정리 필요
+  useFocusEffect(
+  useCallback(() => {
+    let alive = true;
+
+    (async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      try {
+        await syncUserWeekAndDay(uid);
+      } catch (e) {
+        console.log("syncUserWeek failed:", e);
+      }
+
+      // user의 day/week 읽어서 selectedWeek 세팅
+      try {
+        const week = await getUserWeek(uid);
+        if (alive && week) setSelectedWeek(week);
+      } catch (e) {
+        console.log("getUserWeek failed:", e);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [])
+);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -171,7 +206,7 @@ const DietLogScreen = () => {
             </View>
 
             <FlatList
-              data={weekReviews?.filter((r) => r.day === selectedDay)}
+              data={weekReviews?.filter((r) => r.weekDay === selectedDay)}
               style={{ width: "100%" }}
               contentContainerStyle={{ flexGrow: 1 }}
               keyExtractor={(item, index) => index.toString()}

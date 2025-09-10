@@ -10,6 +10,7 @@ import StatusBanner from "../components/MainScreen/StatusBanner";
 import RecentLiked from "../components/MainScreen/RecentLiked";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import Bell from "../components/svg/Bell";
+import {syncUserWeekAndDay} from "../services/user";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
@@ -29,6 +30,7 @@ const MainScreen = () => {
     const curUser = auth.currentUser;
     if (curUser) {
       setEmail(curUser.email);
+      syncUserWeekAndDay(curUser.uid);
     } else {
       setEmail("게스트입니다.");
     }

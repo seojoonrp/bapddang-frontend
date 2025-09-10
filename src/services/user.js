@@ -9,6 +9,7 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  updateDoc,
   onSnapshot,
   serverTimestamp,
   writeBatch,
@@ -37,7 +38,52 @@ export const signUpUser = async (email, password) => {
     return { success: false, error: error.message };
   }
 };
+//week 동기화
+export const syncUserWeekAndDay = async (userId) => {
+  const userDocRef = doc(db, "users", userId);
 
+  try {
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      console.error("User document does not exist!");
+      return;
+    }
+
+    const userData = userDoc.data();
+    const createdAt = userData.createdAt?.toDate?.() || new Date(userData.createdAt);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const toLocalStartOfDay = (d) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+
+    
+    const startCreated = toLocalStartOfDay(createdAt);
+    const startToday = toLocalStartOfDay(new Date());
+    const diffDays = Math.round((startToday - startCreated) / msPerDay);
+    const day = Math.max(1, diffDays + 1);
+    const week = Math.ceil(day / 7);
+
+    await updateDoc(userDocRef, { week, day });
+    console.log(`Successfully updated week=${week} and day=${day} for user=${userId}`);
+  } catch (error) {
+    console.error("Error syncing week:", error);
+  }
+};
+export const getUserWeek = async (userId) => {
+  const userDocRef = doc(db, "users", userId);
+  const userDoc = await getDoc(userDocRef);
+
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+    return userData.week || 1;
+  }
+
+  return 1;
+};
 export const createUserDocument = async (user) => {
   const userDocRef = doc(db, "users", user.uid);
 
@@ -48,6 +94,8 @@ export const createUserDocument = async (user) => {
       likedFoodIds: [],
       recentFoodIds: [],
       createdAt: serverTimestamp(),
+      week: 1,
+      day: 1,
     });
     console.log("Successfully created user document:", user.email);
   } catch (error) {
@@ -140,7 +188,7 @@ export const listenToLikedFoods = (userId, callback) => {
         id: doc.id,
         ...doc.data(),
       }));
-      
+
       callback(likedFoods);
     } else {
       callback([]);
