@@ -37,6 +37,7 @@ const CreateReviewModal = ({
   const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
+  // TODO : 태그 생성 기능
   const [tagOption, setTagOption] = useState([
     "혼밥",
     "매콤해요",

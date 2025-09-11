@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { signOut } from "firebase/auth";
 
 import { auth } from "../services/firebase";
-import { signOut } from "firebase/auth";
-import Colors from "../styles/colors";
+import { syncUserWeekAndDay } from "../services/user";
+
 import UserDrawer from "../components/MainScreen/UserDrawer";
 import StatusBanner from "../components/MainScreen/StatusBanner";
 import RecentLiked from "../components/MainScreen/RecentLiked";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
+
+import Colors from "../styles/colors";
 import Bell from "../components/svg/Bell";
-import {syncUserWeekAndDay} from "../services/user";
 
 const MainScreen = () => {
   const [isFast, setIsFast] = useState(true);
@@ -72,7 +74,7 @@ const MainScreen = () => {
 
       <StatusBanner isFast={isFast} onToggle={toggleFast} />
       <RecentLiked isFast={isFast} />
-      <FoodCardNews mode={isFast?"fast":"slow"} />
+      <FoodCardNews mode={isFast ? "fast" : "slow"} />
 
       <UserDrawer
         isVisible={isDrawerVisible}
@@ -123,7 +125,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.point_red,
   },
 });
-
 
 /* 기존 MainScreen_Fast
 
