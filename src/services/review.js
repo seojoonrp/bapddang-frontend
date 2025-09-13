@@ -10,6 +10,8 @@ import {
   orderBy,
   doc,
   setDoc,
+  writeBatch,
+  increment,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
@@ -58,6 +60,8 @@ export const createReview = async ({
   const weekDay = day % 7 === 0 ? 7 : day % 7;
 
   try {
+    const batch = writeBatch(db);
+    const newReviewRef = doc(collection(db, "reviews"));
     const reviewData = {
       userId: user.uid,
       name,
@@ -72,11 +76,19 @@ export const createReview = async ({
       weekDay,
       createdAt: serverTimestamp(),
     };
+    batch.set(newReviewRef, reviewData);
 
-    const docRef = await addDoc(collection(db, "reviews"), reviewData);
+    foods.forEach((foodItem) => {
+      if (foodItem.id && !foodItem.isCustom) {
+        const foodRef = doc(db, "foods", foodItem.id);
+        batch.update(foodRef, { reviewCount: increment(1) });
+      }
+    });
+    
+    await batch.commit();
 
     Alert.alert("리뷰가 생성되었습니다!");
-    console.log("리뷰 생성:", docRef.id);
+    console.log("리뷰 생성:", newReviewRef.id);
   } catch (error) {
     console.error("리뷰 생성 중 오류 발생:", error);
   }

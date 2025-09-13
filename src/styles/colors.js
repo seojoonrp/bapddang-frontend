@@ -6,6 +6,7 @@ const Colors = {
   light_gray: "#D9D9D9",
   text_gray: "#DEC0C0",
   background_yellow: "#FFFAED",
+  background_white: "#FEFDFA",
   burn_red: "#BE0A20",
   light_text_gray: "#F3EFEF",
   icon_gray: "#CCC",

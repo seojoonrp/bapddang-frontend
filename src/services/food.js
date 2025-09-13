@@ -6,6 +6,9 @@ import {
   query,
   where,
   addDoc,
+  limit,
+  orderBy,
+  onSnapshot,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
@@ -96,4 +99,28 @@ export const classifyFoodNameArray = async (foodNames) => {
     console.error("Error classifying food names:", error);
     return [];
   }
+};
+
+/**
+ * 3일 랭킹 데이터의 변경사항을 실시간으로 감지하는 리스너를 설정합니다.
+ * @param {function} callback 데이터가 변경될 때마다 호출될 콜백 함수
+ * @returns {function} 리스너를 해제하는 unsubscribe 함수
+ */
+export const listenToRankingUpdates = (callback) => {
+  const foodsRef = collection(db, "foods");
+  const q = query(
+    foodsRef,
+    orderBy("threeDayReviewCount", "desc"),
+    limit(10)
+  );
+
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const rankings = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(rankings);
+  });
+
+  return unsubscribe;
 };

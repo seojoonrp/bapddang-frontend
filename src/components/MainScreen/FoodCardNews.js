@@ -4,29 +4,40 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   Pressable,
   Image,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import Modal from "react-native-modal";
 
 import { fetchFoods } from "../../services/food";
 import FoodInfoBox from "./FoodInfoBox";
 
-const { width } = Dimensions.get("window");
+// 1. 화면의 너비를 가져와서 카드의 기본 크기를 결정합니다.
+const { width: screenWidth } = Dimensions.get("window");
 const cardMargin = 16;
+// 이전처럼 화면 너비를 기준으로 카드 크기를 계산합니다.
+const calculatedCardSize = screenWidth - (cardMargin * 2) * 2;
+
 
 const FoodCardNews = ({ mode }) => {
   const [foodsData, setFoodsData] = useState([]);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchFoods();
-      setFoodsData(data);
-      console.log("Fetched foods data:", data);
+      try {
+        const data = await fetchFoods();
+        setFoodsData(data);
+      } catch (error) {
+        console.error("Error fetching food data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-
     fetchData();
   }, []);
 
@@ -42,37 +53,53 @@ const FoodCardNews = ({ mode }) => {
     setShowReview(false);
   };
 
+  // 2. onLayout은 이제 컨테이너의 너비를 얻는 역할만 합니다.
+  const onLayout = (event) => {
+    const { width } = event.nativeEvent.layout;
+    setContainerWidth(width);
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.cardContainer}>
+    <View style={[styles.cardContainer, { width: containerWidth }]}>
       <TouchableOpacity
         onPress={() => handleCardPress(item)}
         activeOpacity={0.7}
-        style={styles.foodButtonContainer}
+        // 3. 카드 크기를 `calculatedCardSize`로 고정합니다.
+        style={[
+          styles.foodButtonContainer,
+          { width: calculatedCardSize, height: calculatedCardSize },
+        ]}
       >
-        <Image
-          source={{ uri: item.imageUrl }}
-          style={styles.foodImage}
-          resizeMode="cover"
-        />
+        {item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.foodImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={[styles.foodImage, styles.imagePlaceholder]} />
+        )}
         <Text style={styles.foodText}>{item.name}</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={foodsData.filter((item) => item.type === mode)}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.name}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: cardMargin }}
-        ItemSeparatorComponent={() => (
-          <View style={{ width: cardMargin * 2 }} />
-        )}
-      />
+    <View style={styles.container} onLayout={onLayout}>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#007BFF" />
+      ) : foodsData.length > 0 ? (
+        <FlatList
+          data={foodsData.filter((item) => item.type === mode)}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+        />
+      ) : (
+        <Text>표시할 음식이 없습니다.</Text>
+      )}
 
       <Modal
         isVisible={showReview}
@@ -96,35 +123,37 @@ export default FoodCardNews;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: 'center',
   },
   cardContainer: {
-    display: "flex",
-    flexDirection: "column",
+    justifyContent: "center",
     alignItems: "center",
   },
   foodButtonContainer: {
-    width: width - cardMargin * 2 - 2,
-    height: width - cardMargin * 2 - 2,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fcfcfc",
     borderColor: "black",
     borderWidth: 1,
+    borderRadius: 20,
+    overflow: "hidden",
   },
   foodImage: {
     width: "100%",
     height: "100%",
   },
+  imagePlaceholder: {
+    backgroundColor: '#E0E0E0',
+  },
   foodText: {
     position: "absolute",
     color: "white",
-    backgroundColor: "black",
+    backgroundColor: "rgba(0,0,0,0.5)",
     fontSize: 18,
-    padding: 5,
+    padding: 8,
+    borderRadius: 5,
     bottom: 12,
-  },
-  name: {
-    fontSize: 50,
   },
   backdrop: {
     position: "absolute",

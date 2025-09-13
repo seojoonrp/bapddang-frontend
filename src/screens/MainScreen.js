@@ -10,6 +10,7 @@ import UserDrawer from "../components/MainScreen/UserDrawer";
 import StatusBanner from "../components/MainScreen/StatusBanner";
 import RecentLiked from "../components/MainScreen/RecentLiked";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
+import Ranking from "../components/MainScreen/Ranking";
 
 import Colors from "../styles/colors";
 import Bell from "../components/svg/Bell";
@@ -75,6 +76,7 @@ const MainScreen = () => {
       <StatusBanner isFast={isFast} onToggle={toggleFast} />
       <RecentLiked isFast={isFast} />
       <FoodCardNews mode={isFast ? "fast" : "slow"} />
+      <Ranking />
 
       <UserDrawer
         isVisible={isDrawerVisible}
