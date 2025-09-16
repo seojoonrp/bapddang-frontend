@@ -72,7 +72,9 @@ const MainScreen = () => {
 
       <RecentLiked />
 
-      <FoodCardNews />
+      <View style={{ flex: 1 }}>
+        <FoodCardNews />
+      </View>
 
       <Ranking />
 
@@ -98,20 +100,17 @@ export default MainScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "white",
+    paddingHorizontal: 15,
   },
   topContainer: {
-    alignSelf: "stretch",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 10,
-
-    borderColor: "black",
-    borderWidth: 1,
   },
   logo: {
     color: "black",

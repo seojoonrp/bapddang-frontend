@@ -81,29 +81,27 @@ export default RecentLiked;
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "stretch",
+    width: "100%",
     flexDirection: "column",
-    marginHorizontal: 18,
-    marginBottom: 12,
+    flexShrink: 0,
   },
   likedText: {
     fontSize: 15,
     fontFamily: "NanumSquareRoundB",
     marginBottom: 6,
-    marginLeft: 4,
   },
   foodContainer: {
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
     minHeight: 48,
+    gap: 6,
   },
   food: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: "#e0e0e0",
-    marginHorizontal: 6,
   },
   foodImage: {
     width: "100%",
@@ -115,7 +113,6 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: "#CCC",
-    marginHorizontal: 6,
     justifyContent: "center",
     alignItems: "center",
     paddingLeft: 2,

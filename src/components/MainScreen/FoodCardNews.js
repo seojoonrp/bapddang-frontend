@@ -8,7 +8,6 @@ import {
   Pressable,
   Image,
   ActivityIndicator,
-  Dimensions,
 } from "react-native";
 import Modal from "react-native-modal";
 
@@ -18,16 +17,16 @@ import useModeStore from "../../stores/modeStore";
 
 import FoodInfoBox from "./FoodInfoBox";
 
-const { width: screenWidth } = Dimensions.get("window");
-const cardMargin = 16;
-const calculatedCardSize = screenWidth - (cardMargin * 2) * 2;
+const MARGIN_MULTIPLIER = 1.02;
 
 const FoodCardNews = () => {
   const { mode } = useModeStore();
 
   const [foodsData, setFoodsData] = useState([]);
-  const [containerWidth, setContainerWidth] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +42,16 @@ const FoodCardNews = () => {
     fetchData();
   }, []);
 
+  const handleLayout = (event) => {
+    const { width, height } = event.nativeEvent.layout;
+    if (width > 0 && containerWidth === 0) {
+      setContainerWidth(width);
+    }
+    if (height > 0 && containerHeight === 0) {
+      setContainerHeight(height);
+    }
+  };
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [showReview, setShowReview] = useState(false);
 
@@ -55,39 +64,29 @@ const FoodCardNews = () => {
     setShowReview(false);
   };
 
-  // 2. onLayout은 이제 컨테이너의 너비를 얻는 역할만 합니다.
-  const onLayout = (event) => {
-    const { width } = event.nativeEvent.layout;
-    setContainerWidth(width);
-  };
-
   const renderItem = ({ item }) => (
-    <View style={[styles.cardContainer, { width: containerWidth }]}>
-      <TouchableOpacity
-        onPress={() => handleCardPress(item)}
-        activeOpacity={0.7}
-        // 3. 카드 크기를 `calculatedCardSize`로 고정합니다.
-        style={[
-          styles.foodButtonContainer,
-          { width: calculatedCardSize, height: calculatedCardSize },
-        ]}
-      >
-        {item.imageUrl ? (
-          <Image
-            source={{ uri: item.imageUrl }}
-            style={styles.foodImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={[styles.foodImage, styles.imagePlaceholder]} />
-        )}
-        <Text style={styles.foodText}>{item.name}</Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      onPress={() => handleCardPress(item)}
+      activeOpacity={0.7}
+      style={[
+        styles.cardContainer,
+        { width: containerHeight * MARGIN_MULTIPLIER, height: containerHeight },
+      ]}
+    >
+      {item.imageUrl ? (
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={[styles.cardImage, { height: containerHeight }]}
+        />
+      ) : (
+        <View style={[styles.cardImage, styles.imagePlaceholder]} />
+      )}
+      <Text style={styles.foodText}>{item.name}</Text>
+    </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container} onLayout={onLayout}>
+    <View style={styles.container} onLayout={handleLayout}>
       {isLoading ? (
         <ActivityIndicator size="large" color="#007BFF" />
       ) : foodsData.length > 0 ? (
@@ -97,7 +96,8 @@ const FoodCardNews = () => {
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          pagingEnabled
+          snapToInterval={containerHeight * MARGIN_MULTIPLIER}
+          decelerationRate="fast"
         />
       ) : (
         <Text>표시할 음식이 없습니다.</Text>
@@ -126,27 +126,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: 'center',
+    alignItems: "center",
   },
   cardContainer: {
     justifyContent: "center",
     alignItems: "center",
-  },
-  foodButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fcfcfc",
-    borderColor: "black",
-    borderWidth: 1,
-    borderRadius: 20,
     overflow: "hidden",
   },
-  foodImage: {
-    width: "100%",
-    height: "100%",
+  cardImage: {
+    aspectRatio: 1,
   },
   imagePlaceholder: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0",
   },
   foodText: {
     position: "absolute",

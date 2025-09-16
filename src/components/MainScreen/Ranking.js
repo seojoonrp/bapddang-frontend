@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { listenToRankingUpdates } from "../../services/food";
 import Colors from "../../styles/colors";
 
@@ -69,8 +64,6 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     width: "100%",
-    paddingHorizontal: 10,
-    marginBottom: 50,
   },
   itemContainer: {
     flexDirection: "row",

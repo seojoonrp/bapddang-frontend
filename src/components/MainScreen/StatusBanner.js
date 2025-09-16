@@ -68,18 +68,16 @@ export default StatusBanner;
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "stretch",
+    width: "100%",
     flexDirection: "column",
     justifyContent: "center",
-    marginTop: 22,
-    marginBottom: 12,
-    marginHorizontal: 10,
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 16,
+    flexShrink: 0,
   },
   topContainer: {
-    alignSelf: "stretch",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
