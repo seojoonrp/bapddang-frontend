@@ -8,22 +8,28 @@ import {
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
+import useModeStore from "../../stores/modeStore";
+
 import Colors from "../../styles/colors";
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
 import Character from "../svg/Character";
 
-const StatusBanner = ({ isFast, onToggle }) => {
+const StatusBanner = () => {
   const navigation = useNavigation();
-  const [animValue] = useState(new Animated.Value(isFast ? 1 : 0));
+
+  const { mode, toggleMode } = useModeStore();
+
+  const [animValue] = useState(new Animated.Value(mode === "fast" ? 1 : 0));
 
   useEffect(() => {
     Animated.timing(animValue, {
-      toValue: isFast ? 1 : 0,
+      toValue: mode === "fast" ? 1 : 0,
       duration: 300,
       useNativeDriver: false,
     }).start();
-  }, [isFast, animValue]);
+  }, [mode, animValue]);
 
   const backgroundColor = animValue.interpolate({
     inputRange: [0, 1],
@@ -39,8 +45,8 @@ const StatusBanner = ({ isFast, onToggle }) => {
           trackColor={{ false: "#359c21", true: "#e02828" }}
           ios_backgroundColor="#359c21"
           thumbColor="#fcfcfc"
-          onValueChange={onToggle}
-          value={isFast}
+          onValueChange={toggleMode}
+          value={mode === "fast"}
         />
       </View>
       <View style={styles.characterContainer}>

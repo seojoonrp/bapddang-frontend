@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity, Animated, Image, ActivityIndicator,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Colors from "../../styles/colors";
-import { listenToLikedFoods } from "../../services/user";
-import { auth } from "../../services/firebase";
 
-const RecentLiked = ({ isFast }) => {
+import { auth } from "../../services/firebase";
+import { listenToLikedFoods } from "../../services/user";
+
+import useModeStore from "../../stores/modeStore";
+
+import Colors from "../../styles/colors";
+
+const RecentLiked = () => {
   const navigation = useNavigation();
-  const [animValue] = useState(new Animated.Value(isFast ? 1 : 0));
+
+  const { mode, modeColor } = useModeStore();
+
+  const [animValue] = useState(new Animated.Value(mode === "fast" ? 1 : 0));
   const [likedFoods, setLikedFoods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     Animated.timing(animValue, {
-      toValue: isFast ? 1 : 0,
+      toValue: mode === "fast" ? 1 : 0,
       duration: 300,
       useNativeDriver: false,
     }).start();
-  }, [isFast, animValue]);
+  }, [mode, animValue]);
 
   useEffect(() => {
     const currentUser = auth.currentUser;
@@ -48,7 +61,7 @@ const RecentLiked = ({ isFast }) => {
       </Animated.Text>
       <View style={styles.foodContainer}>
         {isLoading ? (
-          <ActivityIndicator color={isFast ? Colors.burn_red : Colors.point_green} />
+          <ActivityIndicator color={modeColor} />
         ) : (
           likedFoods.map((food) => (
             <TouchableOpacity key={food.id} style={styles.food}>

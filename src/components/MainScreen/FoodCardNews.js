@@ -13,16 +13,18 @@ import {
 import Modal from "react-native-modal";
 
 import { fetchFoods } from "../../services/food";
+
+import useModeStore from "../../stores/modeStore";
+
 import FoodInfoBox from "./FoodInfoBox";
 
-// 1. 화면의 너비를 가져와서 카드의 기본 크기를 결정합니다.
 const { width: screenWidth } = Dimensions.get("window");
 const cardMargin = 16;
-// 이전처럼 화면 너비를 기준으로 카드 크기를 계산합니다.
 const calculatedCardSize = screenWidth - (cardMargin * 2) * 2;
 
+const FoodCardNews = () => {
+  const { mode } = useModeStore();
 
-const FoodCardNews = ({ mode }) => {
   const [foodsData, setFoodsData] = useState([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
