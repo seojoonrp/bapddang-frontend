@@ -22,7 +22,7 @@ const MainScreen = () => {
   const toggleFast = () => {
     setIsFast((prev) => !prev);
   };
-  ``;
+
   const [email, setEmail] = useState("");
 
   const [isDrawerVisible, setDrawerVisible] = useState(false);
@@ -74,8 +74,11 @@ const MainScreen = () => {
       */}
 
       <StatusBanner isFast={isFast} onToggle={toggleFast} />
+
       <RecentLiked isFast={isFast} />
+
       <FoodCardNews mode={isFast ? "fast" : "slow"} />
+
       <Ranking />
 
       <UserDrawer
