@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderRadius: 16,
-    flexShrink: 0,
   },
   topContainer: {
     width: "100%",

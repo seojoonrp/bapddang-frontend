@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     paddingHorizontal: 15,
+    gap: 20,
   },
   topContainer: {
     width: "100%",
