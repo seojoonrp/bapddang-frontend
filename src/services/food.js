@@ -101,6 +101,35 @@ export const classifyFoodNameArray = async (foodNames) => {
   }
 };
 
+export const fetchAllFoodNames = async () => {
+  try {
+    // 1) 공용 foods 컬렉션의 name
+    const foodsSnap = await getDocs(collection(db, "foods"));
+    const baseNames = foodsSnap.docs
+      .map((d) => d.data()?.name)
+      .filter((v) => typeof v === "string" && v.trim().length > 0);
+
+    // 2) 로그인된 사용자 기준 customFoods의 name
+    const user = auth.currentUser;
+    let customNames = [];
+    if (user) {
+      const customQ = query(
+        collection(db, "customFoods"),
+        where("userId", "==", user.uid)
+      );
+      const customSnap = await getDocs(customQ);
+      customNames = customSnap.docs
+        .map((d) => d.data()?.name)
+        .filter((v) => typeof v === "string" && v.trim().length > 0);
+    }
+
+    // 3) 중복 제거 후 반환
+    return Array.from(new Set([...baseNames, ...customNames]));
+  } catch (e) {
+    console.error("fetchAllFoodNames failed:", e);
+    return [];
+  }
+};
 /**
  * 3일 랭킹 데이터의 변경사항을 실시간으로 감지하는 리스너를 설정합니다.
  * @param {function} callback 데이터가 변경될 때마다 호출될 콜백 함수
