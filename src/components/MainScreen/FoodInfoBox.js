@@ -10,7 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { userLikeFood } from "../../services/user";
-import { fetchTags } from "../../services/gptApi";
+import { fetchTags } from "../../services/anthropicAPI";
 import { db, auth } from "../../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
