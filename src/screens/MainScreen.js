@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  useWindowDimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { signOut } from "firebase/auth";
 
@@ -24,6 +32,8 @@ const MainScreen = () => {
   const openDrawer = () => setDrawerVisible(true);
   const closeDrawer = () => setDrawerVisible(false);
 
+  const { width, height } = useWindowDimensions();
+
   useEffect(() => {
     const curUser = auth.currentUser;
     if (curUser) {
@@ -43,55 +53,74 @@ const MainScreen = () => {
     }
   };
 
+  const scrollableComponents = [
+    { key: "TopHeader" },
+    { key: "StatusBanner" },
+    { key: "RecentLiked" },
+    { key: "FoodCardNews" },
+    { key: "Ranking" },
+  ];
+
+  const renderScrollableComponent = ({ item }) => {
+    switch (item.key) {
+      case "TopHeader":
+        return (
+          <View style={{ backgroundColor: "white", paddingTop: 10 }}>
+            <View style={styles.topContainer}>
+              <Text style={styles.logo}>로고임</Text>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              >
+                <TouchableOpacity>
+                  <Bell />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={openDrawer}>
+                  <View style={styles.userIcon} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        );
+      case "StatusBanner":
+        return <StatusBanner />;
+      case "RecentLiked":
+        return <RecentLiked />;
+      case "FoodCardNews":
+        return (<View style={{height: 300}}><FoodCardNews pad={(width-330)/2}/></View>);
+      case "Ranking":
+        return <Ranking />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.topContainer}>
-        <Text style={styles.logo}>로고임</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <TouchableOpacity>
-            <Bell />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={openDrawer}>
-            <View style={styles.userIcon} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* 기존 로그인/로그아웃 UI
-      <View style={styles.switchContainer}>
-        <Text>{email}</Text>
-        <Button
-          title="로그인/랜딩"
-          onPress={() => navigation.navigate("Landing", { from: "Main" })}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <View style={styles.container}>
+        <FlatList
+          data={scrollableComponents}
+          renderItem={renderScrollableComponent}
+          keyExtractor={(item) => item.key}
+          stickyHeaderIndices={[1]}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
         />
-        <Button title="로그아웃" onPress={handleLogout} />
+
+        <UserDrawer
+          isVisible={isDrawerVisible}
+          onClose={closeDrawer}
+          email={email}
+          onNavigateToLanding={() => {
+            closeDrawer();
+            navigation.navigate("Landing", { from: "Main" });
+          }}
+          onLogout={() => {
+            closeDrawer();
+            handleLogout();
+          }}
+        />
       </View>
-      */}
-
-      <StatusBanner />
-
-      <RecentLiked />
-
-      <View style={{ flex: 1 }}>
-        <FoodCardNews />
-      </View>
-
-      <Ranking />
-
-      <UserDrawer
-        isVisible={isDrawerVisible}
-        onClose={closeDrawer}
-        email={email}
-        onNavigateToLanding={() => {
-          closeDrawer();
-          navigation.navigate("Landing", { from: "Main" });
-        }}
-        onLogout={() => {
-          closeDrawer();
-          handleLogout();
-        }}
-      />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -100,12 +129,8 @@ export default MainScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
     backgroundColor: "white",
     paddingHorizontal: 15,
-    gap: 20,
   },
   topContainer: {
     width: "100%",

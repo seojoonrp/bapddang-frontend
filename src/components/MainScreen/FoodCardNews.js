@@ -19,7 +19,7 @@ import FoodInfoBox from "./FoodInfoBox";
 
 const MARGIN_MULTIPLIER = 1.02;
 
-const FoodCardNews = () => {
+const FoodCardNews = ({ pad }) => {
   const { mode } = useModeStore();
 
   const [foodsData, setFoodsData] = useState([]);
@@ -91,6 +91,7 @@ const FoodCardNews = () => {
         <ActivityIndicator size="large" color="#007BFF" />
       ) : foodsData.length > 0 ? (
         <FlatList
+          paddingHorizontal={pad}
           data={foodsData.filter((item) => item.type === mode)}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
