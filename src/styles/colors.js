@@ -12,6 +12,7 @@ const Colors = {
   icon_gray: "#CCC",
   signup_desc: "#FF7873",
   pressed_button: "#A94946",
+  bg_white: "#FEFDFA",
 };
 
 export default Colors;

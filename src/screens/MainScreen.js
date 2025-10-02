@@ -68,6 +68,11 @@ const MainScreen = () => {
           <View style={{ backgroundColor: "white", paddingTop: 10 }}>
             <View style={styles.topContainer}>
               <Text style={styles.logo}>로고임</Text>
+
+              <TouchableOpacity onPress={() => navigation.navigate("Test")}>
+                <Text>밸런스게임</Text>
+              </TouchableOpacity>
+
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
               >
@@ -86,7 +91,11 @@ const MainScreen = () => {
       case "RecentLiked":
         return <RecentLiked />;
       case "FoodCardNews":
-        return (<View style={{height: 300}}><FoodCardNews pad={(width-330)/2}/></View>);
+        return (
+          <View style={{ height: 300 }}>
+            <FoodCardNews pad={(width - 330) / 2} />
+          </View>
+        );
       case "Ranking":
         return <Ranking />;
       default:

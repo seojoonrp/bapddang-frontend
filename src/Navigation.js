@@ -8,6 +8,8 @@ import SignUpScreen from "./screens/login/SignUpScreen";
 import EmailVerifyScreen from "./screens/login/EmailVerifyScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 
+import TestScreen from "./screens/TestScreen";
+
 const Stack = createStackNavigator();
 
 const StackScreen = () => {
@@ -38,6 +40,8 @@ const StackScreen = () => {
         component={EmailVerifyScreen}
         options={{ title: "이메일 인증 화면" }}
       />
+
+      <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );
 };
