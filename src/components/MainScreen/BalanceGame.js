@@ -1,24 +1,73 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+
 import Colors from "../../styles/colors";
 
-const BalanceGame = ({ question, foodIds }) => {
+const BalanceGame = ({ question, selectedFoods }) => {
+  if (!question || !selectedFoods || selectedFoods.length !== 2) {
+    console.warn("BalanceGame: 파라미터 이상한거 들어옴");
+    return null;
+  }
+
+  const [disabled, setDisabled] = useState(false);
+
+  const OnFoodSelect = (food) => {
+    console.log("선택된 음식:", food.name);
+    setDisabled(true);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.balanceGameText}>밸런스게임</Text>
-      <Text style={styles.questionText}>
-        부장님이 퇴근 10분 전 추가업무{"\n"}
-        야밤에 퇴근할 때, 야식은?
-      </Text>
-      <View style={styles.choiceContainer}>
-        <View style={styles.choiceBox}>
-          <Text style={styles.choiceText}>쫄깃쫄깃! 야채곱창</Text>
-        </View>
-        <View style={styles.choiceBox}>
-          <Text style={styles.choiceText}>알싸~한 마늘족발</Text>
-        </View>
-      </View>
-      <Text style={styles.curPlayerText}>1928명이 참여중, 4시간 남았어요!</Text>
+      {!disabled ? (
+        <>
+          <Text style={styles.balanceGameText}>밸런스게임</Text>
+          <Text style={styles.questionText}>{question}</Text>
+          <View style={styles.choiceContainer}>
+            <TouchableOpacity
+              style={styles.choiceButton}
+              onPress={() => OnFoodSelect(selectedFoods[0])}
+            >
+              {selectedFoods[0]?.imageUrl ? (
+                <Image
+                  source={{ uri: selectedFoods[0].imageUrl }}
+                  style={styles.foodImage}
+                  resizeMode="cover"
+                />
+              ) : null}
+              <Text style={styles.choiceText}>{selectedFoods[0]?.name}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.choiceButton}
+              onPress={() => OnFoodSelect(selectedFoods[1])}
+            >
+              {selectedFoods[1]?.imageUrl ? (
+                <Image
+                  source={{ uri: selectedFoods[1].imageUrl }}
+                  style={styles.foodImage}
+                  resizeMode="cover"
+                />
+              ) : null}
+              <Text style={styles.choiceText}>{selectedFoods[1]?.name}</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.curPlayerText}>
+            1928명이 참여중, 4시간 남았어요!
+          </Text>
+        </>
+      ) : (
+        <>
+          <Text style={styles.disabledText}>
+            오늘의 밸런스 게임을{"\n"}이미 진행하셨습니다!
+          </Text>
+          <Text>어쩌고저쩌고</Text>
+          <TouchableOpacity
+            onPress={() => setDisabled(false)}
+            style={{ borderColor: "black", borderWidth: 1, padding: 8 }}
+          >
+            <Text>다시하기 (디버깅용)</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
@@ -57,7 +106,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  choiceBox: {
+  choiceButton: {
+    position: "relative",
     width: "49%",
     height: 130,
     justifyContent: "center",
@@ -65,12 +115,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: "#A87C66",
     borderWidth: 1.5,
+    overflow: "hidden",
+  },
+  foodImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
   },
   choiceText: {
     textAlign: "center",
     color: Colors.bg_white,
     fontFamily: "NanumSquareB",
     fontSize: 16,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 4,
   },
   curPlayerText: {
     width: "100%",
@@ -81,5 +142,11 @@ const styles = StyleSheet.create({
     color: Colors.text_gray,
     fontFamily: "NanumSquareB",
     fontSize: 12,
+  },
+  disabledText: {
+    textAlign: "center",
+    color: Colors.burn,
+    fontFamily: "NanumSquareEB",
+    fontSize: 20,
   },
 });

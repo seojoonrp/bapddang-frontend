@@ -11,36 +11,17 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 
-import { fetchFoods } from "../../services/food";
-
 import useModeStore from "../../stores/modeStore";
 
 import FoodInfoBox from "./FoodInfoBox";
 
 const MARGIN_MULTIPLIER = 1.02;
 
-const FoodCardNews = ({ pad }) => {
+const FoodCardNews = ({ pad, foodsData, isLoading }) => {
   const { mode } = useModeStore();
-
-  const [foodsData, setFoodsData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchFoods();
-        setFoodsData(data);
-      } catch (error) {
-        console.error("Error fetching food data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const handleLayout = (event) => {
     const { width, height } = event.nativeEvent.layout;

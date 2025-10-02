@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { signOut } from "firebase/auth";
 
 import { auth } from "../services/firebase";
+import { fetchFoods } from "../services/food";
 import { syncUserWeekAndDay } from "../services/user";
 
 import UserDrawer from "../components/MainScreen/UserDrawer";
@@ -31,6 +32,23 @@ const MainScreen = () => {
   const [isDrawerVisible, setDrawerVisible] = useState(false);
   const openDrawer = () => setDrawerVisible(true);
   const closeDrawer = () => setDrawerVisible(false);
+
+  const [foodsData, setFoodsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchFoods();
+        setFoodsData(data);
+      } catch (error) {
+        console.error("Error fetching food data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const { width, height } = useWindowDimensions();
 
@@ -69,7 +87,11 @@ const MainScreen = () => {
             <View style={styles.topContainer}>
               <Text style={styles.logo}>로고임</Text>
 
-              <TouchableOpacity onPress={() => navigation.navigate("Test")}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Test", { foodsData: foodsData })
+                }
+              >
                 <Text>밸런스게임</Text>
               </TouchableOpacity>
 
@@ -93,7 +115,11 @@ const MainScreen = () => {
       case "FoodCardNews":
         return (
           <View style={{ height: 300 }}>
-            <FoodCardNews pad={(width - 330) / 2} />
+            <FoodCardNews
+              pad={(width - 330) / 2}
+              foodsData={foodsData}
+              isLoading={isLoading}
+            />
           </View>
         );
       case "Ranking":
