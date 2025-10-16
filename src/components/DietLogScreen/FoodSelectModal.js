@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -10,53 +10,197 @@ import {
 
 import { auth } from "../../services/firebase";
 import { fetchLikedFoodNames } from "../../services/user";
+import { fetchAllFoodNames } from "../../services/food";
+// 모달은 쓰지 않지만, 기존의 유사도 함수만 재활용
+import { getBestMatches } from "./NameCheckAlgorithm";
 
 import Colors from "../../styles/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
+/** -----------------------------------------------------------
+ * FoodSelectModal
+ *  - phase === 'input' : 음식 입력 단계
+ *  - phase === 'check' : 이름 검수 단계 (내장 컴포넌트로 처리)
+ *  - 완료 시 onSelect(finalNames) 호출, 필요하면 onClose()로 닫기
+ * ----------------------------------------------------------*/
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [likedFoods, setLikedFoods] = useState([]);
+  const [allFoodNames, setAllFoodNames] = useState([]);
 
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const fetchData = async () => {
-      const likedFoods = await fetchLikedFoodNames(user.uid);
-      setLikedFoods(likedFoods);
-    };
-
-    fetchData();
+    (async () => {
+      try {
+        const liked = await fetchLikedFoodNames(user.uid);
+        setLikedFoods(liked || []);
+      } catch (e) {
+        console.log("fetchLikedFoodNames failed:", e);
+      }
+    })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const names = await fetchAllFoodNames();
+        const uniq = Array.from(new Set((names || []).filter(Boolean)));
+        setAllFoodNames(uniq);
+      } catch (e) {
+        console.log("fetchAllFoodNames failed:", e);
+      }
+    })();
+  }, []);
+
+  // 입력 단계 상태
   const [inputList, setInputList] = useState(
-    initialFoods.length === 0 ? [""] : initialFoods
+    Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""]
   );
   const [curInputIndex, setCurInputIndex] = useState(0);
 
+  // 검수 단계 상태
+  const [phase, setPhase] = useState("input"); // 'input' | 'check'
+  const [pendingList, setPendingList] = useState([]); // 검수 대상
+  const [checkIdx, setCheckIdx] = useState(0);
+
   const updateInput = (index, value) => {
-    const newInputs = [...inputList];
-    newInputs[index] = value;
-    setInputList(newInputs);
+    const next = [...inputList];
+    next[index] = value;
+    setInputList(next);
   };
 
   const addInput = () => {
-    setInputList([...inputList, ""]);
+    setInputList((prev) => [...prev, ""]);
     setCurInputIndex(inputList.length);
   };
 
-  const handleConfirm = () => {
-    const filtered = inputList.filter((item) => item.trim() !== "");
-    console.log("Selected food items:", filtered);
+  const startCheck = () => {
+    const filtered = inputList
+      .map((s) => (s || "").trim())
+      .filter((s) => s.length > 0);
 
-    if (filtered.length > 0) {
-      onSelect(filtered);
+    if (!filtered.length) return;
+    setPendingList(filtered);
+    setCheckIdx(0);
+    setPhase("check");
+  };
+
+  const finishAndEmit = (finalArr) => {
+    onSelect?.(finalArr); // 부모로 최종 배열 전달
+    onClose?.();          // 겹침 방지 위해 닫기(원하면 제거 가능)
+  };
+
+  const goNextOrFinish = (updatedArr) => {
+    const next = checkIdx + 1;
+    if (next >= updatedArr.length) {
+      finishAndEmit(updatedArr);
     } else {
-      console.log("No food items selected.");
+      setCheckIdx(next);
     }
   };
 
+  // ---------- 내장 NameCheck UI ----------
+  const NameCheckPanel = ({
+    value,
+    candidates,
+    onPick,      // 제안 수락 (문자열 전달)
+    onKeep,      // 원문 유지
+    onCancel,    // 전체 검수 취소
+  }) => {
+    // 상위의 getBestMatches 재활용 (없으면 방어)
+    const suggestions = useMemo(() => {
+      try {
+        const { top } = getBestMatches(value, candidates, 5) || { top: [] };
+        return top;
+      } catch {
+        return [];
+      }
+   }, [value, candidates]);
+
+    return (
+      <View style={styles.checkBox}>
+        <Text style={styles.checkTitle}>이 이름이 맞나요?</Text>
+        <Text style={styles.checkInputName}>{value}</Text>
+
+        <Text style={styles.checkSubTitle}>추천 후보</Text>
+        <View style={styles.suggestionContainer}>
+          {suggestions.length === 0 ? (
+            <Text style={styles.noSuggestion}>추천 후보가 없습니다.</Text>
+          ) : (
+            suggestions.map(({name,score}, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.suggestionChip}
+                onPress={() => onPick(name)}
+              >
+                <Text style={styles.suggestionText}>{name} ({score.toFixed(3)})</Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
+
+        <View style={styles.checkButtonsRow}>
+          <TouchableOpacity style={[styles.smallBtn, { backgroundColor: "#EEE" }]} onPress={onKeep}>
+            <Text style={[styles.smallBtnText, { color: Colors.burn }]}>원문 유지</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.smallBtn, { backgroundColor: Colors.point_red }]} onPress={onCancel}>
+            <Text style={[styles.smallBtnText, { color: "#FFF" }]}>취소</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.checkHint}>
+          • 후보를 탭하면 바로 확정됩니다.{"\n"}• 원문 유지/스킵은 입력한 이름 그대로 진행합니다.
+        </Text>
+      </View>
+    );
+  };
+
+  // 현재 검수 중 이름
+  const currentName = phase === "check" ? pendingList[checkIdx] : "";
+
+  const acceptSuggestion = (suggested) => {
+    const arr = [...pendingList];
+    arr[checkIdx] = suggested || arr[checkIdx];
+    setPendingList(arr);
+    goNextOrFinish(arr);
+  };
+
+  const keepOriginal = () => {
+    goNextOrFinish(pendingList);
+  };
+
+  const cancelCheck = () => {
+    // 검수 전체 취소 → 입력 단계로 되돌림 (선택 전달 없음)
+    setPhase("input");
+    setPendingList([]);
+    setCheckIdx(0);
+  };
+
+  // ---------------- Render ----------------
+  if (phase === "check") {
+    return (
+      <View style={styles.container}>
+        <IconBar onClose={onClose} />
+        <View style={styles.contentBox}>
+          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+            <Text style={styles.question}>이름 검수 ({checkIdx + 1} / {pendingList.length})</Text>
+
+            <NameCheckPanel
+              value={currentName}
+              candidates={allFoodNames}
+              onPick={acceptSuggestion}
+              onKeep={keepOriginal}
+              onCancel={cancelCheck}
+            />
+          </ScrollView>
+        </View>
+      </View>
+    );
+  }
+
+  // phase === 'input'
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
@@ -92,10 +236,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             containerStyle={{ marginBottom: 20 }}
           />
 
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleConfirm}
-          >
+          <TouchableOpacity style={styles.confirmButton} onPress={startCheck}>
             <Text style={styles.confirmText}>확인</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -106,6 +247,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
 export default FoodSelectModal;
 
+// ---------------- Styles ----------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,7 +289,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.point_red,
     borderRadius: 20,
     borderWidth: 2,
-    borderRadius: 20,
     backgroundColor: "white",
     color: Colors.burn,
     fontFamily: "NanumSquareR",
@@ -192,5 +333,75 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 800,
     color: "#FFF",
+  },
+  // ----- inline check UI -----
+  checkBox: {
+    width: "100%",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: Colors.light_gray,
+    borderRadius: 16,
+  },
+  checkTitle: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 16,
+    color: Colors.burn,
+    marginBottom: 8,
+  },
+  checkInputName: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 22,
+    color: Colors.point_red,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  checkSubTitle: {
+    fontFamily: "NanumSquareB",
+    fontSize: 14,
+    color: Colors.slightly_burn,
+    marginBottom: 8,
+  },
+  suggestionContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 14,
+  },
+  suggestionChip: {
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: Colors.light_gray,
+  },
+  suggestionText: {
+    fontFamily: "NanumSquareB",
+    fontSize: 14,
+    color: Colors.burn,
+  },
+  smallBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  smallBtnText: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 14,
+  },
+  checkButtonsRow: {
+    flexDirection: "row",
+    width: "100%",
+    marginTop: 6,
+  },
+  checkHint: {
+    marginTop: 10,
+    fontSize: 12,
+    color: Colors.slightly_burn,
+    textAlign: "left",
+    lineHeight: 18,
   },
 });

@@ -16,7 +16,7 @@ import {
   editReview,
   fetchReviewById,
 } from "../../services/review";
-import NameCheckModal, { getBestMatches } from "./NameCheckModal";
+import NameCheckModal, { getBestMatches } from "./NameCheckAlgorithm";
 import { classifyFoodNameArray, fetchAllFoodNames } from "../../services/food";
 import { pickImage } from "../../utils/imagePicker";
 
@@ -53,11 +53,6 @@ const CreateReviewModal = ({
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
-
-  const [allFoodNames, setAllFoodNames] = useState([]);
-  const [checkVisible, setCheckVisible] = useState(false);
-  const [pending, setPending] = useState(null);
-
   useEffect(() => {
     if (intent === "edit" && reviewId) {
       const fetchData = async () => {
@@ -89,116 +84,35 @@ const CreateReviewModal = ({
 
   /* TODO: 태그 생성 */
 
-  const handleSubmit = async () => {
-    if (!foodNames) return;
+  const pruneUndefined = (obj) =>
+    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
-    const foods = await classifyFoodNameArray(foodNames);
-
+  const submit = async () => {
     try {
-      if (intent == "edit") {
-        editReview(reviewId, {
-          name,
-          foods,
-          time: selectedTime,
-          tags: selectedTags,
-          imageUrl,
-          comment,
-          rating,
-        });
-      } else if (intent == "create") {
-        createReview({
-          name,
-          foods,
-          time: selectedTime,
-          tags: selectedTags,
-          imageUrl,
-          comment,
-          rating,
-        });
-      }
+      const foods = await classifyFoodNameArray(foodNames || []);
 
-      onClose();
+      const payload = pruneUndefined({
+        name,
+        foods,
+        time: selectedTime ?? null,
+        tags: selectedTags ?? [],
+        imageUrl: imageUrl ?? null,
+        comment: comment ?? "",
+        rating: Number(rating ?? 0),
+      });
+
+      if (intent === "edit" && reviewId) {
+        await editReview(reviewId, payload);
+      } else {
+        await createReview(payload);
+      }
+      onClose?.();
     } catch (error) {
       console.error("리뷰 저장 실패: ", error);
       Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
     }
   };
-  useEffect(() => {
-    (async () => {
-      try {
-        const arr = await fetchAllFoodNames(); // ["떡볶이","로제 떡볶이", ...]
-        setAllFoodNames(Array.from(new Set((arr || []).filter(Boolean))));
-      } catch (e) {
-        console.log("fetchAllFoodNames failed:", e);
-      }
-    })();
-  }, []);
-
-  const pruneUndefined = (obj) =>
-    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
-
-  // classify 결과 모양 표준화 (프로젝트 내 반환키 변동 흡수용)
-  const normalizeClassifyResult = (r) => {
-    const existing = r?.existing || r?.foods || r?.known || [];
-    const custom = r?.custom || r?.customFoods || r?.new || [];
-    return { existing, custom };
-  };
-
-  const submitWithFinalName = async (finalName) => {
-    // 1) 이름 분류 (이 안에서 없는 건 customFoods에 생성까지 됨)
-    //    주의: 이 함수의 현재 반환은 "배열"일 수도/객체일 수도 있으니
-    //    네 프로젝트 규격에 맞게 그대로 저장하거나 표준화해서 쓰면 됨.
-    const classified = await classifyFoodNameArray([finalName]);
-
-    // 2) 네 기존 handleSubmit 형태를 그대로 맞춤
-    //    (여기서는 기존 코드처럼 foods에 분류 결과 전체를 넣는다)
-    const payload = pruneUndefined({
-      name: finalName,
-      foods: classified,               // ← 기존 handleSubmit과 동일한 필드 사용
-      time: selectedTime ?? null,
-      tags: selectedTags ?? [],
-      imageUrl: imageUrl ?? null,
-      comment: comment ?? "",
-      rating: Number(rating ?? 0),
-    });
-
-    if (intent === "edit" && reviewId) {
-      await editReview(reviewId, payload);
-    } else {
-      await createReview(payload);
-    }
-
-    onClose?.();
-  };
-
-  const handlePressSubmit = async () => {
-    const inputName = (name || "").trim();
-    // 빈 값 방지: 빈 입력이면 그대로 모달 띄우되 후보 없음 처리
-    const { best, top } = getBestMatches(inputName, allFoodNames, 5);
-    setPending({ inputName, best, top });
-    setCheckVisible(true);
-  };
-
-  // 모달 콜백
-  const onAccept = async (suggestedName) => {
-    setCheckVisible(false);
-    const finalName = suggestedName || pending?.best?.name || pending?.inputName;
-    await submitWithFinalName(finalName, { forceCustom: false });
-    setPending(null);
-  };
-
-  const onReject = async () => {
-    setCheckVisible(false);
-    const finalName = pending?.inputName || "";
-    // “아니에요” → 입력 그대로 + custom 강제 생성
-    await submitWithFinalName(finalName);
-    setPending(null);
-  };
-
-  const onCancel = () => {
-    setCheckVisible(false);
-    setPending(null);
-  };
+  
 
   return (
     <View style={styles.overlay}>
@@ -298,20 +212,13 @@ const CreateReviewModal = ({
             )}
             <TouchableOpacity
               style={styles.bottomButton}
-              onPress={handlePressSubmit}
+              onPress={submit}
             >
               <Text style={styles.bottomButtonText}>
                 {intent === "edit" ? "수정 저장" : "후기 등록"}
               </Text>
             </TouchableOpacity>
-            <NameCheckModal
-              visible={checkVisible}
-              inputName={pending?.inputName ?? name}
-              candidates={allFoodNames}
-              onAccept={onAccept}
-              onReject={onReject}
-              onCancel={onCancel}
-            />
+            
           </View>
         </ScrollView>
       </View>

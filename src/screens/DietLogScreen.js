@@ -29,6 +29,7 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import { useFocusEffect } from "@react-navigation/native";
 import { auth } from "../services/firebase";
 import { syncUserWeekAndDay,getUserWeek } from "../services/user";
+import { reload } from "firebase/auth";
 
 const DietLogScreen = () => {
   // 추가버튼 관련
@@ -124,6 +125,7 @@ const DietLogScreen = () => {
 
   const handleSelectFood = (foods) => {
     setSelectedFoods(foods);
+    setSelectedReviewId(null);
     setActiveModal("none");
     setNextModal("review");
   };
