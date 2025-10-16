@@ -8,15 +8,14 @@ import {
   Animated,
   useWindowDimensions,
 } from "react-native";
-// SafeAreaView를 react-native-safe-area-context에서 가져옵니다.
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { signOut } from "firebase/auth";
 
-// ... 이하 모든 import는 동일 ...
 import { auth } from "../services/firebase";
 import { fetchFoods } from "../services/food";
 import { syncUserWeekAndDay } from "../services/user";
+
 import UserDrawer from "../components/MainScreen/UserDrawer";
 import StatusBanner from "../components/MainScreen/StatusBanner";
 import RecentLiked from "../components/MainScreen/RecentLiked";
@@ -26,10 +25,9 @@ import BalanceGame from "../components/MainScreen/BalanceGame";
 import Bell from "../components/svg/Bell";
 import Colors from "../styles/colors";
 
-
 const MainScreen = () => {
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets(); // 기기의 안전 영역(상태바 등) 크기를 가져옴
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [isDrawerVisible, setDrawerVisible] = useState(false);
   const [isBalanceGameVisible, setBalanceGameVisible] = useState(false);
@@ -54,7 +52,6 @@ const MainScreen = () => {
     }
   }, [isBalanceGameVisible, statusBannerHeight, insets.top]);
 
-  // ... 이하 데이터 로딩 및 기타 로직은 모두 동일 ...
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -117,7 +114,12 @@ const MainScreen = () => {
           return null;
         }
         return (
-          <View style={{ backgroundColor: "white", paddingTop: 10 }}>
+          <View
+            style={{
+              backgroundColor: "white",
+              paddingTop: 10,
+            }}
+          >
             <View style={styles.topContainer}>
               <Text style={styles.logo}>로고임</Text>
               <TouchableOpacity>
@@ -138,7 +140,14 @@ const MainScreen = () => {
         );
       case "StatusBanner":
         return (
-          <View onLayout={handleBannerLayout}>
+          <View
+            onLayout={handleBannerLayout}
+            style={{
+              backgroundColor: isBalanceGameVisible
+                ? Colors.point_red
+                : "white",
+            }}
+          >
             <StatusBanner />
           </View>
         );
@@ -158,10 +167,18 @@ const MainScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: isBalanceGameVisible ? Colors.point_red : "white" },
+      ]}
+      edges={["left", "right", "bottom"]}
+    >
       <FlatList
-        style={{ paddingHorizontal: 15 }}
-        contentContainerStyle={{ paddingTop: insets.top }} // FlatList 내용이 상태바 아래에서 시작하도록
+        style={{
+          paddingHorizontal: 15,
+        }}
+        contentContainerStyle={{ paddingTop: insets.top }}
         data={scrollableComponents}
         renderItem={renderScrollableComponent}
         keyExtractor={(item) => item.key}
@@ -177,12 +194,9 @@ const MainScreen = () => {
         isVisible={isDrawerVisible}
         onClose={() => setDrawerVisible(false)}
         email={email}
-        // ... 이하 UserDrawer props 동일
       />
 
-      <Animated.View
-        style={[styles.animatedContainer, { top: topAnim }]}
-      >
+      <Animated.View style={[styles.animatedContainer, { top: topAnim }]}>
         <TouchableOpacity
           style={styles.closeButton}
           onPress={() => setBalanceGameVisible(false)}
@@ -200,7 +214,6 @@ export default MainScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
   },
   topContainer: {
     width: "100%",
@@ -223,7 +236,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0, // bottom: 0 추가하여 하단에 붙도록
+    bottom: 0,
     backgroundColor: "white",
     padding: 15,
     paddingTop: 40,
