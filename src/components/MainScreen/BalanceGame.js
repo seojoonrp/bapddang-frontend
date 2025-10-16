@@ -1,20 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
-
+import { fetchFoods } from "../../services/food";
 import Colors from "../../styles/colors";
 
-const BalanceGame = ({ question, selectedFoods }) => {
-  if (!question || !selectedFoods || selectedFoods.length !== 2) {
-    console.warn("BalanceGame: 파라미터 이상한거 들어옴");
-    return null;
-  }
-
+const BalanceGame = () => {
+  const [selectedFoods, setSelectedFoods] = useState([]);
   const [disabled, setDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const question = "부장님이 퇴근 10분 전 추가업무\n야밤에 퇴근할 때, 야식은?";
+
+  useEffect(() => {
+    const loadAndSelectFoods = async () => {
+      try {
+        setIsLoading(true);
+        const allFoods = (await fetchFoods()) || [];
+        if (allFoods && allFoods.length >= 2) {
+          const shuffled = [...allFoods].sort(() => 0.5 - Math.random());
+          setSelectedFoods(shuffled.slice(0, 2));
+        }
+      } catch (error) {
+        console.error("Failed to fetch foods for BalanceGame:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAndSelectFoods();
+  }, []);
 
   const OnFoodSelect = (food) => {
     console.log("선택된 음식:", food.name);
     setDisabled(true);
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text>밸런스 게임을 불러오는 중...</Text>
+      </View>
+    );
+  }
+
+  if (selectedFoods.length < 2) {
+    return (
+      <View style={styles.container}>
+        <Text>밸런스 게임을 위한 음식이 부족합니다.</Text>
+      </View>
+    );
+  }
+
 
   return (
     <View style={styles.container}>
@@ -27,27 +62,23 @@ const BalanceGame = ({ question, selectedFoods }) => {
               style={styles.choiceButton}
               onPress={() => OnFoodSelect(selectedFoods[0])}
             >
-              {selectedFoods[0]?.imageUrl ? (
-                <Image
-                  source={{ uri: selectedFoods[0].imageUrl }}
-                  style={styles.foodImage}
-                  resizeMode="cover"
-                />
-              ) : null}
-              <Text style={styles.choiceText}>{selectedFoods[0]?.name}</Text>
+              <Image
+                source={{ uri: selectedFoods[0].imageUrl }}
+                style={styles.foodImage}
+                resizeMode="cover"
+              />
+              <Text style={styles.choiceText}>{selectedFoods[0].name}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.choiceButton}
               onPress={() => OnFoodSelect(selectedFoods[1])}
             >
-              {selectedFoods[1]?.imageUrl ? (
-                <Image
-                  source={{ uri: selectedFoods[1].imageUrl }}
-                  style={styles.foodImage}
-                  resizeMode="cover"
-                />
-              ) : null}
-              <Text style={styles.choiceText}>{selectedFoods[1]?.name}</Text>
+              <Image
+                source={{ uri: selectedFoods[1].imageUrl }}
+                style={styles.foodImage}
+                resizeMode="cover"
+              />
+              <Text style={styles.choiceText}>{selectedFoods[1].name}</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.curPlayerText}>
@@ -77,6 +108,7 @@ export default BalanceGame;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    minHeight: 250,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",

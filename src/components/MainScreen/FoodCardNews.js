@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import FoodInfoBox from "./FoodInfoBox";
 
 const MARGIN_MULTIPLIER = 1.02;
 
-const FoodCardNews = ({ pad, foodsData, isLoading }) => {
+const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   const { mode } = useModeStore();
 
   const [containerWidth, setContainerWidth] = useState(0);
