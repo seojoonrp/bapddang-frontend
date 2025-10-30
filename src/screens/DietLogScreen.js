@@ -34,6 +34,7 @@ import { reload } from "firebase/auth";
 const DietLogScreen = () => {
   // 추가버튼 관련
   const [selectedFoods, setSelectedFoods] = useState([]);
+  const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const [activeModal, setActiveModal] = useState("none");
@@ -123,8 +124,9 @@ const DietLogScreen = () => {
     }
   };
 
-  const handleSelectFood = (foods) => {
+  const handleSelectFood = (foods,mode) => {
     setSelectedFoods(foods);
+    setSelectedMode(mode);
     setSelectedReviewId(null);
     setActiveModal("none");
     setNextModal("review");
@@ -232,8 +234,9 @@ const DietLogScreen = () => {
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
         <FoodSelectModal
           onClose={handleCloseModal}
-          onSelect={(foods) => {
-            handleSelectFood(foods);
+
+          onSelect={(foods, mode) => {
+            handleSelectFood(foods, mode);
           }}
           initialFoods={selectedFoods}
         />
@@ -252,7 +255,7 @@ const DietLogScreen = () => {
           onClose={handleCloseModal}
           onBack={handleBack}
           foodNames={selectedFoods}
-          mode="fast"
+          mode={selectedMode}
           intent={selectedReviewId ? "edit" : "create"}
           reviewId={selectedReviewId}
         />

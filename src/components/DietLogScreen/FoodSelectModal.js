@@ -18,12 +18,6 @@ import Colors from "../../styles/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-/** -----------------------------------------------------------
- * FoodSelectModal
- *  - phase === 'input' : 음식 입력 단계
- *  - phase === 'check' : 이름 검수 단계 (내장 컴포넌트로 처리)
- *  - 완료 시 onSelect(finalNames) 호출, 필요하면 onClose()로 닫기
- * ----------------------------------------------------------*/
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [likedFoods, setLikedFoods] = useState([]);
   const [allFoodNames, setAllFoodNames] = useState([]);
@@ -64,7 +58,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [phase, setPhase] = useState("input"); // 'input' | 'check'
   const [pendingList, setPendingList] = useState([]); // 검수 대상
   const [checkIdx, setCheckIdx] = useState(0);
-
+  const [targetMode, setTargetMode] = useState("fast"); // 'fast' | 'slow'
   const updateInput = (index, value) => {
     const next = [...inputList];
     next[index] = value;
@@ -76,19 +70,21 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     setCurInputIndex(inputList.length);
   };
 
-  const startCheck = () => {
+  const startCheck = (mode) => {
     const filtered = inputList
       .map((s) => (s || "").trim())
       .filter((s) => s.length > 0);
 
     if (!filtered.length) return;
+    setTargetMode(mode);
+    console.log("Starting check in mode:", mode);
     setPendingList(filtered);
     setCheckIdx(0);
     setPhase("check");
   };
 
   const finishAndEmit = (finalArr) => {
-    onSelect?.(finalArr); // 부모로 최종 배열 전달
+    onSelect?.(finalArr, targetMode); // 부모로 최종 배열 전달
     onClose?.();          // 겹침 방지 위해 닫기(원하면 제거 가능)
   };
 
@@ -176,6 +172,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     setPhase("input");
     setPendingList([]);
     setCheckIdx(0);
+    setTargetMode(null);
   };
 
   // ---------------- Render ----------------
@@ -236,9 +233,21 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             containerStyle={{ marginBottom: 20 }}
           />
 
-          <TouchableOpacity style={styles.confirmButton} onPress={startCheck}>
-            <Text style={styles.confirmText}>확인</Text>
-          </TouchableOpacity>
+          <View style={styles.dualConfirmRow}>
+            <TouchableOpacity
+              style={[styles.confirmButton, { backgroundColor: Colors.point_red }]}
+              onPress={() => startCheck("fast")}
+            >
+              <Text style={styles.confirmText}>고속노화로 저장</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.confirmButton, { backgroundColor: Colors.point_green }]}
+              onPress={() => startCheck("slow")}
+            >
+              <Text style={styles.confirmText}>저속노화로 저장</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     </View>

@@ -30,7 +30,7 @@ import ReviewStar from "../svg/ReviewStar";
 const CreateReviewModal = ({
   onClose,
   foodNames,
-  mode,
+  reviewMode,
   onBack,
   intent = "create",
   reviewId = null,
@@ -99,6 +99,7 @@ const CreateReviewModal = ({
         imageUrl: imageUrl ?? null,
         comment: comment ?? "",
         rating: Number(rating ?? 0),
+        type: reviewMode,
       });
 
       if (intent === "edit" && reviewId) {
@@ -123,7 +124,7 @@ const CreateReviewModal = ({
           styles.header,
           {
             backgroundColor:
-              mode === "fast" ? Colors.point_red : Colors.point_green,
+              reviewMode === "fast" ? Colors.point_red : Colors.point_green,
           },
         ]}
       >
@@ -214,7 +215,7 @@ const CreateReviewModal = ({
               style={styles.bottomButton}
               onPress={submit}
             >
-              <Text style={styles.bottomButtonText}>
+              <Text style={[styles.bottomButtonText,{backgroundColor: reviewMode === "fast" ? Colors.point_red : Colors.point_green}]}>
                 {intent === "edit" ? "수정 저장" : "후기 등록"}
               </Text>
             </TouchableOpacity>
@@ -377,7 +378,6 @@ const styles = StyleSheet.create({
     marginTop: 62,
   },
   bottomButton: {
-    backgroundColor: Colors.point_red,
     width: 151,
     height: 51,
     borderRadius: 20,
