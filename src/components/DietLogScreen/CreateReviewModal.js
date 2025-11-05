@@ -90,6 +90,13 @@ const CreateReviewModal = ({
   const submit = async () => {
     try {
       const foods = await classifyFoodNameArray(foodNames || []);
+      //console.log(reviewMode);
+      
+      if (!selectedTime || rating <= 0 || selectedTags.length === 0) {
+        // 사용 중인 알림 방식에 맞게 교체 (Alert, Toast, Snackbar 등)
+        Alert.alert("필수 항목 누락", "시간대, 태그, 별점을 모두 선택해주세요.");
+        return;
+      }
 
       const payload = pruneUndefined({
         name,
@@ -113,7 +120,7 @@ const CreateReviewModal = ({
       Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
     }
   };
-  
+
 
   return (
     <View style={styles.overlay}>
@@ -129,11 +136,11 @@ const CreateReviewModal = ({
         ]}
       >
         <Star />
-        <TextInput
+        <Text
           style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 30 }]}
-          value={name}
-          onChangeText={setName}
-        />
+        >
+          {name}
+        </Text>
         <Star />
       </View>
 
@@ -212,14 +219,14 @@ const CreateReviewModal = ({
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={styles.bottomButton}
+              style={[styles.bottomButton, { backgroundColor: reviewMode === "fast" ? Colors.point_red : Colors.point_green }]}
               onPress={submit}
             >
-              <Text style={[styles.bottomButtonText,{backgroundColor: reviewMode === "fast" ? Colors.point_red : Colors.point_green}]}>
+              <Text style={[styles.bottomButtonText]}>
                 {intent === "edit" ? "수정 저장" : "후기 등록"}
               </Text>
             </TouchableOpacity>
-            
+
           </View>
         </ScrollView>
       </View>
