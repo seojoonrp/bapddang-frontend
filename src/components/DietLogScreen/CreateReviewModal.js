@@ -92,7 +92,7 @@ const CreateReviewModal = ({
       const foods = await classifyFoodNameArray(foodNames || []);
       //console.log(reviewMode);
       
-      if (!selectedTime || rating <= 0 || selectedTags.length === 0) {
+      if (!selectedTime || rating <= 0) {
         // 사용 중인 알림 방식에 맞게 교체 (Alert, Toast, Snackbar 등)
         Alert.alert("필수 항목 누락", "시간대, 태그, 별점을 모두 선택해주세요.");
         return;
