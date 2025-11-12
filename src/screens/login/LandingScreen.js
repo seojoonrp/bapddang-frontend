@@ -17,6 +17,7 @@ const LandingScreen = () => {
     const from = route.params?.from;
 
     const checkLoginStatus = async () => {
+      // 온 곳이 있으면 로그아웃이므로 검사 X
       if (from) {
         setChecking(false);
         return;

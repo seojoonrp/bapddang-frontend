@@ -12,14 +12,14 @@ const App = () => {
 
   useEffect(() => {
     Font.loadAsync({
-      NanumSquareEB: require("./assets/fonts/NanumSquareEB.ttf"),
-      NanumSquareB: require("./assets/fonts/NanumSquareB.ttf"),
-      NanumSquareR: require("./assets/fonts/NanumSquareR.ttf"),
-      NanumSquareL: require("./assets/fonts/NanumSquareL.ttf"),
-      NanumSquareRoundEB: require("./assets/fonts/NanumSquareRoundEB.ttf"),
-      NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundB.ttf"),
-      NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundR.ttf"),
-      NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundL.ttf"),
+      NanumSquareEB: require("./assets/fonts/NanumSquareEB.woff2"),
+      NanumSquareB: require("./assets/fonts/NanumSquareB.woff2"),
+      NanumSquareR: require("./assets/fonts/NanumSquareR.woff2"),
+      NanumSquareL: require("./assets/fonts/NanumSquareL.woff2"),
+      NanumSquareRoundEB: require("./assets/fonts/NanumSquareRoundEB.woff2"),
+      NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundB.woff2"),
+      NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundR.woff2"),
+      NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundL.woff2"),
     }).then(() => setFontsLoaded(true));
   }, []);
 

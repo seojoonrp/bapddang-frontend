@@ -1,27 +1,55 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Text, TouchableOpacity } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../services/firebase";
-import Colors from "../../styles/colors";
-import { StyleSheet } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function LoginScreen({ navigation }) {
+import api from "../../api/api";
+
+import Colors from "../../styles/colors";
+
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [pwCondition, setPwCondition] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isCompleted = pwCondition && email.length > 0;
 
   const handleLogin = async () => {
+    if (loading) return;
+    setLoading(true);
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, pw);
-      if (!userCredential.user.emailVerified) {
-        console.log("이메일 인증을 완료해주세요.");
-        return;
+      const response = await api.post("/auth/login", {
+        email: email,
+        password: pw,
+      });
+
+      const token = response.data?.token;
+
+      if (token) {
+        await AsyncStorage.setItem("jwt_token", token);
+        console.log("Token:", token);
+
+        // 일단 이메일 인증은 빼고
+        navigation.navigate("메인 화면");
       } else {
-        navigation.navigate("메인 화면", { replace: true });
+        console.log("로그인은 했는데 토큰이 없음");
       }
     } catch (e) {
-      console.log("Error:", e.message);
+      if (e.response) {
+        console.log("Server error:", e.response.data);
+      } else if (e.request) {
+        console.log("Network error:", e.request);
+      } else {
+        console.log("Error:", e.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,6 +57,9 @@ export default function LoginScreen({ navigation }) {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
     setPwCondition(regex.test(pw));
+
+    // 임시로 아무 비번이나 되게 설정
+    setPwCondition(true);
   }, [pw]);
 
   return (
@@ -61,7 +92,7 @@ export default function LoginScreen({ navigation }) {
         <Text
           style={[
             styles.checkText,
-            { color: pwCondition ? "#4caf50" : "#BE2C2C" },
+            { color: pwCondition ? Colors.point_green : Colors.burn },
           ]}
         >
           {pwCondition ? "✓" : "✗"}
@@ -81,17 +112,22 @@ export default function LoginScreen({ navigation }) {
           },
         ]}
         onPress={handleLogin}
-        disabled={!isCompleted}
+        disabled={!isCompleted || loading}
       >
         <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("SignUp")}
+        disabled={loading}
+      >
         <Text style={styles.backToSignupText}>회원가입 하러가기</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {

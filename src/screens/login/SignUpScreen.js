@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
-import { signUpUser } from "../../services/user";
+
+import api from "../../api/api";
 
 import Colors from "../../styles/colors";
 
@@ -28,7 +29,7 @@ function CustomCheckBox({ value, onValueChange }) {
   );
 }
 
-const SignUpEmailScreen = () => {
+const SignUpScreen = () => {
   const navigation = useNavigation();
 
   const [email, setEmail] = useState("");
@@ -37,6 +38,7 @@ const SignUpEmailScreen = () => {
   const [pwConfirm, setPwConfirm] = useState("");
   const [pwCondition, setPwCondition] = useState(false);
   const [pwSame, setPwSame] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isCompleted = pwCondition && pwSame && email.length > 0;
 
   const [showTerms, setShowTerms] = useState(false);
@@ -47,6 +49,9 @@ const SignUpEmailScreen = () => {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
     setPwCondition(regex.test(pw));
     setPwSame(pw === pwConfirm && pw.length > 0);
+
+    // 임시로 아무 비번이나 되게 설정
+    setPwCondition(true);
   }, [pw, pwConfirm]);
 
   const handleEmailVerifyPress = () => {
@@ -60,13 +65,32 @@ const SignUpEmailScreen = () => {
   };
 
   const handleSignUp = async () => {
-    const result = await signUpUser(email, pw);
+    if (loading) return;
+    setLoading(true);
 
-    if (result.success) {
-      console.log("회원가입 성공:", result.user);
-      navigation.navigate("EmailVerify");
-    } else {
-      console.log("회원가입 실패:", result.error);
+    try {
+      const userName = email.split("@")[0];
+
+      const response = await api.post("/auth/signup", {
+        email: email,
+        password: pw,
+        userName: userName,
+      });
+
+      if (response.status === 201) {
+        console.log("SignUp successful:", response.data);
+        navigation.navigate("Login");
+      }
+    } catch (e) {
+      if (e.response) {
+        console.log("Server error:", e.response.data);
+      } else if (e.request) {
+        console.log("Network error:", e.request);
+      } else {
+        console.log("Error:", e.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,14 +163,16 @@ const SignUpEmailScreen = () => {
         <TouchableOpacity
           style={[
             styles.nextButton,
-            { backgroundColor: isCompleted ? Colors.background_yellow : Colors.slightly_burn },
+            {
+              backgroundColor: isCompleted
+                ? Colors.background_yellow
+                : Colors.slightly_burn,
+            },
           ]}
           onPress={handleEmailVerifyPress}
           disabled={!isCompleted}
         >
-          <Text style={styles.nextButtonText}>
-            다음
-          </Text>
+          <Text style={styles.nextButtonText}>다음</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
@@ -178,23 +204,35 @@ const SignUpEmailScreen = () => {
           <TouchableOpacity
             style={[
               styles.modalNextButton,
-              { backgroundColor: agreedCheck ? Colors.point_red : Colors.text_gray },
-              { borderColor: agreedCheck ? Colors.burn_red : Colors.slightly_burn },
+              {
+                backgroundColor: agreedCheck
+                  ? Colors.point_red
+                  : Colors.text_gray,
+              },
+              {
+                borderColor: agreedCheck
+                  ? Colors.burn_red
+                  : Colors.slightly_burn,
+              },
             ]}
             onPress={handleAgree}
             disabled={!agreedCheck}
           >
-            <Text style={[
-              styles.modalNextButtonText,
-              { color: agreedCheck ? Colors.background_yellow : Colors.burn },
-            ]}>
+            <Text
+              style={[
+                styles.modalNextButtonText,
+                { color: agreedCheck ? Colors.background_yellow : Colors.burn },
+              ]}
+            >
               인증메일 받기
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.modalNextButton,
-            { backgroundColor: Colors.text_gray }]}
+            style={[
+              styles.modalNextButton,
+              { backgroundColor: Colors.text_gray },
+            ]}
             onPress={() => setShowTerms(false)}
           >
             <Text style={styles.modalNextButtonText}>취소</Text>
@@ -205,7 +243,7 @@ const SignUpEmailScreen = () => {
   );
 };
 
-export default SignUpEmailScreen;
+export default SignUpScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -330,5 +368,5 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareB",
     alignSelf: "center",
     fontSize: 15,
-  }
+  },
 });
