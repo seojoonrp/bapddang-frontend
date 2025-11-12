@@ -10,7 +10,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { userLikeFood } from "../../services/user";
-import { fetchTags } from "../../services/anthropicAPI";
 import { db, auth } from "../../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -65,10 +64,7 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
       </View>
 
       <View style={styles.contentBox}>
-        <TouchableOpacity
-          style={{ width: 100, height: 40, borderWidth: 2 }}
-          onPress={() => fetchTags(item?.name)}
-        >
+        <TouchableOpacity style={{ width: 100, height: 40, borderWidth: 2 }}>
           <Text style={{ fontSize: 16 }}>태그 생성하기</Text>
         </TouchableOpacity>
 

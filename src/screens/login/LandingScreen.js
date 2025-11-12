@@ -1,32 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../services/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import api from "../../api/api";
+
 import Colors from "../../styles/colors";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
+
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const from = route.params?.from;
-    // 로그인 세션 여부 확인
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (!from && user) {
-        // 이미 로그인 되어 있으면 이메일 인증 여부 체크해서 라우팅
-        if (user.emailVerified) {
-          navigation.replace("메인 화면");
-        } else {
-          navigation.replace("EmailVerify");
+
+    const checkLoginStatus = async () => {
+      if (from) {
+        setChecking(false);
+        return;
+      }
+
+      let token;
+      try {
+        token = await AsyncStorage.getItem("jwt_token");
+      } catch (e) {
+        console.error("AsyncStorage에서 토큰을 가져오는데 실패함");
+        setChecking(false);
+        return;
+      }
+
+      if (token) {
+        try {
+          const response = await api.get("/auth/me");
+
+          if (response.status === 200 && response.data) {
+            navigation.replace("메인 화면");
+          } else {
+            setChecking(false);
+          }
+        } catch (error) {
+          console.log("토큰 만료됨:", error.response?.data?.error);
+          await AsyncStorage.removeItem("jwt_token");
+          setChecking(false);
         }
       } else {
         setChecking(false);
       }
-    });
-
-    return unsub;
+    };
   }, [navigation, route.params]);
 
   if (checking) {
