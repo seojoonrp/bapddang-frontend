@@ -36,7 +36,7 @@ const LoginScreen = ({ navigation }) => {
         console.log("Token:", token);
 
         // 일단 이메일 인증은 빼고
-        navigation.navigate("메인 화면");
+        navigation.navigate("Main");
       } else {
         console.log("로그인은 했는데 토큰이 없음");
       }

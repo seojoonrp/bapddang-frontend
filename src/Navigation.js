@@ -18,8 +18,16 @@ const StackScreen = () => {
       initialRouteName="Landing"
       // screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="메인 화면" component={MainScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="식단 기록 화면" component={DietLogScreen} />
+      <Stack.Screen
+        name="Main"
+        component={MainScreen}
+        options={{ headerShown: false, name: "메인 화면" }}
+      />
+      <Stack.Screen
+        name="DietLog"
+        component={DietLogScreen}
+        options={{ title: "식단 기록 화면" }}
+      />
       <Stack.Screen
         name="Landing"
         component={LandingScreen}
