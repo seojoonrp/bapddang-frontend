@@ -10,9 +10,7 @@ import {
 
 import useAuthStore from "../../stores/authStore";
 import { fetchLikedFoodNames } from "../../services/user";
-import { fetchAllFoodNames } from "../../services/food";
-// 모달은 쓰지 않지만, 기존의 유사도 함수만 재활용
-import { getBestMatches } from "./NameCheckAlgorithm";
+import { validateFoods } from "../../services/food";
 
 import Colors from "../../styles/colors";
 import IconBar from "./IconBar";
@@ -21,7 +19,8 @@ import TagContainer from "../TagContainer";
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const { user } = useAuthStore();
   const [likedFoods, setLikedFoods] = useState([]);
-  const [allFoodNames, setAllFoodNames] = useState([]);
+
+  const 
 
   useEffect(() => {
     if (!user) return;

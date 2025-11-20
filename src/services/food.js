@@ -22,7 +22,16 @@ export const fetchFoodById = async (foodId) => {
     return null;
   }
 };
-
+export const validateFoods = async (names) => {
+  try {
+    const res= await api.post("/foods/validate", {names});
+    return res.data.results ?? [];
+  }
+  catch (error) {
+    console.error("Error validating foods:", error);
+    throw error;
+  }
+};
 export const fetchRankedFoods = () => {
   return []; // Temporarily disable ranking feature
 };
