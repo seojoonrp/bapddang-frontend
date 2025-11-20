@@ -14,6 +14,7 @@ import useAuthStore from "../../stores/authStore";
 import useModeStore from "../../stores/modeStore";
 
 import Colors from "../../styles/colors";
+import { fetchLikedFoods } from "../../services/user";
 
 const RecentLiked = () => {
   const { user } = useAuthStore();
@@ -34,21 +35,25 @@ const RecentLiked = () => {
   }, [mode, animValue]);
 
   useEffect(() => {
-    // const currentUser = user;
-    // if (!currentUser) {
-    //   setIsLoading(false);
-    //   return;
-    // }
+    const loadLikedFoods = async () => {
+      if (!user) {
+        setLikedFoods([]);
+        setIsLoading(false);
+        return;
+      }
 
-    // const unsubscribe = listenToLikedFoods(currentUser.uid, (foods) => {
-    //   setLikedFoods(foods.slice(0, 4));
-    //   if (isLoading) setIsLoading(false);
-    // });
+      try {
+        const foods = await fetchLikedFoods();
+        setLikedFoods(foods.slice(0, 5));
+      } catch (error) {
+        console.error("Error fetching liked foods:", error);
+        setLikedFoods([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // return () => unsubscribe();
-
-    setLikedFoods([]);
-    setIsLoading(false);
+    // loadLikedFoods();
   }, []);
 
   const textColor = animValue.interpolate({
