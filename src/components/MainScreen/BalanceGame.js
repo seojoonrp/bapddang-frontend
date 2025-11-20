@@ -3,6 +3,8 @@ import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 
 import Colors from "../../styles/colors";
 
+import { fetchMainFeedFoods } from "../../services/food";
+
 const BalanceGame = () => {
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [disabled, setDisabled] = useState(false);
@@ -14,7 +16,7 @@ const BalanceGame = () => {
     const loadAndSelectFoods = async () => {
       try {
         setIsLoading(true);
-        const allFoods = (await fetchFoods()) || [];
+        const allFoods = (await fetchMainFeedFoods()) || [];
         if (allFoods && allFoods.length >= 2) {
           const shuffled = [...allFoods].sort(() => 0.5 - Math.random());
           setSelectedFoods(shuffled.slice(0, 2));
