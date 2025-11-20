@@ -11,8 +11,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import useAuthStore from "../../stores/authStore";
-import { listenToLikedFoods } from "../../services/user";
-
 import useModeStore from "../../stores/modeStore";
 
 import Colors from "../../styles/colors";
@@ -36,18 +34,21 @@ const RecentLiked = () => {
   }, [mode, animValue]);
 
   useEffect(() => {
-    const currentUser = user;
-    if (!currentUser) {
-      setIsLoading(false);
-      return;
-    }
+    // const currentUser = user;
+    // if (!currentUser) {
+    //   setIsLoading(false);
+    //   return;
+    // }
 
-    const unsubscribe = listenToLikedFoods(currentUser.uid, (foods) => {
-      setLikedFoods(foods.slice(0, 4));
-      if (isLoading) setIsLoading(false);
-    });
+    // const unsubscribe = listenToLikedFoods(currentUser.uid, (foods) => {
+    //   setLikedFoods(foods.slice(0, 4));
+    //   if (isLoading) setIsLoading(false);
+    // });
 
-    return () => unsubscribe();
+    // return () => unsubscribe();
+
+    setLikedFoods([]);
+    setIsLoading(false);
   }, []);
 
   const textColor = animValue.interpolate({

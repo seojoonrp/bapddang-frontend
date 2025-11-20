@@ -12,7 +12,7 @@ const LandingScreen = () => {
 
   const [checking, setChecking] = useState(true);
 
-  const checkLoginStatus = useAuthStore((state) => state.checkLoginStatus);
+  const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
 
   useEffect(() => {
     const from = route.params?.from;

@@ -18,15 +18,15 @@ import Star from "../svg/Star";
 
 const FoodInfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
-  const {user} = useAuthStore();
+  const { user } = useAuthStore();
+
   const handleLike = () => {
     if (!user) {
       console.log("로그인하거라");
       return;
     }
 
-    const uid = user.uid;
-    likeFood(uid, item.id);
+    likeFood(item.id);
   };
 
   const handleCalendar = () => {
@@ -75,7 +75,7 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
         </TouchableOpacity>
         <Text>좋아요 개수: {item.likeCount}</Text>
         <Text>리뷰 개수: {item.reviewCount}</Text>
-        <Text>칼로리: {item.calories}</Text>
+        <Text>별점: {item.averageRating}</Text>
       </View>
     </View>
   );

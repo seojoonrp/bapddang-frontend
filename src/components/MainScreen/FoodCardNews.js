@@ -34,15 +34,15 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   };
 
   const [selectedItem, setSelectedItem] = useState(null);
-  const [showReview, setShowReview] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleCardPress = (item) => {
     setSelectedItem(item);
-    setShowReview(true);
+    setShowInfo(true);
   };
 
   const handleClose = () => {
-    setShowReview(false);
+    setShowInfo(false);
   };
 
   const renderItem = ({ item }) => (
@@ -54,7 +54,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         { width: containerHeight * MARGIN_MULTIPLIER, height: containerHeight },
       ]}
     >
-      {item.imageUrl ? (
+      {item.imageUrl && item.imageUrl !== "temp" ? (
         <Image
           source={{ uri: item.imageUrl }}
           style={[styles.cardImage, { height: containerHeight }]}
@@ -73,7 +73,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
       ) : foodsData.length > 0 ? (
         <FlatList
           paddingHorizontal={pad}
-          data={foodsData.filter((item) => item.type === mode)}
+          data={foodsData.filter((item) => item.speed === mode)}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           horizontal
@@ -86,7 +86,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
       )}
 
       <Modal
-        isVisible={showReview}
+        isVisible={showInfo}
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0}
@@ -94,9 +94,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleClose} />
-        {selectedItem && (
-          <FoodInfoBox item={selectedItem} mode={mode} onClose={handleClose} />
-        )}
+        <FoodInfoBox item={selectedItem} mode={mode} onClose={handleClose} />
       </Modal>
     </View>
   );

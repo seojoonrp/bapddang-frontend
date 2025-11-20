@@ -6,100 +6,98 @@ import Colors from "../../styles/colors";
 import { fetchMainFeedFoods } from "../../services/food";
 
 const BalanceGame = () => {
-  const [selectedFoods, setSelectedFoods] = useState([]);
-  const [disabled, setDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const question = "부장님이 퇴근 10분 전 추가업무\n야밤에 퇴근할 때, 야식은?";
-
-  useEffect(() => {
-    const loadAndSelectFoods = async () => {
-      try {
-        setIsLoading(true);
-        const allFoods = (await fetchMainFeedFoods()) || [];
-        if (allFoods && allFoods.length >= 2) {
-          const shuffled = [...allFoods].sort(() => 0.5 - Math.random());
-          setSelectedFoods(shuffled.slice(0, 2));
-        }
-      } catch (error) {
-        console.error("Failed to fetch foods for BalanceGame:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAndSelectFoods();
-  }, []);
-
-  const OnFoodSelect = (food) => {
-    console.log("선택된 음식:", food.name);
-    setDisabled(true);
-  };
-
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>밸런스 게임을 불러오는 중...</Text>
-      </View>
-    );
-  }
-
-  if (selectedFoods.length < 2) {
-    return (
-      <View style={styles.container}>
-        <Text>밸런스 게임을 위한 음식이 부족합니다.</Text>
-      </View>
-    );
-  }
-
+  // const [selectedFoods, setSelectedFoods] = useState([]);
+  // const [disabled, setDisabled] = useState(false);
+  // const [isLoading, setIsLoading] = useState(true);
+  // const question = "부장님이 퇴근 10분 전 추가업무\n야밤에 퇴근할 때, 야식은?";
+  // useEffect(() => {
+  //   const loadAndSelectFoods = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       const allFoods = (await fetchMainFeedFoods()) || [];
+  //       if (allFoods && allFoods.length >= 2) {
+  //         const shuffled = [...allFoods].sort(() => 0.5 - Math.random());
+  //         setSelectedFoods(shuffled.slice(0, 2));
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch foods for BalanceGame:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   loadAndSelectFoods();
+  // }, []);
+  // const OnFoodSelect = (food) => {
+  //   console.log("선택된 음식:", food.name);
+  //   setDisabled(true);
+  // };
+  // if (isLoading) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text>밸런스 게임을 불러오는 중...</Text>
+  //     </View>
+  //   );
+  // }
+  // if (selectedFoods.length < 2) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text>밸런스 게임을 위한 음식이 부족합니다.</Text>
+  //     </View>
+  //   );
+  // }
+  // return (
+  //   <View style={styles.container}>
+  //     {!disabled ? (
+  //       <>
+  //         <Text style={styles.balanceGameText}>밸런스게임</Text>
+  //         <Text style={styles.questionText}>{question}</Text>
+  //         <View style={styles.choiceContainer}>
+  //           <TouchableOpacity
+  //             style={styles.choiceButton}
+  //             onPress={() => OnFoodSelect(selectedFoods[0])}
+  //           >
+  //             <Image
+  //               source={{ uri: selectedFoods[0].imageUrl }}
+  //               style={styles.foodImage}
+  //               resizeMode="cover"
+  //             />
+  //             <Text style={styles.choiceText}>{selectedFoods[0].name}</Text>
+  //           </TouchableOpacity>
+  //           <TouchableOpacity
+  //             style={styles.choiceButton}
+  //             onPress={() => OnFoodSelect(selectedFoods[1])}
+  //           >
+  //             <Image
+  //               source={{ uri: selectedFoods[1].imageUrl }}
+  //               style={styles.foodImage}
+  //               resizeMode="cover"
+  //             />
+  //             <Text style={styles.choiceText}>{selectedFoods[1].name}</Text>
+  //           </TouchableOpacity>
+  //         </View>
+  //         <Text style={styles.curPlayerText}>
+  //           1928명이 참여중, 4시간 남았어요!
+  //         </Text>
+  //       </>
+  //     ) : (
+  //       <>
+  //         <Text style={styles.disabledText}>
+  //           오늘의 밸런스 게임을{"\n"}이미 진행하셨습니다!
+  //         </Text>
+  //         <Text>어쩌고저쩌고</Text>
+  //         <TouchableOpacity
+  //           onPress={() => setDisabled(false)}
+  //           style={{ borderColor: "black", borderWidth: 1, padding: 8 }}
+  //         >
+  //           <Text>다시하기 (디버깅용)</Text>
+  //         </TouchableOpacity>
+  //       </>
+  //     )}
+  //   </View>
+  // );
   return (
     <View style={styles.container}>
-      {!disabled ? (
-        <>
-          <Text style={styles.balanceGameText}>밸런스게임</Text>
-          <Text style={styles.questionText}>{question}</Text>
-          <View style={styles.choiceContainer}>
-            <TouchableOpacity
-              style={styles.choiceButton}
-              onPress={() => OnFoodSelect(selectedFoods[0])}
-            >
-              <Image
-                source={{ uri: selectedFoods[0].imageUrl }}
-                style={styles.foodImage}
-                resizeMode="cover"
-              />
-              <Text style={styles.choiceText}>{selectedFoods[0].name}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.choiceButton}
-              onPress={() => OnFoodSelect(selectedFoods[1])}
-            >
-              <Image
-                source={{ uri: selectedFoods[1].imageUrl }}
-                style={styles.foodImage}
-                resizeMode="cover"
-              />
-              <Text style={styles.choiceText}>{selectedFoods[1].name}</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.curPlayerText}>
-            1928명이 참여중, 4시간 남았어요!
-          </Text>
-        </>
-      ) : (
-        <>
-          <Text style={styles.disabledText}>
-            오늘의 밸런스 게임을{"\n"}이미 진행하셨습니다!
-          </Text>
-          <Text>어쩌고저쩌고</Text>
-          <TouchableOpacity
-            onPress={() => setDisabled(false)}
-            style={{ borderColor: "black", borderWidth: 1, padding: 8 }}
-          >
-            <Text>다시하기 (디버깅용)</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <Text>밸런스 게임은 현재 준비중입니다!</Text>
     </View>
   );
 };

@@ -68,7 +68,7 @@ const MainScreen = () => {
           speed: "fast",
         });
 
-        console.table("Main feed foods fetched:", data);
+        console.log("Main feed foods:", JSON.stringify(data, null, 2));
         setMainFeedData(data || []);
       } catch (error) {
         console.error("Error fetching main feed foods:", error);
