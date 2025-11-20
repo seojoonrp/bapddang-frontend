@@ -11,19 +11,17 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
+import api from "../api/api";
 
-export const fetchFoods = async () => {
+export const fetchMainFeedFoods = async ({ type, speed }) => {
   try {
-    const querySnapshot = await getDocs(collection(db, "foods"));
+    const response = await api.get("/foods/main-feed", {
+      params: { type, speed },
+    });
 
-    const foodsData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    return foodsData;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching foods:", error);
+    console.error("Error fetching main feed foods:", error);
     return [];
   }
 };
@@ -137,11 +135,7 @@ export const fetchAllFoodNames = async () => {
  */
 export const listenToRankingUpdates = (callback) => {
   const foodsRef = collection(db, "foods");
-  const q = query(
-    foodsRef,
-    orderBy("threeDayReviewCount", "desc"),
-    limit(10)
-  );
+  const q = query(foodsRef, orderBy("threeDayReviewCount", "desc"), limit(10));
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const rankings = querySnapshot.docs.map((doc) => ({

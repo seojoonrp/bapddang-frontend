@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import api from "../../api/api";
+import useAuthStore from "../../stores/authStore";
 
 import Colors from "../../styles/colors";
 
@@ -12,6 +11,8 @@ const LandingScreen = () => {
   const route = useRoute();
 
   const [checking, setChecking] = useState(true);
+
+  const checkLoginStatus = useAuthStore((state) => state.checkLoginStatus);
 
   useEffect(() => {
     const from = route.params?.from;
@@ -23,33 +24,16 @@ const LandingScreen = () => {
         return;
       }
 
-      let token;
-      try {
-        token = await AsyncStorage.getItem("jwt_token");
-      } catch (e) {
-        console.error("AsyncStorage에서 토큰을 가져오는데 실패함");
-        setChecking(false);
-        return;
-      }
+      const isLoggedIn = await checkLoginSession();
 
-      if (token) {
-        try {
-          const response = await api.get("/auth/me");
-
-          if (response.status === 200 && response.data) {
-            navigation.replace("메인 화면");
-          } else {
-            setChecking(false);
-          }
-        } catch (error) {
-          console.log("토큰 만료됨:", error.response?.data?.error);
-          await AsyncStorage.removeItem("jwt_token");
-          setChecking(false);
-        }
+      if (isLoggedIn) {
+        navigation.replace("Main");
       } else {
         setChecking(false);
       }
     };
+
+    checkLoginStatus();
   }, [navigation, route.params]);
 
   if (checking) {

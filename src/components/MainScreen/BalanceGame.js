@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
-import { fetchFoods } from "../../services/food";
+
 import Colors from "../../styles/colors";
 
 const BalanceGame = () => {
@@ -49,7 +49,6 @@ const BalanceGame = () => {
       </View>
     );
   }
-
 
   return (
     <View style={styles.container}>

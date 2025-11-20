@@ -8,13 +8,15 @@ import {
   Animated,
   useWindowDimensions,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { signOut } from "firebase/auth";
 
-import { auth } from "../services/firebase";
-import { fetchFoods } from "../services/food";
-import { syncUserWeekAndDay } from "../services/user";
+import useAuthStore from "../stores/authStore";
+
+import { fetchMainFeedFoods } from "../services/food";
 
 import UserDrawer from "../components/MainScreen/UserDrawer";
 import StatusBanner from "../components/MainScreen/StatusBanner";
@@ -28,13 +30,19 @@ import Colors from "../styles/colors";
 const MainScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const [email, setEmail] = useState("");
+
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.setLogout);
+
+  const [isLoading, setIsLoading] = useState(true);
   const [isDrawerVisible, setDrawerVisible] = useState(false);
   const [isBalanceGameVisible, setBalanceGameVisible] = useState(false);
-  const [foodsData, setFoodsData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [mainFeedData, setMainFeedData] = useState([]);
+
   const [statusBannerHeight, setStatusBannerHeight] = useState(0);
   const { height: screenHeight } = useWindowDimensions();
+
   const topAnim = useRef(new Animated.Value(screenHeight)).current;
 
   useEffect(() => {
@@ -55,10 +63,15 @@ const MainScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchFoods();
-        setFoodsData(data || []);
+        const data = await fetchMainFeedFoods({
+          type: "meal",
+          speed: "fast",
+        });
+
+        console.table("Main feed foods fetched:", data);
+        setMainFeedData(data || []);
       } catch (error) {
-        console.error("Error fetching food data:", error);
+        console.error("Error fetching main feed foods:", error);
       } finally {
         setIsLoading(false);
       }
@@ -66,22 +79,13 @@ const MainScreen = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const curUser = auth.currentUser;
-    if (curUser) {
-      setEmail(curUser.email);
-      syncUserWeekAndDay(curUser.uid);
-    } else {
-      setEmail("게스트입니다.");
-    }
-  }, []);
-
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await AsyncStorage.removeItem("jwt_token");
+
       navigation.replace("Landing", { from: "Main" });
     } catch (error) {
-      console.error("로그아웃 실패:", error);
+      console.error("Error while logging out:", error);
     }
   };
 
@@ -156,7 +160,7 @@ const MainScreen = () => {
       case "FoodCardNews":
         return (
           <View style={{ height: 300 }}>
-            <FoodCardNews foodsData={foodsData} isLoading={isLoading} />
+            <FoodCardNews foodsData={mainFeedData} isLoading={isLoading} />
           </View>
         );
       case "Ranking":
@@ -193,7 +197,7 @@ const MainScreen = () => {
       <UserDrawer
         isVisible={isDrawerVisible}
         onClose={() => setDrawerVisible(false)}
-        email={email}
+        email={user?.email}
       />
 
       <Animated.View style={[styles.animatedContainer, { top: topAnim }]}>
