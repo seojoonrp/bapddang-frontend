@@ -20,7 +20,6 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const { user } = useAuthStore();
   const [likedFoods, setLikedFoods] = useState([]);
 
-  const 
 
   useEffect(() => {
     if (!user) return;
