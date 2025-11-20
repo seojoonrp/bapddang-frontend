@@ -16,8 +16,6 @@ import {
   editReview,
   fetchReviewById,
 } from "../../services/review";
-import NameCheckModal, { getBestMatches } from "./NameCheckAlgorithm";
-import { classifyFoodNameArray, fetchAllFoodNames } from "../../services/food";
 import { pickImage } from "../../utils/imagePicker";
 
 import IconBar from "./IconBar";
@@ -89,7 +87,7 @@ const CreateReviewModal = ({
 
   const submit = async () => {
     try {
-      const foods = await classifyFoodNameArray(foodNames || []);
+      const foods = foodNames || [];
       //console.log(reviewMode);
       
       if (!selectedTime || rating <= 0) {

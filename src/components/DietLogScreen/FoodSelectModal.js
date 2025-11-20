@@ -87,6 +87,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
