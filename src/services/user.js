@@ -18,7 +18,7 @@ export const unlikeFood = async (foodID) => {
 
 export const fetchLikedFoods = async () => {
   try {
-    const response = await api.get("/users/liked-foods");
+    const response = await api.get("/liked-foods");
     return response.data;
   } catch (error) {
     console.error("Error fetching liked foods:", error);

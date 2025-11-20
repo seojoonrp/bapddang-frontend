@@ -63,10 +63,6 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
       </View>
 
       <View style={styles.contentBox}>
-        <TouchableOpacity style={{ width: 100, height: 40, borderWidth: 2 }}>
-          <Text style={{ fontSize: 16 }}>태그 생성하기</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
           onPress={handleLike}
