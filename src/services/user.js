@@ -1,202 +1,27 @@
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
-import {
-  doc,
-  documentId,
-  collection,
-  setDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  onSnapshot,
-  serverTimestamp,
-  writeBatch,
-  arrayUnion,
-  arrayRemove,
-  increment,
-  query,
-  where,
-} from "firebase/firestore";
-import { auth, db } from "./firebase";
+import api from "../api/api";
 
-export const signUpUser = async (email, password) => {
+export const likeFood = async (foodID) => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    await sendEmailVerification(userCredential.user);
-
-    return { success: true, user: userCredential.user };
+    const response = await api.post(`/foods/${foodID}/like`);
   } catch (error) {
-    console.error("Error creating user:", error);
-
-    return { success: false, error: error.message };
+    console.error("Error liking food:", error);
   }
 };
-//week 동기화
-export const syncUserWeekAndDay = async (userId) => {
-  const userDocRef = doc(db, "users", userId);
 
+export const unlikeFood = async (foodID) => {
   try {
-    const userDoc = await getDoc(userDocRef);
-
-    if (!userDoc.exists()) {
-      console.error("User document does not exist!");
-      return;
-    }
-
-    const userData = userDoc.data();
-    const createdAt = userData.createdAt?.toDate?.() || new Date(userData.createdAt);
-
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const toLocalStartOfDay = (d) => {
-      const x = new Date(d);
-      x.setHours(0, 0, 0, 0);
-      return x;
-    };
-
-    
-    const startCreated = toLocalStartOfDay(createdAt);
-    const startToday = toLocalStartOfDay(new Date());
-    const diffDays = Math.round((startToday - startCreated) / msPerDay);
-    const day = Math.max(1, diffDays + 1);
-    const week = Math.ceil(day / 7);
-
-    await updateDoc(userDocRef, { week, day });
-    console.log(`Successfully updated week=${week} and day=${day} for user=${userId}`);
+    await api.delete(`/foods/${foodID}/like`);
   } catch (error) {
-    console.error("Error syncing week:", error);
+    console.error("Error unliking food:", error);
   }
 };
-export const getUserWeek = async (userId) => {
-  const userDocRef = doc(db, "users", userId);
-  const userDoc = await getDoc(userDocRef);
 
-  if (userDoc.exists()) {
-    const userData = userDoc.data();
-    return userData.week || 1;
-  }
-
-  return 1;
-};
-export const createUserDocument = async (user) => {
-  const userDocRef = doc(db, "users", user.uid);
-
+export const fetchLikedFoods = async () => {
   try {
-    await setDoc(userDocRef, {
-      userName: "username",
-      email: user.email,
-      likedFoodIds: [],
-      recentFoodIds: [],
-      createdAt: serverTimestamp(),
-      week: 1,
-      day: 1,
-    });
-    console.log("Successfully created user document:", user.email);
-  } catch (error) {
-    console.error("Error creating user document:", error);
-  }
-};
-
-export const userLikeFood = async (userId, foodId) => {
-  const userDocRef = doc(db, "users", userId);
-  const foodDocRef = doc(db, "foods", foodId);
-  const batch = writeBatch(db);
-
-  try {
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-      throw new Error("User document does not exist!");
-    }
-
-    const userData = userDoc.data();
-    const isAlreadyLiked = userData.likedFoodIds?.includes(foodId);
-
-    if (isAlreadyLiked) {
-      batch.update(userDocRef, {
-        likedFoodIds: arrayRemove(foodId),
-      });
-      batch.update(foodDocRef, {
-        likeCount: increment(-1),
-      });
-      console.log(`Successfully UNLIKED food: ${foodId} by user: ${userId}`);
-    } else {
-      batch.update(userDocRef, {
-        likedFoodIds: arrayUnion(foodId),
-      });
-      batch.update(foodDocRef, {
-        likeCount: increment(1),
-      });
-      console.log(`Successfully LIKED food: ${foodId} by user: ${userId}`);
-    }
-
-    await batch.commit();
-  } catch (error) {
-    console.error("Error toggling like for food:", error);
-  }
-};
-
-export const fetchLikedFoodNames = async (userId) => {
-  const userDocRef = doc(db, "users", userId);
-
-  try {
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      const likedFoodIds = userData.likedFoodIds || [];
-      if (likedFoodIds.length === 0) return [];
-
-      const foodsRef = collection(db, "foods");
-      const q = query(foodsRef, where(documentId(), "in", likedFoodIds));
-      const querySnapshot = await getDocs(q);
-
-      const likedFoodNames = querySnapshot.docs.map((doc) => doc.data().name);
-      return likedFoodNames;
-    } else {
-      console.log("No such user document!");
-      return [];
-    }
+    const response = await api.get("/users/liked-foods");
+    return response.data;
   } catch (error) {
     console.error("Error fetching liked foods:", error);
     return [];
   }
-};
-
-export const listenToLikedFoods = (userId, callback) => {
-  const userDocRef = doc(db, "users", userId);
-
-  const unsubscribe = onSnapshot(userDocRef, async (userDoc) => {
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      const likedFoodIds = userData.likedFoodIds || [];
-
-      if (likedFoodIds.length === 0) {
-        callback([]);
-        return;
-      }
-
-      const foodsRef = collection(db, "foods");
-      const q = query(foodsRef, where(documentId(), "in", likedFoodIds));
-      const querySnapshot = await getDocs(q);
-
-      const likedFoods = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      callback(likedFoods);
-    } else {
-      callback([]);
-    }
-  }, (error) => {
-    console.error("Error listening to liked foods:", error);
-    callback([]);
-  });
-
-  return unsubscribe;
 };

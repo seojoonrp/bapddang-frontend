@@ -1,6 +1,10 @@
+// src/components/MainScreen/Ranking.js
+
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { listenToRankingUpdates } from "../../services/food";
+import { View, Text, StyleSheet } from "react-native";
+
+import { fetchRankedFoods } from "../../services/food";
+
 import Colors from "../../styles/colors";
 
 const Ranking = () => {
@@ -9,13 +13,18 @@ const Ranking = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = listenToRankingUpdates((data) => {
-      setRankings(data);
-      if (loading) {
+    const loadRankings = async () => {
+      try {
+        setLoading(true);
+        const fetchedRankings = await fetchRankedFoods();
+
+        setRankings(fetchedRankings);
+      } catch (error) {
+        console.error("Failed to fetch rankings:", error);
+      } finally {
         setLoading(false);
       }
-    });
-    return () => unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -29,12 +38,7 @@ const Ranking = () => {
   }, [rankings]);
 
   if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007BFF" />
-        <Text style={styles.infoText}>랭킹을 불러오는 중...</Text>
-      </View>
-    );
+    // 로딩 표시
   }
 
   if (rankings.length === 0) {

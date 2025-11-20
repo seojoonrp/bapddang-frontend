@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { userLikeFood } from "../../services/user";
+import { likeFood } from "../../services/user";
 import { db, auth } from "../../services/firebase";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -27,7 +27,7 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
     }
 
     const uid = user.uid;
-    userLikeFood(uid, item.id);
+    likeFood(uid, item.id);
   };
 
   const handleCalendar = () => {
