@@ -20,7 +20,16 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const { user } = useAuthStore();
   const [likedFoods, setLikedFoods] = useState([]);
 
+  // 서버 요청 진행 상태
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 입력 단계 상태
+  const [inputList, setInputList] = useState(
+    Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""]
+  );
+  const [curInputIndex, setCurInputIndex] = useState(0);
+
+  //좋아요한 음식 fetch
   useEffect(() => {
     if (!user) return;
 
@@ -32,31 +41,8 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
         console.log("fetchLikedFoodNames failed:", e);
       }
     })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const names = await fetchAllFoodNames();
-        const uniq = Array.from(new Set((names || []).filter(Boolean)));
-        setAllFoodNames(uniq);
-      } catch (e) {
-        console.log("fetchAllFoodNames failed:", e);
-      }
-    })();
-  }, []);
-
-  // 입력 단계 상태
-  const [inputList, setInputList] = useState(
-    Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""]
-  );
-  const [curInputIndex, setCurInputIndex] = useState(0);
-
-  // 검수 단계 상태
-  const [phase, setPhase] = useState("input"); // 'input' | 'check'
-  const [pendingList, setPendingList] = useState([]); // 검수 대상
-  const [checkIdx, setCheckIdx] = useState(0);
-  const [targetMode, setTargetMode] = useState("fast"); // 'fast' | 'slow'
+  }, [user]);
+  
   const updateInput = (index, value) => {
     const next = [...inputList];
     next[index] = value;
@@ -68,134 +54,39 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     setCurInputIndex(inputList.length);
   };
 
-  const startCheck = (mode) => {
+  const startCheck = async (mode) => {
     const filtered = inputList
       .map((s) => (s || "").trim())
       .filter((s) => s.length > 0);
-
     if (!filtered.length) return;
-    setTargetMode(mode);
-    console.log("Starting check in mode:", mode);
-    setPendingList(filtered);
-    setCheckIdx(0);
-    setPhase("check");
-  };
-
-  const finishAndEmit = (finalArr) => {
-    onSelect?.(finalArr, targetMode); // 부모로 최종 배열 전달
-    onClose?.();          // 겹침 방지 위해 닫기(원하면 제거 가능)
-  };
-
-  const goNextOrFinish = (updatedArr) => {
-    const next = checkIdx + 1;
-    if (next >= updatedArr.length) {
-      finishAndEmit(updatedArr);
-    } else {
-      setCheckIdx(next);
+    if(!user){
+      alert("로그인이 필요합니다.");
+      return;
     }
-  };
+    try{
+      setIsSubmitting(true);
+      const results = await validateFoods(filtered);
 
-  // ---------- 내장 NameCheck UI ----------
-  const NameCheckPanel = ({
-    value,
-    candidates,
-    onPick,      // 제안 수락 (문자열 전달)
-    onKeep,      // 원문 유지
-    onCancel,    // 전체 검수 취소
-  }) => {
-    // 상위의 getBestMatches 재활용 (없으면 방어)
-    const suggestions = useMemo(() => {
-      try {
-        const { top } = getBestMatches(value, candidates, 5) || { top: [] };
-        return top;
-      } catch {
-        return [];
-      }
-   }, [value, candidates]);
+      const finalNames = results.map((item,idx) =>{
+        switch(item.status){
+          case "ok":
+            return item.food?.name ?? item.originalName ?? filtered[idx];
+          case "suggestion":
+            return item.correctedName;
+          case "new":
+          default:
+            return item.originalName ?? filtered[idx];
+        }
+      });
 
-    return (
-      <View style={styles.checkBox}>
-        <Text style={styles.checkTitle}>이 이름이 맞나요?</Text>
-        <Text style={styles.checkInputName}>{value}</Text>
-
-        <Text style={styles.checkSubTitle}>추천 후보</Text>
-        <View style={styles.suggestionContainer}>
-          {suggestions.length === 0 ? (
-            <Text style={styles.noSuggestion}>추천 후보가 없습니다.</Text>
-          ) : (
-            suggestions.map(({name,score}, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={styles.suggestionChip}
-                onPress={() => onPick(name)}
-              >
-                <Text style={styles.suggestionText}>{name} ({score.toFixed(3)})</Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-
-        <View style={styles.checkButtonsRow}>
-          <TouchableOpacity style={[styles.smallBtn, { backgroundColor: "#EEE" }]} onPress={onKeep}>
-            <Text style={[styles.smallBtnText, { color: Colors.burn }]}>원문 유지</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.smallBtn, { backgroundColor: Colors.point_red }]} onPress={onCancel}>
-            <Text style={[styles.smallBtnText, { color: "#FFF" }]}>취소</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.checkHint}>
-          • 후보를 탭하면 바로 확정됩니다.{"\n"}• 원문 유지/스킵은 입력한 이름 그대로 진행합니다.
-        </Text>
-      </View>
-    );
-  };
-
-  // 현재 검수 중 이름
-  const currentName = phase === "check" ? pendingList[checkIdx] : "";
-
-  const acceptSuggestion = (suggested) => {
-    const arr = [...pendingList];
-    arr[checkIdx] = suggested || arr[checkIdx];
-    setPendingList(arr);
-    goNextOrFinish(arr);
-  };
-
-  const keepOriginal = () => {
-    goNextOrFinish(pendingList);
-  };
-
-  const cancelCheck = () => {
-    // 검수 전체 취소 → 입력 단계로 되돌림 (선택 전달 없음)
-    setPhase("input");
-    setPendingList([]);
-    setCheckIdx(0);
-    setTargetMode(null);
-  };
-
-  // ---------------- Render ----------------
-  if (phase === "check") {
-    return (
-      <View style={styles.container}>
-        <IconBar onClose={onClose} />
-        <View style={styles.contentBox}>
-          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <Text style={styles.question}>이름 검수 ({checkIdx + 1} / {pendingList.length})</Text>
-
-            <NameCheckPanel
-              value={currentName}
-              candidates={allFoodNames}
-              onPick={acceptSuggestion}
-              onKeep={keepOriginal}
-              onCancel={cancelCheck}
-            />
-          </ScrollView>
-        </View>
-      </View>
-    );
-  }
-
-  // phase === 'input'
+      onSelect(finalNames, mode);
+      onClose?.();
+    }catch(error){
+      alert("음식 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      console.error("Error in startCheck:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
