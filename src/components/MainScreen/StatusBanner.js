@@ -53,7 +53,7 @@ const StatusBanner = () => {
         <Character width={118.9614} height={123.28672} />
       </View>
       <View style={styles.bottomContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate("식단 기록 화면")}>
+        <TouchableOpacity onPress={() => navigation.navigate("DietLog")}>
           <Edit />
         </TouchableOpacity>
         <TouchableOpacity>

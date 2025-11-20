@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { auth } from "../../services/firebase";
+import useAuthStore from "../../stores/authStore";
 import { listenToLikedFoods } from "../../services/user";
 
 import useModeStore from "../../stores/modeStore";
@@ -18,6 +18,7 @@ import useModeStore from "../../stores/modeStore";
 import Colors from "../../styles/colors";
 
 const RecentLiked = () => {
+  const { user } = useAuthStore();
   const navigation = useNavigation();
 
   const { mode, modeColor } = useModeStore();
@@ -35,7 +36,7 @@ const RecentLiked = () => {
   }, [mode, animValue]);
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
+    const currentUser = user;
     if (!currentUser) {
       setIsLoading(false);
       return;

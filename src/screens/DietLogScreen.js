@@ -17,7 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
-
+import useAuthStore from "../stores/authStore";
 import { fetchReviewsByWeek } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
@@ -27,12 +27,12 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 
 //weekandday 동기화
 import { useFocusEffect } from "@react-navigation/native";
-import { auth } from "../services/firebase";
 import { syncUserWeekAndDay,getUserWeek } from "../services/user";
-import { reload } from "firebase/auth";
+
 
 const DietLogScreen = () => {
   // 추가버튼 관련
+  const { user } = useAuthStore();
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -71,7 +71,7 @@ const DietLogScreen = () => {
     let alive = true;
 
     (async () => {
-      const uid = auth.currentUser?.uid;
+      const uid = user?.uid;
       if (!uid) return;
 
       try {

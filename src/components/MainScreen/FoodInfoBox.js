@@ -10,7 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { likeFood } from "../../services/user";
-import { db, auth } from "../../services/firebase";
+import useAuthStore from "../../stores/authStore";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../styles/colors";
@@ -18,9 +18,8 @@ import Star from "../svg/Star";
 
 const FoodInfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
-
+  const {user} = useAuthStore();
   const handleLike = () => {
-    const user = auth.currentUser;
     if (!user) {
       console.log("로그인하거라");
       return;

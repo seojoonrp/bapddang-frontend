@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
-import { auth } from "../../services/firebase";
 import Colors from "../../styles/colors";
 import { createUserDocument } from "../../services/user";
 
@@ -10,29 +9,23 @@ const EmailVerifyScreen = () => {
   const navigation = useNavigation();
 
   const checkVerification = async () => {
-    if (!auth.currentUser) {
-      console.log("No user is currently signed in.");
-      setLoading(false);
-      return;
-    }
+    // try {
+    //   await auth.currentUser.reload();
+    //   const currentUser = auth.currentUser;
 
-    try {
-      await auth.currentUser.reload();
-      const currentUser = auth.currentUser;
+    //   if (!currentUser.emailVerified) {
+    //     console.log("Email not verified yet.");
+    //   } else {
+    //     console.log("이메일 인증이 완료되었습니다!");
 
-      if (!currentUser.emailVerified) {
-        console.log("Email not verified yet.");
-      } else {
-        console.log("이메일 인증이 완료되었습니다!");
-
-        await createUserDocument(currentUser);
-        setTimeout(() => {
-          navigation.replace("메인 화면", { replace: true });
-        }, 500);
-      }
-    } catch (e) {
-      console.log("Error:", e.message);
-    }
+    //     await createUserDocument(currentUser);
+    //     setTimeout(() => {
+    //       navigation.replace("메인 화면", { replace: true });
+    //     }, 500);
+    //   }
+    // } catch (e) {
+    //   console.log("Error:", e.message);
+    // }
   };
 
   return (
@@ -42,7 +35,7 @@ const EmailVerifyScreen = () => {
       </Text>
 
       <View style={styles.emailContainer}>
-        <Text style={styles.emailText}>{auth.currentUser?.email}</Text>
+        <Text style={styles.emailText}>{}</Text>
       </View>
 
       <TouchableOpacity style={styles.finishButton} onPress={checkVerification}>
