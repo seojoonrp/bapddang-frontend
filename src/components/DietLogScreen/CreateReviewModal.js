@@ -27,7 +27,7 @@ import ReviewStar from "../svg/ReviewStar";
 
 const CreateReviewModal = ({
   onClose,
-  foodNames,
+  foods,//이 부분 수정 필요
   reviewMode,
   onBack,
   intent = "create",

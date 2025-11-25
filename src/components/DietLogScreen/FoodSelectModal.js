@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import useAuthStore from "../../stores/authStore";
-import { fetchLikedFoodNames } from "../../services/user";
+import { fetchLikedFoods } from "../../services/user";
 import { validateFoods } from "../../services/food";
 
 import Colors from "../../styles/colors";
@@ -29,20 +29,31 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   );
   const [curInputIndex, setCurInputIndex] = useState(0);
 
+  const [validationResults, setValidationResults] = useState(null);   // /foods/validate 결과 전체
+  const [selectedSuggestions, setSelectedSuggestions] = useState({}); // { index: chosenOutput }
+  const [pendingMode, setPendingMode] = useState(null);              // "fast" | "slow"
+  const [isChoosingSuggestion, setIsChoosingSuggestion] = useState(false);
+  const chooseSuggestion =(resultIndex,option)=>{
+    setSelectedSuggestions((prev) => ({
+      ...prev,
+      [resultIndex]: option,
+    }));
+  };
   //좋아요한 음식 fetch
-  useEffect(() => {
+  /*
+ useEffect(() => {
     if (!user) return;
 
     (async () => {
       try {
-        const liked = await fetchLikedFoodNames(user.uid);
+        const liked = await fetchLikedFoods(user.uid);
         setLikedFoods(liked || []);
       } catch (e) {
-        console.log("fetchLikedFoodNames failed:", e);
+        console.log("fetchLikedFoods failed:", e);
       }
     })();
   }, [user]);
-  
+  */
   const updateInput = (index, value) => {
     const next = [...inputList];
     next[index] = value;
@@ -59,29 +70,56 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
       .map((s) => (s || "").trim())
       .filter((s) => s.length > 0);
     if (!filtered.length) return;
-    if(!user){
+    if (!user) {
       alert("로그인이 필요합니다.");
       return;
     }
-    try{
+    try {
       setIsSubmitting(true);
       const results = await validateFoods(filtered);
 
-      const finalNames = results.map((item,idx) =>{
-        switch(item.status){
-          case "ok":
-            return item.food?.name ?? item.originalName ?? filtered[idx];
-          case "suggestion":
-            return item.correctedName;
-          case "new":
-          default:
-            return item.originalName ?? filtered[idx];
+      const finalFoods = results.map((item, idx) => {
+        const fallbackname = item.originalName ?? filtered[idx];
+
+        if(item.status === "suggestion"){
+          setIsChoosingSuggestion(true);
+          const chosen= selectedSuggestions[idx];
+          return {
+            name: chosen?.name ?? fallbackname,
+            foodId: chosen?.id,
+            foodType: chosen.type,
+          };
         }
+
+        if (item.status === "ok") {
+          const o = item.okOutput || {};
+          return {
+            name: o.name ?? fallbackname,
+            foodId: o.id,
+            foodType: o.type,
+          };
+        }
+
+        if (item.status === "new") {
+          const n = item.newOutput || {};
+          return {
+            name: n.name ?? fallbackname,
+            foodId: n.id,
+            foodType: n.type || "new",
+
+          };
+        }
+        const chosen= selectedSuggestions[idx];
+        return {
+          name: chosen?.name ?? fallbackname,
+          foodId: chosen?.id,
+          foodType: chosen.type,
+        };
       });
 
-      onSelect(finalNames, mode);
+      onSelect(finalFoods, mode);
       onClose?.();
-    }catch(error){
+    } catch (error) {
       alert("음식 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
       console.error("Error in startCheck:", error);
     } finally {
@@ -93,6 +131,59 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
       <IconBar onClose={onClose} />
 
       <View style={styles.contentBox}>
+        {isChoosingSuggestion ? (
+        // ✅ suggestion 선택 단계
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.question}>어떤 음식이 가장 가까운가요?</Text>
+
+          {validationResults?.map((item, idx) => {
+            if (item.status !== "suggestion") {
+              const base =
+                item.okOutput || item.newOutput || { name: item.originalName };
+              return (
+                <View key={idx} style={styles.checkBox}>
+                  <Text style={styles.checkTitle}>{item.originalName}</Text>
+                  <Text style={styles.checkInputName}>{base.name}</Text>
+                </View>
+              );
+            }
+
+            return (
+              <View key={idx} style={styles.checkBox}>
+                <Text style={styles.checkTitle}>{item.originalName}</Text>
+                <View style={styles.suggestionContainer}>
+                  {item.suggestionOutputs.map((opt) => {
+                    const selected =
+                      selectedSuggestions[idx]?.id === opt.id;
+                    return (
+                      <TouchableOpacity
+                        key={opt.id}
+                        style={[
+                          styles.suggestionChip,
+                          selected && { borderWidth: 2 },
+                        ]}
+                        onPress={() => chooseSuggestion(idx, opt)}
+                      >
+                        <Text style={styles.suggestionText}>{opt.name}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
+
+          <TouchableOpacity
+            style={[styles.confirmButton, { backgroundColor: Colors.point_red }]}
+            onPress={confirmSuggestions}
+          >
+            <Text style={styles.confirmText}>이 선택으로 리뷰 작성</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      ) : (
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
@@ -139,6 +230,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             </TouchableOpacity>
           </View>
         </ScrollView>
+      )}
       </View>
     </View>
   );
@@ -303,4 +395,4 @@ const styles = StyleSheet.create({
     textAlign: "left",
     lineHeight: 18,
   },
-});
+}); 

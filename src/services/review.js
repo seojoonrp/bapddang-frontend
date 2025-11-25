@@ -24,8 +24,12 @@ export const createReview = async ({
 
     return response.data;
   } catch (error) {
-    console.error("Error creating review:", error);
-    return null;
+    console.log("🔴 createReview error status:", error.response?.status);
+  console.log(
+    "🔴 createReview error data:",
+    JSON.stringify(error.response?.data, null, 2)
+  );
+  throw error;
   }
 };
 

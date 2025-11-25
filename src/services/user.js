@@ -18,7 +18,7 @@ export const unlikeFood = async (foodID) => {
 
 export const fetchLikedFoods = async () => {
   try {
-    const response = await api.get("/liked-foods");
+    const response = await api.get("/liked-foods"); //백엔드에서 rerturn 형식 수정하면 다시 고치기 배열 형태로 바꿔서 보내줘야될듯
     return response.data;
   } catch (error) {
     console.error("Error fetching liked foods:", error);
