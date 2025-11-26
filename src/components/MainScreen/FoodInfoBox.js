@@ -31,7 +31,7 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
 
   const handleCalendar = () => {
     onClose();
-    navigation.navigate("식단 기록 화면");
+    navigation.navigate("DietLog");
   };
 
   if (!item) return null;

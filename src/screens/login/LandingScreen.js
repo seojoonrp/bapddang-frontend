@@ -45,7 +45,7 @@ const LandingScreen = () => {
       <Text style={styles.logo}>로고임</Text>
       <TouchableOpacity
         style={styles.guestButton}
-        onPress={() => navigation.navigate("메인 화면")}
+        onPress={() => navigation.navigate("Main")}
       >
         <Text style={styles.guestButtonText}>게스트로 둘러보기</Text>
       </TouchableOpacity>

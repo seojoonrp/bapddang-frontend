@@ -21,7 +21,7 @@ const StackScreen = () => {
       <Stack.Screen
         name="Main"
         component={MainScreen}
-        options={{ headerShown: false, name: "메인 화면" }}
+        options={{ headerShown: false, title: "메인 화면" }}
       />
       <Stack.Screen
         name="DietLog"
