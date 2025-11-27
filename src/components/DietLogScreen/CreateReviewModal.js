@@ -97,7 +97,7 @@ const CreateReviewModal = ({
     try {
       if (!selectedTime || rating <= 0) {
         // 사용 중인 알림 방식에 맞게 교체 (Alert, Toast, Snackbar 등)
-        Alert.alert("필수 항목 누락", "시간대, 태그, 별점을 모두 선택해주세요.");
+        Alert.alert("필수 항목 누락", "시간대, 별점을 모두 선택해주세요.");
         return;
       }
       const foodsPayload = (foods || []).map((f) => ({
@@ -111,7 +111,7 @@ const CreateReviewModal = ({
         speed: reviewMode,
         mealTime: timeMapping[selectedTime],
         tags: selectedTags ?? [],
-        imageUrl: imageUrl ?? null,
+        imageUrl: imageUrl ?? "",
         comment: comment ?? "",
         rating: Number(rating ?? 0),
       });

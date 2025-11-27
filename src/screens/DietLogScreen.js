@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState,useCallback } from "react";
+import { useEffect, useRef, useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,11 +14,12 @@ import Animated, {
   interpolate,
   withTiming,
   Easing,
+  setDynamicFeatureFlag,
 } from "react-native-reanimated";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "../stores/authStore";
-import { fetchReviewsByWeek } from "../services/review";
+import { fetchReviewsByDay } from "../services/review";
 import Colors from "../styles/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -27,12 +28,13 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 
 //weekandday 동기화
 import { useFocusEffect } from "@react-navigation/native";
-import { syncUserWeekAndDay,getUserWeek } from "../services/user";
+import { syncUserWeekAndDay } from "../services/user";
 
 
 const DietLogScreen = () => {
   // 추가버튼 관련
   const { user } = useAuthStore();
+  
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -40,6 +42,7 @@ const DietLogScreen = () => {
   const [activeModal, setActiveModal] = useState("none");
   const [nextModal, setNextModal] = useState(null);
   const [back, setBack] = useState(false);
+
 
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
@@ -57,53 +60,79 @@ const DietLogScreen = () => {
     };
   });
 
-  // 나중에 초기값 받아와서 설정 필요
-  const [selectedDay, setSelectedDay] = useState(1);
-  const [selectedWeek, setSelectedWeek] = useState(1);
-
+  const userDay = user?.day || 1;
+  const initialWeek=Math.ceil(userDay / 7);
+  const initialDay=((userDay - 1) % 7) + 1;
+  const [selectedDay, setSelectedDay] = useState(initialDay);
+  const [currentMaxWeek, setCurrentMaxWeek] = useState(initialWeek);
+  const [selectedWeek, setSelectedWeek] = useState(initialWeek);
   // 리뷰 가져오기
-  const [weekReviews, setWeekReviews] = useState([]);
+  const [dailyReviews, setDailyReviews] = useState([]);
   const [selectedReviewId, setSelectedReviewId] = useState(null);
 
   // 이 부분 좀 정리 필요
   useFocusEffect(
-  useCallback(() => {
-    let alive = true;
+    useCallback(() => {
+      let alive = true;
 
-    (async () => {
-      const uid = user?.uid;
-      if (!uid) return;
+      (async () => {
+        const uid = user?.uid;
+        if (!uid) return;
 
-      try {
-        await syncUserWeekAndDay(uid);
-      } catch (e) {
-        console.log("syncUserWeek failed:", e);
-      }
+        try {
+          await syncUserWeekAndDay(uid);
+        } catch (e) {
+          console.log("syncUserWeek failed:", e);
+        }
 
-      // user의 day/week 읽어서 selectedWeek 세팅
-      try {
-        const week = await getUserWeek(uid);
-        if (alive && week) setSelectedWeek(week);
-      } catch (e) {
-        console.log("getUserWeek failed:", e);
-      }
-    })();
+        // user의 day/week 읽어서 selectedWeek 세팅
+        try {
+          const userDay = user?.day ?? 1;
+          
+          const calculatedWeek = Math.ceil(userDay / 7);
+          const currentDayofThisWeek = ((userDay - 1) % 7) + 1;
+          if (alive) {
+            setCurrentMaxWeek(calculatedWeek);
+            setSelectedWeek(calculatedWeek);
+            setSelectedDay(currentDayofThisWeek);
+          }
+        } catch (e) {
+          console.log("getUserWeek failed:", e);
+        }
+      })();
 
-    return () => {
-      alive = false;
-    };
-  }, [])
-);
+      return () => {
+        alive = false;
+      };
+    }, [user])
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      const reviews = await fetchReviewsByWeek(selectedWeek);
-      setWeekReviews(reviews);
-      console.log("Fetched reviews for week", selectedWeek, reviews);
+    const fetchDailyData = async () => {
+      const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
+      console.log(`Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`);
+      try{
+        const reviews = await fetchReviewsByDay(targetAbsoluteDay);
+        setDailyReviews(reviews|| []);
+        
+      } catch (e) {
+        console.log("Failed to fetch reviews for day:", e);
+        setDailyReviews([]);
+      }
     };
 
-    fetchData();
-  }, [selectedWeek]);
+    fetchDailyData();
+  }, [selectedWeek, selectedDay]);
+
+  const handleMarshmallowClick = (offset) => {
+    const targetWeek = currentMaxWeek - offset;
+    if (targetWeek < 1) {
+      return;
+    }
+
+    setSelectedWeek(targetWeek);
+    setSelectedDay(1);
+  };
 
   const handleCloseModal = () => {
     setActiveModal("none");
@@ -124,7 +153,7 @@ const DietLogScreen = () => {
     }
   };
 
-  const handleSelectFood = (foods,mode) => {
+  const handleSelectFood = (foods, mode) => {
     setSelectedFoods(foods);
     setSelectedMode(mode);
     setSelectedReviewId(null);
@@ -152,7 +181,11 @@ const DietLogScreen = () => {
 
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
-      <MarshmallowStick />
+      <MarshmallowStick
+        currentMaxWeek={currentMaxWeek}
+        selectedWeek={selectedWeek}
+        onClick={handleMarshmallowClick}
+      />
 
       <TouchableOpacity
         onPress={() => setActiveModal("foodSelect")}
@@ -210,12 +243,18 @@ const DietLogScreen = () => {
             </View>
 
             <FlatList
-              data={weekReviews?.filter((r) => r.weekDay === selectedDay)}
+              data={dailyReviews}
               style={{ width: "100%" }}
-              contentContainerStyle={{ flexGrow: 1 }}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <ReviewCard review={item} onEdit={handleEditReview} />
+              )}
+              // 데이터가 없을 때 표시할 UI (옵션)
+              ListEmptyComponent={() => (
+                <View style={{ alignItems: 'center', marginTop: 50 }}>
+                  <Text style={{ color: '#999', fontFamily: 'NanumSquareR' }}>
+                    기록된 식단이 없습니다.
+                  </Text>
+                </View>
               )}
               showsVerticalScrollIndicator={false}
             />

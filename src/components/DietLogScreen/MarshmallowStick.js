@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { View, StyleSheet, FlatList, Animated } from "react-native";
+import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
 
 import Marshmallow from "../svg/Marshmallow";
 import marshmallowData from "../../data/MarshmallowData.json";
@@ -8,7 +8,7 @@ import Colors from "../../styles/colors";
 const ITEM_HEIGHT = 180;
 const MARSHMALLOW_SIZE = 160;
 
-const MarshmallowStick = () => {
+const MarshmallowStick = ({onClick}) => {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   return (
@@ -39,13 +39,27 @@ const MarshmallowStick = () => {
         style={styles.listContainer}
         data={marshmallowData.marshmallows}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              if(onClick){
+                onClick(index);
+              }
+            }}
+            style={{
+              height: ITEM_HEIGHT, // FlatList의 snapToInterval과 일치시킴
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
           <Marshmallow
             roastStep={item.roastStep}
             rotation={item.rotation}
             size={MARSHMALLOW_SIZE}
             verticalGap={(ITEM_HEIGHT - MARSHMALLOW_SIZE) / 2}
           />
+          </TouchableOpacity>
         )}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}

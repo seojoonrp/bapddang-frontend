@@ -29,28 +29,31 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
   // 서버 요청 진행 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pendingMode,setPendingMode]= useState(null);
+  const [pendingMode, setPendingMode] = useState(null);
 
   const [isInCheckMode, setIsInCheckMode] = useState(false);
   const [suggestionQueue, setSuggestionQueue] = useState([]);
-  const [resolvedItems,setResolvedItems]= useState([]);
+  const [resolvedItems, setResolvedItems] = useState([]);
 
-
-  //좋아요한 음식 fetch
-  /*
- useEffect(() => {
+  // 좋아요한 음식 불러오기
+  useEffect(() => {
     if (!user) return;
 
-    (async () => {
-      try {
-        const liked = await fetchLikedFoods(user.uid);
-        setLikedFoods(liked || []);
-      } catch (e) {
-        console.log("fetchLikedFoods failed:", e);
-      }
-    })();
+    fetchLikedFoods()
+      .then((data) => {
+        console.log("Fetched liked foods:", data.likedFoods); 
+        if (data) {
+          const names = data.likedFoods.map((food) => food.name);
+          setLikedFoods(names);
+        } else {
+          setLikedFoods([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching liked foods:", error);
+      });
   }, [user]);
-  */
+
   const updateInput = (index, value) => {
     const next = [...inputList];
     next[index] = value;
@@ -77,104 +80,104 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
       const results = await validateFoods(filtered);
 
-      const toResolve=[];
-      const toCheck=[];
+      const toResolve = [];
+      const toCheck = [];
 
       results.forEach((item, idx) => {
-        const fallbackName= item.originalName ?? filtered[idx];
-        if(item.status==="suggestion"){
-          toCheck.push({...item, fallbackName});
+        const fallbackName = item.originalName ?? filtered[idx];
+        if (item.status === "suggestion") {
+          toCheck.push({ ...item, fallbackName });
         }
-        else{
-          const output= item.okOutput || item.newOutput|| {};
+        else {
+          const output = item.okOutput || item.newOutput || {};
           toResolve.push({
             name: output.name ?? fallbackName,
             foodId: output.id,
             foodType: output.type || (item.status === "new" ? "new" : "general"),
-        });
-      }
-    });
+          });
+        }
+      });
 
-    setResolvedItems(toResolve);
-    setSuggestionQueue(toCheck);
-      
-    if (toCheck.length >0){
-      setIsInCheckMode(true);
-    }else{
-      completeSelection(toResolve, mode);
-    }
-  } catch (error) {
+      setResolvedItems(toResolve);
+      setSuggestionQueue(toCheck);
+
+      if (toCheck.length > 0) {
+        setIsInCheckMode(true);
+      } else {
+        completeSelection(toResolve, mode);
+      }
+    } catch (error) {
       alert("음식 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
       console.error("Error in startCheck:", error);
-    } finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
   const handleResolveSuggestion = (choiceItem) => {
-    const newItem ={
+    const newItem = {
       name: choiceItem.name,
       foodId: choiceItem.id,
       foodType: choiceItem.type,
     };
-    const nextResolved= [...resolvedItems, newItem];
+    const nextResolved = [...resolvedItems, newItem];
     setResolvedItems(nextResolved);
-    const nextQueue= suggestionQueue.slice(1);
+    const nextQueue = suggestionQueue.slice(1);
     setSuggestionQueue(nextQueue);
-    if (nextQueue.length ===0){
-      completeSelection( nextResolved, pendingMode);
+    if (nextQueue.length === 0) {
+      completeSelection(nextResolved, pendingMode);
     }
   };
   const handleCreateCustom = async () => {
-    const currentItem= suggestionQueue[0];
-    if(!currentItem) return;
+    const currentItem = suggestionQueue[0];
+    if (!currentItem) return;
 
-    try{
+    try {
       setIsSubmitting(true);
 
-      const newFoodData =await createCustomFood(currentItem.fallbackName);
-      
-      const newItem ={
+      const newFoodData = await createCustomFood(currentItem.fallbackName);
+
+      const newItem = {
         name: newFoodData.name,
         foodId: newFoodData.id,
         foodType: "custom",
       }
       moveToNext(newItem);
-    }catch(error){
+    } catch (error) {
       alert("음식 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
       console.error("Error in handleCreateCustom:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
-  const moveToNext= (newItem) => {
-    const nextResolved= [...resolvedItems, newItem];
+  const moveToNext = (newItem) => {
+    const nextResolved = [...resolvedItems, newItem];
     setResolvedItems(nextResolved);
 
-    const nextQueue= suggestionQueue.slice(1);
+    const nextQueue = suggestionQueue.slice(1);
     setSuggestionQueue(nextQueue);
 
-    if(nextQueue.length ===0){
+    if (nextQueue.length === 0) {
       completeSelection(nextResolved, pendingMode);
     }
   };
 
-  const completeSelection= (finalFoods, mode) => {
-    onSelect(finalFoods,mode);
+  const completeSelection = (finalFoods, mode) => {
+    onSelect(finalFoods, mode);
     onClose?.();
   };
 
-  const currentTarget=suggestionQueue[0];
+  const currentTarget = suggestionQueue[0];
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
 
       <View style={styles.contentBox}>
         {isInCheckMode && currentTarget ? (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
             <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
-            
+
             <Text style={styles.checkHint}>
-                {resolvedItems.length + 1} / {resolvedItems.length + suggestionQueue.length} 번째 음식 확인 중
+              {resolvedItems.length + 1} / {resolvedItems.length + suggestionQueue.length} 번째 음식 확인 중
             </Text>
 
             <View style={styles.checkBox}>
@@ -183,18 +186,18 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             </View>
 
             <View style={{ width: "100%", marginTop: 20 }}>
-                <Text style={styles.subTitle}>추천 검색 결과</Text>
-                <View style={styles.suggestionContainer}>
+              <Text style={styles.subTitle}>추천 검색 결과</Text>
+              <View style={styles.suggestionContainer}>
                 {currentTarget.suggestionOutputs?.map((opt) => (
-                    <TouchableOpacity
+                  <TouchableOpacity
                     key={opt.id}
                     style={styles.suggestionChip}
                     onPress={() => handleResolveSuggestion(opt)}
-                    >
+                  >
                     <Text style={styles.suggestionText}>{opt.name}</Text>
-                    </TouchableOpacity>
+                  </TouchableOpacity>
                 ))}
-                </View>
+              </View>
             </View>
 
             {/* 원본 유지 버튼 */}
@@ -206,54 +209,54 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             </TouchableOpacity>
 
           </ScrollView>
-      ) : (
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
+        ) : (
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
 
-          {inputList.map((input, index) => (
-            <TextInput
-              key={index}
-              style={styles.input}
-              placeholder="음식 이름을 입력해주세요"
-              value={input}
-              onChangeText={(text) => updateInput(index, text)}
-              onFocus={() => setCurInputIndex(index)}
+            {inputList.map((input, index) => (
+              <TextInput
+                key={index}
+                style={styles.input}
+                placeholder="음식 이름을 입력해주세요"
+                value={input}
+                onChangeText={(text) => updateInput(index, text)}
+                onFocus={() => setCurInputIndex(index)}
+              />
+            ))}
+
+            <TouchableOpacity style={styles.addButton} onPress={addInput}>
+              <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.subTitle}>좋아요한 음식</Text>
+            <TagContainer
+              tags={likedFoods}
+              mode="assign"
+              onPress={(food) => updateInput(curInputIndex, food)}
+              containerStyle={{ marginBottom: 20 }}
             />
-          ))}
 
-          <TouchableOpacity style={styles.addButton} onPress={addInput}>
-            <Text style={styles.addButtonText}>+</Text>
-          </TouchableOpacity>
+            <View style={styles.dualConfirmRow}>
+              <TouchableOpacity
+                style={[styles.confirmButton, { backgroundColor: Colors.point_red }]}
+                onPress={() => startCheck("fast")}
+              >
+                <Text style={styles.confirmText}>고속노화로 저장</Text>
+              </TouchableOpacity>
 
-          <Text style={styles.subTitle}>좋아요한 음식</Text>
-          <TagContainer
-            tags={likedFoods}
-            mode="assign"
-            onPress={(food) => updateInput(curInputIndex, food)}
-            containerStyle={{ marginBottom: 20 }}
-          />
-
-          <View style={styles.dualConfirmRow}>
-            <TouchableOpacity
-              style={[styles.confirmButton, { backgroundColor: Colors.point_red }]}
-              onPress={() => startCheck("fast")}
-            >
-              <Text style={styles.confirmText}>고속노화로 저장</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.confirmButton, { backgroundColor: Colors.point_green }]}
-              onPress={() => startCheck("slow")}
-            >
-              <Text style={styles.confirmText}>저속노화로 저장</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      )}
+              <TouchableOpacity
+                style={[styles.confirmButton, { backgroundColor: Colors.point_green }]}
+                onPress={() => startCheck("slow")}
+              >
+                <Text style={styles.confirmText}>저속노화로 저장</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        )}
       </View>
     </View>
   );

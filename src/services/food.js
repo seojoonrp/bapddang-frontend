@@ -45,3 +45,12 @@ export const createCustomFood = async (name) =>{
 export const fetchRankedFoods = () => {
   return []; // Temporarily disable ranking feature
 };
+export const fetchLikedFoods = async () => {
+  try {
+    const response = await api.get("/foods/liked"); 
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching liked foods:", error);
+    return [];
+  }
+};
