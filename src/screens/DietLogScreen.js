@@ -35,6 +35,8 @@ const DietLogScreen = () => {
   // 추가버튼 관련
   const { user } = useAuthStore();
   
+  const [displayMonth, setDisplayMonth] = useState(null);
+  const [weekDates, setWeekDates] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -106,6 +108,22 @@ const DietLogScreen = () => {
       };
     }, [user])
   );
+
+  useEffect(() => {
+    if(!user?.createdAt)return;
+    const startDate = new Date(user.createdAt);
+    const weekStartOffset=((selectedWeek - 1) * 7);
+    startDate.setDate(startDate.getDate() + weekStartOffset);
+
+    setDisplayMonth(startDate.getMonth() + 1);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      dates.push(date.getDate());
+    }
+    setWeekDates(dates);
+  }, [selectedWeek, user?.createdAt]);
 
   useEffect(() => {
     const fetchDailyData = async () => {
@@ -218,9 +236,10 @@ const DietLogScreen = () => {
             <Animated.Text style={[styles.sheetTitleText, animatedTextStyle]}>
               주간 식단기록
             </Animated.Text>
+            <Text style={styles.monthText}>{displayMonth}월</Text>
 
             <View style={styles.dayContainer}>
-              {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7].map((num, index) => (
                 <TouchableOpacity
                   key={num}
                   onPress={() => setSelectedDay(num)}
@@ -236,7 +255,7 @@ const DietLogScreen = () => {
                       selectedDay === num && { color: "white" },
                     ]}
                   >
-                    {num}
+                    {weekDates[index]}
                   </Text>
                 </TouchableOpacity>
               ))}
