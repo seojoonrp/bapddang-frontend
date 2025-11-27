@@ -254,7 +254,7 @@ const DietLogScreen = () => {
         <CreateReviewModal
           onClose={handleCloseModal}
           onBack={handleBack}
-          foodNames={selectedFoods}
+          foods={selectedFoods}
           reviewMode={selectedMode}
           intent={selectedReviewId ? "edit" : "create"}
           reviewId={selectedReviewId}

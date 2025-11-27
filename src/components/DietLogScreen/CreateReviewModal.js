@@ -27,7 +27,7 @@ import ReviewStar from "../svg/ReviewStar";
 
 const CreateReviewModal = ({
   onClose,
-  foods,//이 부분 수정 필요
+  foods,
   reviewMode,
   onBack,
   intent = "create",
@@ -36,6 +36,12 @@ const CreateReviewModal = ({
   const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
+  const timeMapping = {
+    "아침": "breakfast",
+    "점심": "lunch",
+    "저녁": "dinner",
+    "기타": "snack"
+  };
   // TODO : 태그 생성 기능
   const [tagOption, setTagOption] = useState([
     "혼밥",
@@ -70,10 +76,12 @@ const CreateReviewModal = ({
 
   useEffect(() => {
     if (intent === "create") {
-      setName(foodNames.join("&"));
+      const names = Array.isArray(foods) 
+        ? foods.map(f => (typeof f === 'object' ? f.name : f)).join(" & ")
+        : "";
+      setName(names);
     }
-  }, [intent, foodNames]);
-
+  }, [intent, foods]);
   const handleTagPress = (tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -87,30 +95,33 @@ const CreateReviewModal = ({
 
   const submit = async () => {
     try {
-      const foods = foodNames || [];
-      //console.log(reviewMode);
-      
       if (!selectedTime || rating <= 0) {
         // 사용 중인 알림 방식에 맞게 교체 (Alert, Toast, Snackbar 등)
         Alert.alert("필수 항목 누락", "시간대, 태그, 별점을 모두 선택해주세요.");
         return;
       }
-
+      const foodsPayload = (foods || []).map((f) => ({
+        foodId: f.foodId,
+        foodType: f.foodType,
+      }));
+      
       const payload = pruneUndefined({
         name,
-        foods,
-        time: selectedTime ?? null,
+        foods: foodsPayload,
+        speed: reviewMode,
+        mealTime: timeMapping[selectedTime],
         tags: selectedTags ?? [],
         imageUrl: imageUrl ?? null,
         comment: comment ?? "",
         rating: Number(rating ?? 0),
-        type: reviewMode,
       });
 
       if (intent === "edit" && reviewId) {
         await editReview(reviewId, payload);
+        Alert.alert("리뷰 수정 완료", "리뷰가 성공적으로 수정되었습니다.");
       } else {
         await createReview(payload);
+        Alert.alert("리뷰 등록 완료", "리뷰가 성공적으로 등록되었습니다.");
       }
       onClose?.();
     } catch (error) {
