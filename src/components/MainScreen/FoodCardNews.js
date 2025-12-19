@@ -15,7 +15,7 @@ import useModeStore from "../../stores/modeStore";
 
 import FoodInfoBox from "./FoodInfoBox";
 
-const MARGIN_MULTIPLIER = 1.02;
+const MARGIN_MULTIPLIER = 1.04;
 
 const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   const { mode } = useModeStore();
@@ -54,20 +54,17 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         {
           width: containerHeight * MARGIN_MULTIPLIER,
           height: containerHeight,
-          borderWidth: 1,
-          borderColor: "black",
         },
       ]}
     >
-      {item.imageUrl && item.imageUrl !== "temp" ? (
-        <Image
-          source={{ uri: item.imageUrl }}
-          style={[styles.cardImage, { height: containerHeight }]}
-        />
-      ) : (
-        <View style={[styles.cardImage, styles.imagePlaceholder]} />
-      )}
-      <Text style={styles.foodText}>{item.name}</Text>
+      <View
+        style={[
+          styles.cardImage,
+          { width: containerHeight, height: containerHeight },
+        ]}
+      >
+        <Text style={styles.foodText}>{item.name}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -77,7 +74,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         <ActivityIndicator size="large" color="#007BFF" />
       ) : foodsData.length > 0 ? (
         <FlatList
-          paddingHorizontal={pad}
+          contentContainerStyle={{ paddingHorizontal: pad }}
           data={foodsData.filter((item) => item.speed === mode)}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -119,19 +116,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   cardImage: {
-    aspectRatio: 1,
-  },
-  imagePlaceholder: {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
   },
   foodText: {
-    position: "absolute",
     color: "white",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    fontSize: 18,
-    padding: 8,
-    borderRadius: 5,
-    bottom: 12,
+    fontSize: 24,
   },
   backdrop: {
     position: "absolute",

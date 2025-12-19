@@ -28,7 +28,7 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
   });
 
   const containerHeight = scrollY.interpolate({
-    inputRange: [scrollThreshold * 0.5, scrollThreshold],
+    inputRange: [0, scrollThreshold],
     outputRange: heightRange,
     extrapolate: "clamp",
   });

@@ -58,7 +58,7 @@ const Ranking = () => {
       {currentRankingItem && (
         <View style={styles.itemContainer}>
           <Text style={styles.rankText}>
-            {currentIndex + 1} {currentRankingItem.name}
+            {currentIndex + 1}&nbsp;&nbsp;{currentRankingItem}
           </Text>
         </View>
       )}
@@ -70,21 +70,18 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     width: "100%",
+    paddingHorizontal: 16,
+    height: 28,
   },
   itemContainer: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.background_white,
-    height: 32,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: "#A87C66",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   rankText: {
     fontSize: 16,

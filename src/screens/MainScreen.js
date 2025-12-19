@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -34,8 +34,10 @@ const MainScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
+  const screenWidth = useWindowDimensions().width;
   const screenHeight = useWindowDimensions().height;
   const bannerHeightRange = [230, screenHeight - SCROLL_THRESHOLD + 25];
+  const cardNewsSize = 300;
 
   const user = useAuthStore((state) => state.user);
   const { mode, toggleMode } = useModeStore();
@@ -47,59 +49,63 @@ const MainScreen = () => {
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const isBottomSheetOpen = useRef(false);
+  const offsetY = useRef(0);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        return Math.abs(gestureState.dy) > 5;
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        const newValue = -gestureState.dy;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (evt, gestureState) => {
+          return Math.abs(gestureState.dy) > 50;
+        },
+        onPanResponderGrant: () => {
+          offsetY.current = scrollY._value || 0;
+        },
+        onPanResponderMove: (evt, gestureState) => {
+          const deltaY = -gestureState.dy;
+          const newValue = offsetY.current + deltaY;
 
-        if (isBottomSheetOpen.current && newValue > 0) return;
-        if (!isBottomSheetOpen.current && newValue < 0) return;
+          if (newValue > SCROLL_THRESHOLD) {
+            scrollY.setValue(SCROLL_THRESHOLD);
+            return;
+          }
+          if (newValue < 0) {
+            scrollY.setValue(0);
+            return;
+          }
 
-        if (newValue >= 0 && newValue <= SCROLL_THRESHOLD) {
           scrollY.setValue(newValue);
-        }
-        if (newValue < 0 && isBottomSheetOpen.current) {
-          scrollY.setValue(SCROLL_THRESHOLD + newValue);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (-gestureState.dy > 70) {
-          Animated.timing(scrollY, {
-            toValue: SCROLL_THRESHOLD,
-            duration: 250,
+        },
+        onPanResponderRelease: (evt, gestureState) => {
+          const { vy } = gestureState;
+          const velocity = -vy;
+          const currentValue = scrollY._value || 0;
+
+          let toValue = 0;
+          // 속도가 빠르거나 절반 이상 올라오면 상단 고정
+          if (
+            velocity > 0.5 ||
+            (currentValue > SCROLL_THRESHOLD / 2 && velocity > -0.5)
+          ) {
+            toValue = SCROLL_THRESHOLD;
+          } else {
+            toValue = 0;
+          }
+
+          Animated.spring(scrollY, {
+            toValue: toValue,
+            velocity: velocity,
+            tension: 30,
+            friction: 40,
             useNativeDriver: false,
           }).start(() => {
-            isBottomSheetOpen.current = true;
+            isBottomSheetOpen.current = toValue === SCROLL_THRESHOLD;
+            offsetY.current = toValue;
           });
-        } else if (gestureState.dy > 70) {
-          Animated.timing(scrollY, {
-            toValue: 0,
-            duration: 250,
-            useNativeDriver: false,
-          }).start(() => {
-            isBottomSheetOpen.current = false;
-          });
-        } else if (isBottomSheetOpen.current) {
-          Animated.timing(scrollY, {
-            toValue: SCROLL_THRESHOLD,
-            duration: 250,
-            useNativeDriver: false,
-          }).start();
-        } else {
-          Animated.timing(scrollY, {
-            toValue: 0,
-            duration: 250,
-            useNativeDriver: false,
-          }).start();
-        }
-      },
-    })
-  ).current;
+        },
+      }),
+    []
+  );
 
   // 카뉴 음식 정보 받아오기
   useEffect(() => {
@@ -116,15 +122,17 @@ const MainScreen = () => {
     fetchData();
   }, []);
 
+  const cardNewsPadding = screenWidth / 2 - (cardNewsSize / 2) * 1.04;
+
   // 애니메이션 인터폴레이션 정의
   const heroTranslateY = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD * 0.5, SCROLL_THRESHOLD],
-    outputRange: [156, 100, -5],
+    inputRange: [0, SCROLL_THRESHOLD],
+    outputRange: [156, -5],
     extrapolate: "clamp",
   });
 
   const heroPaddingHorizontal = scrollY.interpolate({
-    inputRange: [SCROLL_THRESHOLD * 0.5, SCROLL_THRESHOLD],
+    inputRange: [SCROLL_THRESHOLD * 0.2, SCROLL_THRESHOLD],
     outputRange: [12, -1],
     extrapolate: "clamp",
   });
@@ -223,7 +231,11 @@ const MainScreen = () => {
       <View style={styles.staticContentLayer}>
         <RecentLiked />
         <View style={{ height: 300 }}>
-          <FoodCardNews foodsData={mainFeedData} isLoading={isLoading} />
+          <FoodCardNews
+            pad={cardNewsPadding}
+            foodsData={mainFeedData}
+            isLoading={isLoading}
+          />
         </View>
         <Ranking />
       </View>
@@ -254,7 +266,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    marginTop: 45,
+    marginTop: 50,
     paddingHorizontal: 20,
     gap: 10,
     zIndex: 10,
@@ -280,9 +292,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
     marginTop: 8,
-
-    borderColor: "black",
-    borderWidth: 1,
   },
   logoText: {
     fontSize: 24,
@@ -305,10 +314,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    overflow: "hidden",
-
-    borderColor: "black",
-    borderWidth: 1,
+    marginBottom: 24,
+    gap: 12,
   },
 
   bottomSheetWrapper: {
