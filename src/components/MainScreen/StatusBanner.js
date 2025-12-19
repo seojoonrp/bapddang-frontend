@@ -3,14 +3,17 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  Switch,
   Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import useModeStore from "../../stores/modeStore";
 import Colors from "../../styles/colors";
+
+import useModeStore from "../../stores/modeStore";
+
+import ModeSwitch from "../ModeSwitch";
+
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
 import Character from "../svg/Character";
@@ -19,7 +22,8 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
   const navigation = useNavigation();
-  const { mode } = useModeStore();
+
+  const { mode, toggleMode, modeColor } = useModeStore();
 
   const borderRadius = scrollY.interpolate({
     inputRange: [scrollThreshold * 0.7, scrollThreshold],
@@ -33,13 +37,28 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
     extrapolate: "clamp",
   });
 
+  const topPosition = scrollY.interpolate({
+    inputRange: [0, scrollThreshold],
+    outputRange: [14, 66],
+    extrapolate: "clamp",
+  });
+
+  const bottomPosition = scrollY.interpolate({
+    inputRange: [0, scrollThreshold],
+    outputRange: [10, 30],
+    extrapolate: "clamp",
+  });
+
   return (
     <Animated.View
-      style={[styles.container, { borderRadius, height: containerHeight }]}
+      style={[
+        styles.container,
+        { borderRadius, height: containerHeight, backgroundColor: modeColor },
+      ]}
     >
       <AnimatedLinearGradient
-        colors={["#E92F0500", "#5E101060"]}
-        start={{ x: 0, y: 0 }}
+        colors={[`rgba(0, 0, 0, 0)`, `rgba(0, 0, 0, 0.25)`]}
+        start={{ x: 0, y: 0.2 }}
         end={{ x: 0, y: 1 }}
         style={[
           styles.container,
@@ -50,32 +69,28 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
           },
         ]}
       >
-        <Animated.View style={styles.topContainer}>
-          <Switch
-            style={{ transform: [{ scale: 0.8 }] }}
-            trackColor={{ false: "#359c21", true: "#e02828" }}
-            thumbColor="#fcfcfc"
-            value={mode === "fast"}
-            disabled={true}
-          />
-          <Text style={styles.curStreakText}>고속노화모드</Text>
+        <Animated.View style={[styles.switchContainer, { top: topPosition }]}>
+          <Text style={styles.modeText}>
+            {mode === "fast" ? "고속" : "저속"}노화모드
+          </Text>
+          <ModeSwitch value={mode === "fast"} onValueChange={toggleMode} />
         </Animated.View>
 
-        <View style={styles.characterContainer}>
-          <Character width={118.9614} height={123.28672} />
-        </View>
-
-        <View style={styles.bottomContainer}>
+        <Animated.View
+          style={[styles.bottomContainer, { bottom: bottomPosition }]}
+        >
           <TouchableOpacity
-            style={styles.iconButton}
+            style={[styles.iconButton, { backgroundColor: modeColor }]}
             onPress={() => navigation.navigate("DietLog")}
           >
             <Edit color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: modeColor }]}
+          >
             <Favorite color="white" />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </AnimatedLinearGradient>
     </Animated.View>
   );
@@ -85,32 +100,33 @@ export default StatusBanner;
 
 const styles = StyleSheet.create({
   container: {
+    position: "relative",
     width: "100%",
-    backgroundColor: Colors.point_red,
     flexDirection: "column",
     justifyContent: "center",
   },
-  topContainer: {
+
+  switchContainer: {
+    position: "absolute",
+    top: 14,
+    left: 18,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     gap: 8,
-    marginBottom: 10,
   },
-  characterContainer: {
-    marginBottom: 10,
-  },
-  curStreakText: {
-    fontSize: 17,
+  modeText: {
     color: Colors.background_yellow,
-    fontFamily: "NanumSquareRoundB",
+    fontFamily: "KCCGanpan",
+    fontSize: 18,
   },
+
   bottomContainer: {
+    position: "absolute",
+    width: "100%",
+    right: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    marginHorizontal: 14,
-    marginBottom: 8,
     gap: 8,
   },
   iconButton: {

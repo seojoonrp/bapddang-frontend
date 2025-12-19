@@ -15,7 +15,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import useAuthStore from "../stores/authStore";
-import useModeStore from "../stores/modeStore";
 import { fetchMainFeedFoods } from "../services/food";
 
 import UserDrawer from "../components/MainScreen/UserDrawer";
@@ -40,7 +39,6 @@ const MainScreen = () => {
   const cardNewsSize = 300;
 
   const user = useAuthStore((state) => state.user);
-  const { mode, toggleMode } = useModeStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const [mainFeedData, setMainFeedData] = useState([]);
