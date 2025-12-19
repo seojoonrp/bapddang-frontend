@@ -51,7 +51,12 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
       activeOpacity={0.7}
       style={[
         styles.cardContainer,
-        { width: containerHeight * MARGIN_MULTIPLIER, height: containerHeight },
+        {
+          width: containerHeight * MARGIN_MULTIPLIER,
+          height: containerHeight,
+          borderWidth: 1,
+          borderColor: "black",
+        },
       ]}
     >
       {item.imageUrl && item.imageUrl !== "temp" ? (

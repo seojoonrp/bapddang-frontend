@@ -53,7 +53,7 @@ const RecentLiked = () => {
       }
     };
 
-    // loadLikedFoods();
+    loadLikedFoods();
   }, []);
 
   const textColor = animValue.interpolate({
@@ -63,22 +63,23 @@ const RecentLiked = () => {
 
   return (
     <View style={styles.container}>
-      <Animated.Text style={[styles.likedText, { color: textColor }]}>
-        최근 좋아요한 음식들
-      </Animated.Text>
       <View style={styles.foodContainer}>
         {isLoading ? (
           <ActivityIndicator color={modeColor} />
         ) : (
           likedFoods.map((food) => (
             <TouchableOpacity key={food.id} style={styles.food}>
-              <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
+              {food.imageURL !== "temp" ? (
+                <Image
+                  source={{ uri: food.imageURL }}
+                  style={styles.foodImage}
+                />
+              ) : (
+                <Text>{food.name}</Text>
+              )}
             </TouchableOpacity>
           ))
         )}
-        <TouchableOpacity style={styles.viewAllButton}>
-          <Text style={styles.viewAllText}>&gt;&gt;</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -102,32 +103,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     minHeight: 48,
-    gap: 6,
+    gap: 8,
   },
   food: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#e0e0e0",
   },
   foodImage: {
     width: "100%",
     height: "100%",
     borderRadius: 24,
-  },
-  viewAllButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#CCC",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingLeft: 2,
-  },
-  viewAllText: {
-    fontSize: 17,
-    fontFamily: "NanumSquareRoundEB",
-    color: "#FFF",
-    textAlign: "center",
   },
 });

@@ -25,6 +25,8 @@ const Ranking = () => {
         setLoading(false);
       }
     };
+
+    setRankings(["마라탕", "로제파스타", "돈가스"]); // temp
   }, []);
 
   useEffect(() => {
