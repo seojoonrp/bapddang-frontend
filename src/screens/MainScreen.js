@@ -41,8 +41,9 @@ const MainScreen = () => {
   const { mode, toggleMode } = useModeStore();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isDrawerVisible, setDrawerVisible] = useState(false);
   const [mainFeedData, setMainFeedData] = useState([]);
+
+  const hasNotifications = true;
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -76,7 +77,7 @@ const MainScreen = () => {
 
   const iconColor = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: ["#33363F", "#FFFFFF"],
+    outputRange: ["#FFC77D", "#FFFFFF"],
   });
 
   const logoOpacity = scrollY.interpolate({
@@ -85,15 +86,64 @@ const MainScreen = () => {
     extrapolate: "clamp",
   });
 
+  // svg 아이콘 애니메이션 (나중에 따로 빼면 좋을듯)
+  const iconFirstOpacity = scrollY.interpolate({
+    inputRange: [0, SCROLL_THRESHOLD],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+  const iconSecondOpacity = scrollY.interpolate({
+    inputRange: [0, SCROLL_THRESHOLD],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+  const CrossFadeIcon = ({
+    IconComponent,
+    size = 24,
+    firstColor,
+    secondColor,
+  }) => (
+    <View
+      style={{
+        width: size,
+        height: size,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Animated.View
+        style={{ position: "absolute", opacity: iconFirstOpacity }}
+      >
+        <IconComponent color={firstColor} width={size} height={size} />
+      </Animated.View>
+      <Animated.View
+        style={{ position: "absolute", opacity: iconSecondOpacity }}
+      >
+        <IconComponent color={secondColor} width={size} height={size} />
+      </Animated.View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {/* 화면 상단 잡다한 것들 */}
       <Animated.View style={styles.settingsRow}>
         <TouchableOpacity onPress={() => {}}>
-          <Bell color={iconColor} />
+          <CrossFadeIcon
+            IconComponent={Bell}
+            size={24}
+            firstColor={"#FFC77D"}
+            secondColor={"#FFFFFF"}
+          />
+          {hasNotifications && <View style={styles.notificationCircle} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {}}>
-          <Settings color={iconColor} />
+          <CrossFadeIcon
+            IconComponent={Settings}
+            size={24}
+            firstColor={"#FFC77D"}
+            secondColor={"#FFFFFF"}
+          />
         </TouchableOpacity>
       </Animated.View>
 
@@ -149,12 +199,6 @@ const MainScreen = () => {
           <BalanceGame />
         </View>
       </Animated.ScrollView>
-
-      {/* <UserDrawer
-        isVisible={isDrawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        email={user?.email}
-      /> */}
     </View>
   );
 };
@@ -164,7 +208,7 @@ export default MainScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: Colors.background_yellow,
   },
 
   settingsRow: {
@@ -172,11 +216,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingHorizontal: 15,
+    marginTop: 45,
+    paddingHorizontal: 20,
     gap: 10,
-
-    borderColor: "black",
-    borderWidth: 1,
+    zIndex: 10,
+  },
+  topIcons: {
+    width: 24,
+    height: 24,
+  },
+  notificationCircle: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: Colors.point_red,
   },
 
   logoRow: {
