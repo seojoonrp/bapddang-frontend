@@ -20,6 +20,7 @@ const App = () => {
       NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundB.woff2"),
       NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundR.woff2"),
       NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundL.woff2"),
+      KCCGanpan: require("./assets/fonts/KCC-Ganpan.woff2"),
     }).then(() => setFontsLoaded(true));
   }, []);
 

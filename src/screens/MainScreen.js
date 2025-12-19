@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Animated,
   useWindowDimensions,
-  Switch,
+  PanResponder,
 } from "react-native";
 import {
   SafeAreaView,
@@ -28,7 +28,7 @@ import Bell from "../components/svg/Bell";
 import Settings from "../components/svg/Settings";
 import Colors from "../styles/colors";
 
-const SCROLL_THRESHOLD = 600;
+const SCROLL_THRESHOLD = 580;
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -46,6 +46,60 @@ const MainScreen = () => {
   const hasNotifications = true;
 
   const scrollY = useRef(new Animated.Value(0)).current;
+  const isBottomSheetOpen = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        const newValue = -gestureState.dy;
+
+        if (isBottomSheetOpen.current && newValue > 0) return;
+        if (!isBottomSheetOpen.current && newValue < 0) return;
+
+        if (newValue >= 0 && newValue <= SCROLL_THRESHOLD) {
+          scrollY.setValue(newValue);
+        }
+        if (newValue < 0 && isBottomSheetOpen.current) {
+          scrollY.setValue(SCROLL_THRESHOLD + newValue);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (-gestureState.dy > 70) {
+          Animated.timing(scrollY, {
+            toValue: SCROLL_THRESHOLD,
+            duration: 250,
+            useNativeDriver: false,
+          }).start(() => {
+            isBottomSheetOpen.current = true;
+          });
+        } else if (gestureState.dy > 70) {
+          Animated.timing(scrollY, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+          }).start(() => {
+            isBottomSheetOpen.current = false;
+          });
+        } else if (isBottomSheetOpen.current) {
+          Animated.timing(scrollY, {
+            toValue: SCROLL_THRESHOLD,
+            duration: 250,
+            useNativeDriver: false,
+          }).start();
+        } else {
+          Animated.timing(scrollY, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   // 카뉴 음식 정보 받아오기
   useEffect(() => {
@@ -64,25 +118,20 @@ const MainScreen = () => {
 
   // 애니메이션 인터폴레이션 정의
   const heroTranslateY = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [insets.top + 60, 0],
+    inputRange: [0, SCROLL_THRESHOLD * 0.5, SCROLL_THRESHOLD],
+    outputRange: [156, 100, -5],
     extrapolate: "clamp",
   });
 
   const heroPaddingHorizontal = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [15, 0],
+    inputRange: [SCROLL_THRESHOLD * 0.5, SCROLL_THRESHOLD],
+    outputRange: [12, -1],
     extrapolate: "clamp",
   });
 
-  const iconColor = scrollY.interpolate({
+  const bottomSheetTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: ["#FFC77D", "#FFFFFF"],
-  });
-
-  const logoOpacity = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD / 2],
-    outputRange: [1, 0],
+    outputRange: [SCROLL_THRESHOLD, 0],
     extrapolate: "clamp",
   });
 
@@ -125,7 +174,7 @@ const MainScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       {/* 화면 상단 잡다한 것들 */}
       <Animated.View style={styles.settingsRow}>
         <TouchableOpacity onPress={() => {}}>
@@ -180,25 +229,14 @@ const MainScreen = () => {
       </View>
 
       {/* 바텀시트 */}
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        snapToOffsets={[0, SCROLL_THRESHOLD]}
-        decelerationRate="fast"
-        bounces={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        contentContainerStyle={{
-          paddingTop: screenHeight,
-        }}
-        style={StyleSheet.absoluteFill}
+      <Animated.View
+        style={[
+          styles.bottomSheetWrapper,
+          { transform: [{ translateY: bottomSheetTranslateY }] },
+        ]}
       >
-        <View style={styles.bottomSheetWrapper}>
-          <BalanceGame />
-        </View>
-      </Animated.ScrollView>
+        <BalanceGame />
+      </Animated.View>
     </View>
   );
 };
@@ -241,7 +279,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 15,
-    marginTop: 10,
+    marginTop: 8,
 
     borderColor: "black",
     borderWidth: 1,
@@ -261,9 +299,6 @@ const styles = StyleSheet.create({
   heroContainer: {
     position: "absolute",
     width: "100%",
-
-    borderColor: "black",
-    borderWidth: 1,
   },
 
   staticContentLayer: {
@@ -277,10 +312,14 @@ const styles = StyleSheet.create({
   },
 
   bottomSheetWrapper: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     backgroundColor: "white",
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     height: SCROLL_THRESHOLD,
     padding: 20,
+    zIndex: 5,
   },
 });
