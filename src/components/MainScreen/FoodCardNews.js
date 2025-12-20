@@ -57,14 +57,11 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         },
       ]}
     >
-      <View
-        style={[
-          styles.cardImage,
-          { width: containerHeight, height: containerHeight },
-        ]}
-      >
-        <Text style={styles.foodText}>{item.name}</Text>
-      </View>
+      <Image
+        source={{ uri: item.imageURL }}
+        style={[{ width: containerHeight, height: containerHeight }]}
+      />
+      <Text style={styles.foodText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
@@ -115,12 +112,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
-  cardImage: {
-    backgroundColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   foodText: {
+    position: "absolute",
+    bottom: 15,
+    backgroundColor: "black",
+    padding: 5,
     color: "white",
     fontSize: 24,
   },

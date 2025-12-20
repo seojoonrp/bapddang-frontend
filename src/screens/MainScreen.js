@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    marginBottom: 24,
+    marginBottom: 32,
     gap: 12,
   },
 
