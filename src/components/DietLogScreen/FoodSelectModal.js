@@ -41,9 +41,9 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
     fetchLikedFoods()
       .then((data) => {
-        console.log("Fetched liked foods:", data.likedFoods); 
+        console.log("Fetched liked foods:", data.likedFoods);
         if (data) {
-          const names = data.likedFoods.map((food) => food.name);
+          const names = data.map((food) => food.name);
           setLikedFoods(names);
         } else {
           setLikedFoods([]);
@@ -87,13 +87,13 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
         const fallbackName = item.originalName ?? filtered[idx];
         if (item.status === "suggestion") {
           toCheck.push({ ...item, fallbackName });
-        }
-        else {
+        } else {
           const output = item.okOutput || item.newOutput || {};
           toResolve.push({
             name: output.name ?? fallbackName,
             foodId: output.id,
-            foodType: output.type || (item.status === "new" ? "new" : "general"),
+            foodType:
+              output.type || (item.status === "new" ? "new" : "general"),
           });
         }
       });
@@ -140,7 +140,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
         name: newFoodData.name,
         foodId: newFoodData.id,
         foodType: "custom",
-      }
+      };
       moveToNext(newItem);
     } catch (error) {
       alert("음식 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -177,12 +177,15 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
 
             <Text style={styles.checkHint}>
-              {resolvedItems.length + 1} / {resolvedItems.length + suggestionQueue.length} 번째 음식 확인 중
+              {resolvedItems.length + 1} /{" "}
+              {resolvedItems.length + suggestionQueue.length} 번째 음식 확인 중
             </Text>
 
             <View style={styles.checkBox}>
               <Text style={styles.checkTitle}>입력한 음식</Text>
-              <Text style={styles.checkInputName}>{currentTarget.fallbackName}</Text>
+              <Text style={styles.checkInputName}>
+                {currentTarget.fallbackName}
+              </Text>
             </View>
 
             <View style={{ width: "100%", marginTop: 20 }}>
@@ -202,12 +205,14 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
             {/* 원본 유지 버튼 */}
             <TouchableOpacity
-              style={[styles.confirmButton, { backgroundColor: Colors.slightly_burn, marginTop: 30 }]}
+              style={[
+                styles.confirmButton,
+                { backgroundColor: Colors.slightly_burn, marginTop: 30 },
+              ]}
               onPress={handleCreateCustom}
             >
               <Text style={styles.confirmText}>원문 그대로 사용</Text>
             </TouchableOpacity>
-
           </ScrollView>
         ) : (
           <ScrollView
@@ -242,14 +247,20 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
             <View style={styles.dualConfirmRow}>
               <TouchableOpacity
-                style={[styles.confirmButton, { backgroundColor: Colors.point_red }]}
+                style={[
+                  styles.confirmButton,
+                  { backgroundColor: Colors.point_red },
+                ]}
                 onPress={() => startCheck("fast")}
               >
                 <Text style={styles.confirmText}>고속노화로 저장</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.confirmButton, { backgroundColor: Colors.point_green }]}
+                style={[
+                  styles.confirmButton,
+                  { backgroundColor: Colors.point_green },
+                ]}
                 onPress={() => startCheck("slow")}
               >
                 <Text style={styles.confirmText}>저속노화로 저장</Text>
@@ -364,7 +375,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.light_gray,
     borderRadius: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   checkTitle: {
@@ -405,4 +416,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.burn,
   },
-}); 
+});
