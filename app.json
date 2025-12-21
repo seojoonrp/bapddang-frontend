@@ -12,7 +12,23 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.happetite.bobttaeng",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
+            ]
+          },
+          {
+            "CFBundleURLSchemes": [
+              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
+            ]
+          }
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,6 +39,28 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.636208679388-4aa1ldr2j227cgki5oh5a3f2o9qqb9ip"
+        }
+      ],
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          "kakaoAppKey": "e8dcae88e87ed3b8a084375fce4ca957",
+          "kotlinVersion": "1.9.0"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "142f5028-e8d7-4a65-8aa4-b35083d0ce51"
+      }
     }
   }
 }
