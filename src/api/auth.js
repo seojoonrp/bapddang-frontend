@@ -27,3 +27,11 @@ export const loginWithGoogleApi = async (idToken) => {
 
   return response.data;
 };
+
+export const loginWithKakaoApi = async (accessToken) => {
+  const response = await api.post("/auth/kakao", {
+    accessToken: accessToken,
+  });
+
+  return response.data;
+};

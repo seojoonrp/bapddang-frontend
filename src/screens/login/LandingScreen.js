@@ -4,8 +4,8 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import useAuthStore from "../../stores/authStore";
 
+import { handleGoogleLogin, handleKakaoLogin } from "../../services/auth";
 import Colors from "../../styles/colors";
-import { handleGoogleLogin } from "../../services/auth";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
@@ -49,6 +49,21 @@ const LandingScreen = () => {
     }
   };
 
+  const onKakaoLoginPress = async () => {
+    try {
+      const success = await handleKakaoLogin();
+      if (success) {
+        navigation.navigate("Main");
+      }
+    } catch (error) {
+      console.log("Landing Screen Kakao Login Error:", error);
+    }
+  };
+
+  const onAppleLoginPress = () => {
+    console.log("애플하이");
+  };
+
   if (checking) {
     // 로딩화면 띄우면 좋을듯
   }
@@ -82,6 +97,18 @@ const LandingScreen = () => {
         style={{ position: "absolute", top: 40, left: 40 }}
       >
         <Text style={styles.logo}>구글 로그인</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onKakaoLoginPress}
+        style={{ position: "absolute", top: 80, left: 40 }}
+      >
+        <Text style={styles.logo}>카카오 로그인</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onAppleLoginPress}
+        style={{ position: "absolute", top: 120, left: 40 }}
+      >
+        <Text style={styles.logo}>애플 로그인 (미완)</Text>
       </TouchableOpacity>
     </View>
   );

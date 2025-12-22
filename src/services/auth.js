@@ -1,16 +1,21 @@
 // src/services/auth.js
 
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { loginWithGoogleApi } from "../api/auth";
+import { login, logout as kakaoLogout } from "@react-native-seoul/kakao-login";
+
+import { loginWithGoogleApi, loginWithKakaoApi } from "../api/auth";
+
+import {
+  EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+} from "@env";
 
 import useAuthStore from "../stores/authStore";
 
 export const initGoogleLogin = () => {
   GoogleSignin.configure({
-    webClientId:
-      "636208679388-b89kfh97065p2pg8furebbge59kcun3h.apps.googleusercontent.com",
-    iosClientId:
-      "636208679388-4aa1ldr2j227cgki5oh5a3f2o9qqb9ip.apps.googleusercontent.com",
+    webClientId: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    iosClientId: EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   });
 };
 
@@ -23,25 +28,58 @@ export const handleGoogleLogin = async () => {
 
     if (result.accessToken) {
       await useAuthStore.getState().setLogin(result.user, result.accessToken);
+
+      console.log("Google Login Success:", result.user.email);
+      console.log("Token:", result.accessToken);
+      return true;
     }
 
-    console.log("Google Login Success:", result.user.email);
-    console.log("Token:", result.accessToken);
-    return true;
+    return false;
   } catch (error) {
     console.log("Google Login Service Error:", error);
     throw error;
   }
 };
 
+export const handleKakaoLogin = async () => {
+  try {
+    const token = await login();
+
+    const result = await loginWithKakaoApi(token.accessToken);
+
+    if (result.accessToken) {
+      await useAuthStore.getState().setLogin(result.user, result.accessToken);
+
+      console.log("Kakao Login Success:");
+      console.log("Token:", result.accessToken);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.log("Kakao Login Service Error:", error);
+    throw error;
+  }
+};
+
 export const handleLogout = async () => {
   try {
-    await GoogleSignin.signOut();
+    const user = useAuthStore.getState().user;
+    const loginMethod = user?.loginMethod;
+
+    if (loginMethod === "google") {
+      await GoogleSignin.signOut();
+    } else if (loginMethod === "kakao") {
+      await kakaoLogout();
+    }
+
     await useAuthStore.getState().setLogout();
 
-    console.log("Logout Success");
+    console.log(`Logout Success (${loginMethod})`);
   } catch (error) {
     console.log("Logout Service Error:", error);
+
+    await useAuthStore.getState().setLogout();
     throw error;
   }
 };
