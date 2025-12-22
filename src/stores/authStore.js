@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { fetchMyInfo } from "../services/auth";
+import { fetchMyInfoApi } from "../api/auth";
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -26,7 +26,7 @@ const useAuthStore = create((set) => ({
 
   // 4. 랜딩페이지에서 세션 체크
   checkLoginStatus: async () => {
-    const userData = await fetchMyInfo();
+    const userData = await fetchMyInfoApi();
 
     if (userData) {
       set({ user: userData, isLogin: true });

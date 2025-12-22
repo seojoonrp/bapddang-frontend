@@ -5,6 +5,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import useAuthStore from "../../stores/authStore";
 
 import Colors from "../../styles/colors";
+import { handleGoogleLogin } from "../../services/auth";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
@@ -37,6 +38,17 @@ const LandingScreen = () => {
   //   checkLoginStatus();
   // }, [navigation, route.params]);
 
+  const onGoogleLoginPress = async () => {
+    try {
+      const success = await handleGoogleLogin();
+      if (success) {
+        navigation.navigate("Main");
+      }
+    } catch (error) {
+      console.log("Landing Screen Google Login Error:", error);
+    }
+  };
+
   if (checking) {
     // 로딩화면 띄우면 좋을듯
   }
@@ -64,6 +76,13 @@ const LandingScreen = () => {
       >
         이미 계정이 있다면? 로그인
       </Text>
+
+      <TouchableOpacity
+        onPress={onGoogleLoginPress}
+        style={{ position: "absolute", top: 40, left: 40 }}
+      >
+        <Text style={styles.logo}>구글 로그인</Text>
+      </TouchableOpacity>
     </View>
   );
 };
