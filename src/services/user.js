@@ -3,6 +3,8 @@ import api from "../api/api";
 export const likeFood = async (foodID) => {
   try {
     const response = await api.post(`/foods/${foodID}/like`);
+
+    console.log("Successfully liked food");
   } catch (error) {
     console.error("Error liking food:", error);
   }
@@ -11,6 +13,8 @@ export const likeFood = async (foodID) => {
 export const unlikeFood = async (foodID) => {
   try {
     await api.delete(`/foods/${foodID}/like`);
+
+    console.log("Successfully unliked food");
   } catch (error) {
     console.error("Error unliking food:", error);
   }

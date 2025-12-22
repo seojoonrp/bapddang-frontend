@@ -26,6 +26,7 @@ import BalanceGame from "../components/MainScreen/BalanceGame";
 import Bell from "../components/svg/Bell";
 import Settings from "../components/svg/Settings";
 import Colors from "../styles/colors";
+import { handleLogout } from "../services/auth";
 
 const SCROLL_THRESHOLD = 580;
 
@@ -179,6 +180,11 @@ const MainScreen = () => {
     </View>
   );
 
+  const onLogoutPress = async () => {
+    await handleLogout();
+    navigation.replace("Landing");
+  };
+
   return (
     <View style={styles.container} {...panResponder.panHandlers}>
       {/* 화면 상단 잡다한 것들 */}
@@ -204,6 +210,9 @@ const MainScreen = () => {
 
       <View style={styles.logoRow}>
         <Text style={styles.logoText}>밥땡</Text>
+        <TouchableOpacity onPress={onLogoutPress}>
+          <Text>로그아웃</Text>
+        </TouchableOpacity>
         <View style={styles.userProfile}></View>
       </View>
 

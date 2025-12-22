@@ -3,7 +3,7 @@ import api from "../api/api";
 export const fetchMainFeedFoods = async ({ type, speed }) => {
   try {
     const response = await api.get("/foods/main-feed", {
-      params: { type, speed, count: 7 },
+      params: { type, speed, count: 4 },
     });
 
     return response.data;
