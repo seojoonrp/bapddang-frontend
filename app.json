@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "142f5028-e8d7-4a65-8aa4-b35083d0ce51"
+      }
+    },
+    "owner": "happetite-2025b"
   }
 }
