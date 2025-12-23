@@ -97,7 +97,7 @@ const BalanceGame = () => {
   // );
   return (
     <View style={styles.container}>
-      <Text>밸런스 게임은 현재 준비중입니다!</Text>
+      <Text>밸런스게임임</Text>
     </View>
   );
 };

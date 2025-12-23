@@ -6,6 +6,7 @@ import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Navigation from "./Navigation";
+import { initGoogleLogin } from "./services/auth";
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -20,7 +21,10 @@ const App = () => {
       NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundB.woff2"),
       NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundR.woff2"),
       NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundL.woff2"),
+      KCCGanpan: require("./assets/fonts/KCC-Ganpan.woff2"),
     }).then(() => setFontsLoaded(true));
+
+    initGoogleLogin();
   }, []);
 
   if (!fontsLoaded) return null;

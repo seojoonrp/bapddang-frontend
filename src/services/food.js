@@ -3,7 +3,7 @@ import api from "../api/api";
 export const fetchMainFeedFoods = async ({ type, speed }) => {
   try {
     const response = await api.get("/foods/main-feed", {
-      params: { type, speed, count: 3 },
+      params: { type, speed, count: 4 },
     });
 
     return response.data;
@@ -22,32 +22,34 @@ export const fetchFoodById = async (foodId) => {
     return null;
   }
 };
+
 export const validateFoods = async (names) => {
   try {
-    const res= await api.post("/foods/validate", {names});
+    const res = await api.post("/foods/validate", { names });
     return res.data.results ?? [];
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error validating foods:", error);
     throw error;
   }
 };
-export const createCustomFood = async (name) =>{
-  try{
-    const response= await api.post("/custom-foods", {name});
+
+export const createCustomFood = async (name) => {
+  try {
+    const response = await api.post("/custom-foods", { name });
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error creating custom food:", error);
     throw error;
   }
 };
+
 export const fetchRankedFoods = () => {
   return []; // Temporarily disable ranking feature
 };
+
 export const fetchLikedFoods = async () => {
   try {
-    const response = await api.get("/foods/liked"); 
+    const response = await api.get("/foods/liked");
     return response.data;
   } catch (error) {
     console.error("Error fetching liked foods:", error);

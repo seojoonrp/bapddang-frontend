@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import useAuthStore from "../../stores/authStore";
 
+import { handleGoogleLogin, handleKakaoLogin } from "../../services/auth";
 import Colors from "../../styles/colors";
 
 const LandingScreen = () => {
@@ -14,27 +15,54 @@ const LandingScreen = () => {
 
   const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
 
-  useEffect(() => {
-    const from = route.params?.from;
+  // 로그인 세션 검사 -> 소셜로그인 테스트 때문에 꺼둠
+  // useEffect(() => {
+  //   const from = route.params?.from;
 
-    const checkLoginStatus = async () => {
-      // 온 곳이 있으면 로그아웃이므로 검사 X
-      if (from) {
-        setChecking(false);
-        return;
+  //   const checkLoginStatus = async () => {
+  //     // 온 곳이 있으면 로그아웃이므로 검사 X
+  //     if (from) {
+  //       setChecking(false);
+  //       return;
+  //     }
+
+  //     const isLoggedIn = await checkLoginSession();
+
+  //     if (isLoggedIn) {
+  //       navigation.replace("Main");
+  //     } else {
+  //       setChecking(false);
+  //     }
+  //   };
+
+  //   checkLoginStatus();
+  // }, [navigation, route.params]);
+
+  const onGoogleLoginPress = async () => {
+    try {
+      const success = await handleGoogleLogin();
+      if (success) {
+        navigation.navigate("Main");
       }
+    } catch (error) {
+      console.log("Landing Screen Google Login Error:", error);
+    }
+  };
 
-      const isLoggedIn = await checkLoginSession();
-
-      if (isLoggedIn) {
-        navigation.replace("Main");
-      } else {
-        setChecking(false);
+  const onKakaoLoginPress = async () => {
+    try {
+      const success = await handleKakaoLogin();
+      if (success) {
+        navigation.navigate("Main");
       }
-    };
+    } catch (error) {
+      console.log("Landing Screen Kakao Login Error:", error);
+    }
+  };
 
-    checkLoginStatus();
-  }, [navigation, route.params]);
+  const onAppleLoginPress = () => {
+    console.log("애플하이");
+  };
 
   if (checking) {
     // 로딩화면 띄우면 좋을듯
@@ -63,6 +91,25 @@ const LandingScreen = () => {
       >
         이미 계정이 있다면? 로그인
       </Text>
+
+      <TouchableOpacity
+        onPress={onGoogleLoginPress}
+        style={{ position: "absolute", top: 40, left: 40 }}
+      >
+        <Text style={styles.logo}>구글 로그인</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onKakaoLoginPress}
+        style={{ position: "absolute", top: 80, left: 40 }}
+      >
+        <Text style={styles.logo}>카카오 로그인</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={onAppleLoginPress}
+        style={{ position: "absolute", top: 120, left: 40 }}
+      >
+        <Text style={styles.logo}>애플 로그인 (미완)</Text>
+      </TouchableOpacity>
     </View>
   );
 };
