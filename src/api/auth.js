@@ -1,3 +1,5 @@
+// src/api/auth.js
+
 import api from "./api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -31,6 +33,15 @@ export const loginWithGoogleApi = async (idToken) => {
 export const loginWithKakaoApi = async (accessToken) => {
   const response = await api.post("/auth/kakao", {
     accessToken: accessToken,
+  });
+
+  return response.data;
+};
+
+export const loginWithAppleApi = async (identityToken, fullName) => {
+  const response = await api.post("/auth/apple", {
+    identityToken: identityToken,
+    fullName: fullName, // { givenName, familyName }
   });
 
   return response.data;

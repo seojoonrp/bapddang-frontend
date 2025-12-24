@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 import useAuthStore from "../../stores/authStore";
 
-import { handleGoogleLogin, handleKakaoLogin } from "../../services/auth";
+import {
+  handleAppleLogin,
+  handleGoogleLogin,
+  handleKakaoLogin,
+} from "../../services/auth";
 import Colors from "../../styles/colors";
 
 const LandingScreen = () => {
@@ -60,8 +65,15 @@ const LandingScreen = () => {
     }
   };
 
-  const onAppleLoginPress = () => {
-    console.log("애플하이");
+  const onAppleLoginPress = async () => {
+    try {
+      const success = await handleAppleLogin();
+      if (success) {
+        navigation.navigate("Main");
+      }
+    } catch (error) {
+      console.log("Landing Screen Apple Login Error:", error);
+    }
   };
 
   if (checking) {
@@ -104,12 +116,19 @@ const LandingScreen = () => {
       >
         <Text style={styles.logo}>카카오 로그인</Text>
       </TouchableOpacity>
-      <TouchableOpacity
+      <AppleAuthentication.AppleAuthenticationButton
+        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+        borderRadius={5}
+        style={{
+          width: 200,
+          height: 44,
+          position: "absolute",
+          top: 120,
+          left: 40,
+        }}
         onPress={onAppleLoginPress}
-        style={{ position: "absolute", top: 120, left: 40 }}
-      >
-        <Text style={styles.logo}>애플 로그인 (미완)</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };
