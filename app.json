@@ -12,19 +12,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "usesAppleSignIn": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.happetite.bobttaeng",
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": [
-              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
-            ]
-          },
-          {
-            "CFBundleURLSchemes": [
-              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
-            ]
+            "CFBundleURLSchemes": ["kakaoe8dcae88e87ed3b8a084375fce4ca957"]
           }
         ],
         "ITSAppUsesNonExemptEncryption": false

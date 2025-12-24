@@ -1,9 +1,14 @@
 // src/services/auth.js
 
+import * as AppleAuthentication from "expo-apple-authentication";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { login, logout as kakaoLogout } from "@react-native-seoul/kakao-login";
 
-import { loginWithGoogleApi, loginWithKakaoApi } from "../api/auth";
+import {
+  loginWithAppleApi,
+  loginWithGoogleApi,
+  loginWithKakaoApi,
+} from "../api/auth";
 
 import {
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -58,6 +63,38 @@ export const handleKakaoLogin = async () => {
     return false;
   } catch (error) {
     console.log("Kakao Login Service Error:", error);
+    throw error;
+  }
+};
+
+export const handleAppleLogin = async () => {
+  try {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    const result = await loginWithAppleApi(
+      credential.identityToken,
+      credential.fullName
+    );
+
+    if (result.accessToken) {
+      await useAuthStore.getState().setLogin(result.user, result.accessToken);
+      console.log("Apple Login Success:", result.user.email);
+      console.log("Token:", result.accessToken);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    if (error.code === "ERR_REQUEST_CANCELED") {
+      console.log("Apple Login Canceled by User");
+      return false;
+    }
+    console.log("Apple Login Service Error:", error);
     throw error;
   }
 };
