@@ -5,7 +5,7 @@ import { View, Text, StyleSheet } from "react-native";
 
 import { fetchRankedFoods } from "../../services/food";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 const Ranking = () => {
   const [rankings, setRankings] = useState([]);

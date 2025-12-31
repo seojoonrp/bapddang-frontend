@@ -11,7 +11,7 @@ import Modal from "react-native-modal";
 
 import api from "../../api/api";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 function CustomCheckBox({ value, onValueChange }) {
   return (
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginTop: 24,
     marginBottom: 6,
-    color: Colors.signup_desc,
+    color: Colors.light_red,
     marginLeft: 20,
   },
   inputBg: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: "NanumSquareEB",
     fontSize: 16,
-    color: Colors.signup_desc,
+    color: Colors.light_red,
     marginBottom: 30,
   },
   checkboxContainer: {
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareB",
   },
   backToLoginText: {
-    color: Colors.signup_desc,
+    color: Colors.light_red,
     fontFamily: "NanumSquareB",
     alignSelf: "center",
     fontSize: 15,

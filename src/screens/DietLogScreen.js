@@ -20,7 +20,7 @@ import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "../stores/authStore";
 import { fetchReviewsByDay } from "../services/review";
-import Colors from "../styles/colors";
+import Colors from "../constants/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
@@ -30,11 +30,10 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import { useFocusEffect } from "@react-navigation/native";
 import { syncUserWeekAndDay } from "../services/user";
 
-
 const DietLogScreen = () => {
   // 추가버튼 관련
   const { user } = useAuthStore();
-  
+
   const [displayMonth, setDisplayMonth] = useState(null);
   const [weekDates, setWeekDates] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState([]);
@@ -44,7 +43,6 @@ const DietLogScreen = () => {
   const [activeModal, setActiveModal] = useState("none");
   const [nextModal, setNextModal] = useState(null);
   const [back, setBack] = useState(false);
-
 
   // BottomSheet 관련 설정
   const sheetRef = useRef(null);
@@ -63,8 +61,8 @@ const DietLogScreen = () => {
   });
 
   const userDay = user?.day || 1;
-  const initialWeek=Math.ceil(userDay / 7);
-  const initialDay=((userDay - 1) % 7) + 1;
+  const initialWeek = Math.ceil(userDay / 7);
+  const initialDay = ((userDay - 1) % 7) + 1;
   const [selectedDay, setSelectedDay] = useState(initialDay);
   const [currentMaxWeek, setCurrentMaxWeek] = useState(initialWeek);
   const [selectedWeek, setSelectedWeek] = useState(initialWeek);
@@ -90,7 +88,7 @@ const DietLogScreen = () => {
         // user의 day/week 읽어서 selectedWeek 세팅
         try {
           const userDay = user?.day ?? 1;
-          
+
           const calculatedWeek = Math.ceil(userDay / 7);
           const currentDayofThisWeek = ((userDay - 1) % 7) + 1;
           if (alive) {
@@ -110,9 +108,9 @@ const DietLogScreen = () => {
   );
 
   useEffect(() => {
-    if(!user?.createdAt)return;
+    if (!user?.createdAt) return;
     const startDate = new Date(user.createdAt);
-    const weekStartOffset=((selectedWeek - 1) * 7);
+    const weekStartOffset = (selectedWeek - 1) * 7;
     startDate.setDate(startDate.getDate() + weekStartOffset);
 
     setDisplayMonth(startDate.getMonth() + 1);
@@ -128,11 +126,12 @@ const DietLogScreen = () => {
   useEffect(() => {
     const fetchDailyData = async () => {
       const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
-      console.log(`Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`);
-      try{
+      console.log(
+        `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`
+      );
+      try {
         const reviews = await fetchReviewsByDay(targetAbsoluteDay);
-        setDailyReviews(reviews|| []);
-        
+        setDailyReviews(reviews || []);
       } catch (e) {
         console.log("Failed to fetch reviews for day:", e);
         setDailyReviews([]);
@@ -269,8 +268,8 @@ const DietLogScreen = () => {
               )}
               // 데이터가 없을 때 표시할 UI (옵션)
               ListEmptyComponent={() => (
-                <View style={{ alignItems: 'center', marginTop: 50 }}>
-                  <Text style={{ color: '#999', fontFamily: 'NanumSquareR' }}>
+                <View style={{ alignItems: "center", marginTop: 50 }}>
+                  <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
                     기록된 식단이 없습니다.
                   </Text>
                 </View>
@@ -292,7 +291,6 @@ const DietLogScreen = () => {
         <Pressable style={styles.backdrop} onPress={handleCloseModal} />
         <FoodSelectModal
           onClose={handleCloseModal}
-
           onSelect={(foods, mode) => {
             handleSelectFood(foods, mode);
           }}

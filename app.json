@@ -1,9 +1,11 @@
 {
   "expo": {
-    "name": "bobttaeng",
+    "name": "밥땡",
     "slug": "bobttaeng",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./src/assets/app-icon.png",
+    "scheme": "bobttaeng",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -32,7 +34,7 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/favicon.png"
     },
     "plugins": [
       "expo-dev-client",

@@ -4,7 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { EXPO_PUBLIC_API_BASE_URL } from "@env";
 
 const api = axios.create({
-  baseURL: EXPO_PUBLIC_API_BASE_URL,
+  // baseURL: EXPO_PUBLIC_API_BASE_URL,
+  baseURL: "https://nontheological-unpostered-addyson.ngrok-free.dev/api/v1",
+  headers: {
+    "ngrok-skip-browser-warning": "69420",
+  },
 });
 
 api.interceptors.request.use(

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
-import Colors from "../styles/colors";
+import Colors from "../constants/colors";
 
 const ModeSwitch = ({ value, onValueChange }) => {
   const moveAnim = useRef(new Animated.Value(value ? 1 : 0)).current;

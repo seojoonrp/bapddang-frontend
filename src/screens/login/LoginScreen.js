@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import api from "../../api/api";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 17,
     fontFamily: "NanumSquareRoundEB",
-    color: Colors.signup_desc,
+    color: Colors.light_red,
     marginTop: 36,
     marginBottom: 6,
     marginLeft: 20,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   backToSignupText: {
-    color: Colors.signup_desc,
+    color: Colors.light_red,
     textAlign: "center",
     fontFamily: "NanumSquareB",
     fontSize: 15,

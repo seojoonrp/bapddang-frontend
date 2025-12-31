@@ -25,7 +25,7 @@ import Ranking from "../components/MainScreen/Ranking";
 import BalanceGame from "../components/MainScreen/BalanceGame";
 import Bell from "../components/svg/Bell";
 import Settings from "../components/svg/Settings";
-import Colors from "../styles/colors";
+import Colors from "../constants/colors";
 import { handleLogout } from "../services/auth";
 
 const SCROLL_THRESHOLD = 580;

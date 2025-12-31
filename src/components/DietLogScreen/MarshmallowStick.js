@@ -3,12 +3,12 @@ import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
 
 import Marshmallow from "../svg/Marshmallow";
 import marshmallowData from "../../data/MarshmallowData.json";
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 const ITEM_HEIGHT = 180;
 const MARSHMALLOW_SIZE = 160;
 
-const MarshmallowStick = ({onClick}) => {
+const MarshmallowStick = ({ onClick }) => {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   return (
@@ -43,7 +43,7 @@ const MarshmallowStick = ({onClick}) => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              if(onClick){
+              if (onClick) {
                 onClick(index);
               }
             }}
@@ -53,12 +53,12 @@ const MarshmallowStick = ({onClick}) => {
               alignItems: "center",
             }}
           >
-          <Marshmallow
-            roastStep={item.roastStep}
-            rotation={item.rotation}
-            size={MARSHMALLOW_SIZE}
-            verticalGap={(ITEM_HEIGHT - MARSHMALLOW_SIZE) / 2}
-          />
+            <Marshmallow
+              roastStep={item.roastStep}
+              rotation={item.rotation}
+              size={MARSHMALLOW_SIZE}
+              verticalGap={(ITEM_HEIGHT - MARSHMALLOW_SIZE) / 2}
+            />
           </TouchableOpacity>
         )}
         showsVerticalScrollIndicator={false}

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import * as AppleAuthentication from "expo-apple-authentication";
+
+import GoogleIcon from "../../assets/icons/google-icon.svg";
+import KakaoIcon from "../../assets/icons/kakao-icon.svg";
+import AppleIcon from "../../assets/icons/apple-icon.svg";
 
 import useAuthStore from "../../stores/authStore";
 
@@ -10,33 +13,47 @@ import {
   handleGoogleLogin,
   handleKakaoLogin,
 } from "../../services/auth";
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
+import DebugButton from "../../components/DebugButton";
+import api from "../../api/api";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
+  const [isServerOnline, setIsServerOnline] = useState(false);
+  const checkPing = async () => {
+    try {
+      const response = await api.get("/ping");
+      if (response.status === 200) {
+        console.log("Ping response:", response.data);
+        setIsServerOnline(true);
+      } else {
+        console.log("Server is offline or returned an error.");
+        setIsServerOnline(false);
+      }
+    } catch (error) {
+      console.log("Ping error:", error);
+      setIsServerOnline(false);
+    }
+  };
+
   const [checking, setChecking] = useState(true);
 
-  const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
+  // const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
 
-  // 로그인 세션 검사 -> 소셜로그인 테스트 때문에 꺼둠
   // useEffect(() => {
   //   const from = route.params?.from;
 
   //   const checkLoginStatus = async () => {
   //     // 온 곳이 있으면 로그아웃이므로 검사 X
-  //     if (from) {
-  //       setChecking(false);
-  //       return;
-  //     }
+  //     if (from) return;
 
   //     const isLoggedIn = await checkLoginSession();
 
   //     if (isLoggedIn) {
   //       navigation.replace("Main");
-  //     } else {
-  //       setChecking(false);
   //     }
   //   };
 
@@ -76,13 +93,10 @@ const LandingScreen = () => {
     }
   };
 
-  if (checking) {
-    // 로딩화면 띄우면 좋을듯
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>로고임</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.logo}>밥땡</Text>
+
       <TouchableOpacity
         style={styles.guestButton}
         onPress={() => navigation.navigate("Main")}
@@ -95,6 +109,31 @@ const LandingScreen = () => {
       >
         <Text style={styles.signUpButtonText}>회원가입</Text>
       </TouchableOpacity>
+
+      <View style={styles.socialButtonsRow}>
+        <View
+          style={[styles.socialButton, { backgroundColor: "white" }]}
+          onPress={onGoogleLoginPress}
+        >
+          <GoogleIcon width={22} height={22} />
+        </View>
+        <View
+          style={[
+            styles.socialButton,
+            { backgroundColor: Colors.kakao_yellow },
+          ]}
+          onPress={onKakaoLoginPress}
+        >
+          <KakaoIcon width={24} height={24} />
+        </View>
+        <View
+          style={[styles.socialButton, { backgroundColor: "black" }]}
+          onPress={onAppleLoginPress}
+        >
+          <AppleIcon width={24} height={24} />
+        </View>
+      </View>
+
       <Text
         style={styles.loginButtonText}
         onPress={() => navigation.navigate("Login")}
@@ -104,32 +143,12 @@ const LandingScreen = () => {
         이미 계정이 있다면? 로그인
       </Text>
 
-      <TouchableOpacity
-        onPress={onGoogleLoginPress}
-        style={{ position: "absolute", top: 40, left: 40 }}
-      >
-        <Text style={styles.logo}>구글 로그인</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={onKakaoLoginPress}
-        style={{ position: "absolute", top: 80, left: 40 }}
-      >
-        <Text style={styles.logo}>카카오 로그인</Text>
-      </TouchableOpacity>
-      <AppleAuthentication.AppleAuthenticationButton
-        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-        borderRadius={5}
-        style={{
-          width: 200,
-          height: 44,
-          position: "absolute",
-          top: 120,
-          left: 40,
-        }}
-        onPress={onAppleLoginPress}
+      <DebugButton
+        index={0}
+        label={"Server response check"}
+        onPress={() => checkPing()}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -143,23 +162,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     paddingHorizontal: 10,
-    paddingBottom: 57,
+    paddingBottom: 24,
+    gap: 16,
     backgroundColor: Colors.point_red,
   },
   logo: {
     color: "white",
-    fontSize: 24,
+    fontSize: 48,
     fontWeight: "bold",
-    marginBottom: 90,
+    marginBottom: 192,
   },
   guestButton: {
     width: "100%",
     paddingVertical: 16,
     backgroundColor: Colors.burn_red,
-    borderColor: "#FF7873",
+    borderColor: Colors.light_red,
     borderWidth: 1,
     borderRadius: 24,
-    marginBottom: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -167,7 +186,7 @@ const styles = StyleSheet.create({
     color: Colors.background_yellow,
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 17,
+    fontSize: 16,
   },
   signUpButton: {
     width: "100%",
@@ -178,18 +197,35 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 90,
   },
   signUpButtonText: {
     color: Colors.burn,
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 17,
+    fontSize: 16,
+  },
+  socialButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 48,
+  },
+  socialButton: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 58,
+    height: 58,
+    borderColor: Colors.light_red,
+    borderWidth: 1,
+    borderRadius: 24,
   },
   loginButtonText: {
-    color: "#FF7873",
+    color: Colors.light_red,
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 15,
+    fontSize: 16,
   },
 });

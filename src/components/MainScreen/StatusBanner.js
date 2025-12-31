@@ -8,7 +8,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 import useModeStore from "../../stores/modeStore";
 

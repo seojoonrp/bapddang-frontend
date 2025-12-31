@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
 import BalanceGame from "../components/MainScreen/BalanceGame";
-import Colors from "../styles/colors";
+import Colors from "../constants/colors";
 
 const TestScreen = () => {
   const route = useRoute();

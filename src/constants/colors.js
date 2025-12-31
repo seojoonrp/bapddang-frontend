@@ -10,9 +10,10 @@ const Colors = {
   burn_red: "#BE0A20",
   light_text_gray: "#F3EFEF",
   icon_gray: "#CCC",
-  signup_desc: "#FF7873",
+  light_red: "#FF7873",
   pressed_button: "#A94946",
   bg_white: "#FEFDFA",
+  kakao_yellow: "#FEE500",
 };
 
 export default Colors;

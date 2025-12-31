@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import useAuthStore from "../../stores/authStore";
 import useModeStore from "../../stores/modeStore";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 import { fetchLikedFoods } from "../../services/user";
 
 const RecentLiked = () => {

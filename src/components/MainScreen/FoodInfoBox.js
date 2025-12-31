@@ -13,7 +13,7 @@ import { likeFood } from "../../services/user";
 import useAuthStore from "../../stores/authStore";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 
 const FoodInfoBox = ({ item, mode, onClose }) => {

@@ -13,7 +13,7 @@ import { fetchLikedFoods } from "../../services/user";
 import { validateFoods } from "../../services/food";
 import { createCustomFood } from "../../services/food";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
