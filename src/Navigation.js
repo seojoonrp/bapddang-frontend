@@ -6,6 +6,7 @@ import DietLogScreen from "./screens/DietLogScreen";
 import LoginScreen from "./screens/login/LoginScreen";
 import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
+import WelcomeScreen from "./screens/login/WelcomeScreen";
 
 import TestScreen from "./screens/TestScreen";
 
@@ -42,7 +43,11 @@ const StackScreen = () => {
         component={SignUpScreen}
         options={{ title: "회원가입 화면" }}
       />
-
+      <Stack.Screen
+        name="Welcome"
+        component={WelcomeScreen}
+        options={{ title: "환영 화면" }}
+      />
       <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );

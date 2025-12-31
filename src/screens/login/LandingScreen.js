@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import GoogleIcon from "../../assets/icons/google-icon.svg";
-import KakaoIcon from "../../assets/icons/kakao-icon.svg";
-import AppleIcon from "../../assets/icons/apple-icon.svg";
+import GoogleIcon from "../../assets/icons/google.svg";
+import KakaoIcon from "../../assets/icons/kakao.svg";
+import AppleIcon from "../../assets/icons/apple.svg";
 
 import useAuthStore from "../../stores/authStore";
 
@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
   container: {
     display: "flex",
     flexDirection: "column",
+    backgroundColor: Colors.point_red,
     justifyContent: "flex-end",
     alignItems: "center",
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingBottom: 24,
     gap: 16,
-    backgroundColor: Colors.point_red,
   },
   logo: {
     color: "white",

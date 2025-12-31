@@ -5,6 +5,7 @@ const Colors = {
   point_green: "#76C168",
   light_gray: "#D9D9D9",
   text_gray: "#DEC0C0",
+  placeholder_gray: "#D2C0C0",
   background_yellow: "#FFFAED",
   background_white: "#FEFDFA",
   burn_red: "#BE0A20",

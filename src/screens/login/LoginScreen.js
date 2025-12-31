@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../api/api";
 
 import Colors from "../../constants/colors";
+import DebugButton from "../../components/DebugButton";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -123,6 +124,12 @@ const LoginScreen = ({ navigation }) => {
       >
         <Text style={styles.backToSignupText}>회원가입 하러가기</Text>
       </TouchableOpacity>
+
+      <DebugButton
+        index={0}
+        label={"Go to Landing"}
+        onPress={() => navigation.replace("Landing")}
+      />
     </View>
   );
 };

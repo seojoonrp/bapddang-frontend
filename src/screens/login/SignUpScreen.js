@@ -5,15 +5,30 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Pressable,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
 
 import api from "../../api/api";
 
-import Colors from "../../constants/colors";
+import ChevronIcon from "../../assets/icons/chevron.svg";
+import EyeOpenIcon from "../../assets/icons/eye-open.svg";
+import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
+import CheckYesIcon from "../../assets/icons/check-yes.svg";
+import CheckNoIcon from "../../assets/icons/check-no.svg";
+import CheckCircleYesIcon from "../../assets/icons/check-circle-yes.svg";
+import CheckCircleNoIcon from "../../assets/icons/check-circle-no.svg";
 
-function CustomCheckBox({ value, onValueChange }) {
+import Colors from "../../constants/colors";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+const CustomCheckBox = ({ value, onValueChange }) => {
   return (
     <TouchableOpacity
       onPress={() => onValueChange(!value)}
@@ -27,41 +42,75 @@ function CustomCheckBox({ value, onValueChange }) {
       }}
     />
   );
-}
+};
+
+const StatusMessage = ({ okMessage, errorMessage, isError }) => {
+  return (
+    <View style={styles.statusMessageContainer}>
+      {isError ? (
+        <CheckNoIcon width={16} height={16} />
+      ) : (
+        <CheckYesIcon width={16} height={16} />
+      )}
+      <Text style={styles.statusMessageText}>
+        {isError ? errorMessage : okMessage}
+      </Text>
+    </View>
+  );
+};
+
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
 
-  const [email, setEmail] = useState("");
+  const insets = useSafeAreaInsets();
+
+  const [username, setUsername] = useState("");
   const [pw, setPw] = useState("");
 
   const [pwConfirm, setPwConfirm] = useState("");
   const [pwCondition, setPwCondition] = useState(false);
   const [pwSame, setPwSame] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const isCompleted = pwCondition && pwSame && email.length > 0;
+  const isCompleted = pwCondition && pwSame && username.length > 0;
+
+  const [isPwVisible, setIsPwVisible] = useState(false);
+  const [isPwConfirmVisible, setIsPwConfirmVisible] = useState(false);
 
   const [showTerms, setShowTerms] = useState(false);
-  const [agreedCheck, setAgreedCheck] = useState(false);
+
+  const [agreedApp, setAgreedApp] = useState(false);
+  const [agreedPrivacy, setAgreedPrivacy] = useState(false);
+  const isAllAgreed = agreedApp && agreedPrivacy;
+
+  const toggleAll = () => {
+    const newValue = !isAllAgreed;
+    setAgreedApp(newValue);
+    setAgreedPrivacy(newValue);
+  };
 
   useEffect(() => {
-    const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
-    setPwCondition(regex.test(pw));
+    setPwCondition(PASSWORD_REGEX.test(pw));
     setPwSame(pw === pwConfirm && pw.length > 0);
 
     // 임시로 아무 비번이나 되게 설정
     setPwCondition(true);
   }, [pw, pwConfirm]);
 
-  const handleEmailVerifyPress = () => {
-    setAgreedCheck(false);
+  const handleNextPress = () => {
+    setAgreedApp(false);
+    setAgreedPrivacy(false);
+
     setShowTerms(true);
   };
 
-  const handleAgree = () => {
+  const handleAgree = async () => {
+    // await handleSignUp();
     setShowTerms(false);
-    handleSignUp();
+    navigation.navigate("Welcome");
   };
 
   const handleSignUp = async () => {
@@ -69,10 +118,10 @@ const SignUpScreen = () => {
     setLoading(true);
 
     try {
-      const userName = email.split("@")[0];
+      const userName = username.split("@")[0];
 
       const response = await api.post("/auth/signup", {
-        email: email,
+        email: username,
         password: pw,
         userName: userName,
       });
@@ -95,69 +144,94 @@ const SignUpScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.mainContainer}>
-        <Text style={styles.titleText}>E-mail</Text>
-        <View style={styles.inputBg}>
-          <TextInput
-            style={styles.inputText}
-            placeholder="이메일을 입력해주세요..."
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholderTextColor="#aaa"
-          />
-        </View>
-
-        <Text style={styles.titleText}>Password</Text>
-        <View style={styles.inputBg}>
-          <TextInput
-            style={styles.inputText}
-            placeholder="비밀번호를 입력해주세요..."
-            secureTextEntry
-            value={pw}
-            onChangeText={setPw}
-            autoCapitalize="none"
-            placeholderTextColor="#aaa"
-          />
-        </View>
-
-        <View style={styles.descContainer}>
-          <Text
-            style={[
-              styles.checkText,
-              { color: pwCondition ? "#4caf50" : "#BE2C2C" },
-            ]}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.headerContainer, { top: insets.top + 8 }]}>
+          <TouchableOpacity
+            style={styles.goBackButton}
+            onPress={() => navigation.goBack()}
           >
-            {pwCondition ? "✓" : "✗"}
-          </Text>
-          <Text style={styles.descText}>
-            대문자, 소문자, 특수기호 포함 8자 이상
-          </Text>
+            <ChevronIcon width={24} height={24} />
+          </TouchableOpacity>
+          <Text style={styles.registerText}>회원가입</Text>
         </View>
 
-        <View style={styles.inputBg}>
-          <TextInput
-            style={styles.inputText}
-            placeholder="비밀번호를 다시 입력해주세요..."
-            secureTextEntry
-            value={pwConfirm}
-            onChangeText={setPwConfirm}
-            placeholderTextColor="#aaa"
+        <View style={[styles.inputContainer, { marginBottom: 16 }]}>
+          <Text style={styles.inputFieldText}>ID</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.flexInput}
+              placeholder="아이디를 입력해주세요..."
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              placeholderTextColor={Colors.placeholder_gray}
+            />
+          </View>
+          <StatusMessage
+            okMessage="중복되지 않는 아이디입니다."
+            errorMessage="중복되는 아이디입니다."
+            isError={false}
           />
         </View>
 
-        <View style={styles.descContainer}>
-          <Text
-            style={[
-              styles.checkText,
-              { color: pwSame ? "#4caf50" : "#BE2C2C" },
-            ]}
-          >
-            {pwSame ? "✓" : "✗"}
-          </Text>
-          <Text style={styles.descText}>비밀번호 일치</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputFieldText}>Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.flexInput}
+              placeholder="비밀번호를 입력해주세요..."
+              value={pw}
+              onChangeText={setPw}
+              autoCapitalize="none"
+              secureTextEntry={!isPwVisible}
+              placeholderTextColor={Colors.placeholder_gray}
+            />
+            <TouchableOpacity
+              onPress={() => setIsPwVisible(!isPwVisible)}
+              style={styles.iconButton}
+            >
+              {isPwVisible ? (
+                <EyeOpenIcon width={24} height={24} />
+              ) : (
+                <EyeClosedIcon width={24} height={24} />
+              )}
+            </TouchableOpacity>
+          </View>
+          <StatusMessage
+            okMessage="영문 대문자, 소문자, 숫자, 특수문자 포함 8자 이상"
+            errorMessage="영문 대문자, 소문자, 숫자, 특수문자 포함 8자 이상"
+            isError={!pwCondition}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.flexInput}
+              placeholder="비밀번호를 다시 입력해주세요..."
+              value={pwConfirm}
+              onChangeText={setPwConfirm}
+              autoCapitalize="none"
+              secureTextEntry={!isPwVisible}
+              placeholderTextColor={Colors.placeholder_gray}
+            />
+            <TouchableOpacity
+              onPress={() => setIsPwConfirmVisible(!isPwConfirmVisible)}
+              style={styles.iconButton}
+            >
+              {isPwConfirmVisible ? (
+                <EyeOpenIcon width={24} height={24} />
+              ) : (
+                <EyeClosedIcon width={24} height={24} />
+              )}
+            </TouchableOpacity>
+          </View>
+          <StatusMessage
+            okMessage="비밀번호가 일치합니다."
+            errorMessage="비밀번호가 일치하지 않습니다."
+            isError={!pwSame}
+          />
         </View>
 
         <TouchableOpacity
@@ -169,77 +243,97 @@ const SignUpScreen = () => {
                 : Colors.slightly_burn,
             },
           ]}
-          onPress={handleEmailVerifyPress}
+          onPress={handleNextPress}
           disabled={!isCompleted}
         >
           <Text style={styles.nextButtonText}>다음</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.backToLoginText}>로그인 하러가기</Text>
-        </TouchableOpacity>
-      </View>
+        <Modal
+          isVisible={showTerms}
+          animationIn="slideInUp"
+          animationOut="slideOutDown"
+          backdropOpacity={0.4}
+          onBackdropPress={() => setShowTerms(false)}
+          style={styles.modal}
+          useNativeDriver={true}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.grabBar} />
 
-      <Modal
-        isVisible={showTerms}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        backdropOpacity={0.5}
-        onBackdropPress={() => setShowTerms(false)}
-        style={{ margin: 0 }}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            서비스 이용에 필요한 약관에 동의해주세요.
-          </Text>
-
-          <View style={styles.checkboxContainer}>
-            <CustomCheckBox
-              value={agreedCheck}
-              onValueChange={setAgreedCheck}
-            />
-            <Text style={styles.termsText}>[필수] 동의</Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.modalNextButton,
-              {
-                backgroundColor: agreedCheck
-                  ? Colors.point_red
-                  : Colors.text_gray,
-              },
-              {
-                borderColor: agreedCheck
-                  ? Colors.burn_red
-                  : Colors.slightly_burn,
-              },
-            ]}
-            onPress={handleAgree}
-            disabled={!agreedCheck}
-          >
-            <Text
-              style={[
-                styles.modalNextButtonText,
-                { color: agreedCheck ? Colors.background_yellow : Colors.burn },
-              ]}
-            >
-              인증메일 받기
+            <Text style={styles.modalTitle}>
+              서비스 이용에 필요한 약관에 동의해주세요.
             </Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.modalNextButton,
-              { backgroundColor: Colors.text_gray },
-            ]}
-            onPress={() => setShowTerms(false)}
-          >
-            <Text style={styles.modalNextButtonText}>취소</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </View>
+            <View style={styles.checkboxWrapper}>
+              <Pressable style={styles.checkboxRow} onPress={toggleAll}>
+                {isAllAgreed ? (
+                  <CheckCircleYesIcon width={24} height={24} />
+                ) : (
+                  <CheckCircleNoIcon width={24} height={24} />
+                )}
+                <Text style={styles.termsText}>전체 동의</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.checkboxRow}
+                onPress={() => setAgreedApp(!agreedApp)}
+              >
+                {agreedApp ? (
+                  <CheckCircleYesIcon width={24} height={24} />
+                ) : (
+                  <CheckCircleNoIcon width={24} height={24} />
+                )}
+                <Text style={styles.termsText}>[필수] 앱 이용약관 동의</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.checkboxRow}
+                onPress={() => setAgreedPrivacy(!agreedPrivacy)}
+              >
+                {agreedPrivacy ? (
+                  <CheckCircleYesIcon width={24} height={24} />
+                ) : (
+                  <CheckCircleNoIcon width={24} height={24} />
+                )}
+                <Text style={styles.termsText}>
+                  [필수] 개인정보 수집 및 이용 동의
+                </Text>
+              </Pressable>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.modalNextButton,
+                {
+                  backgroundColor: isAllAgreed
+                    ? Colors.point_red
+                    : Colors.text_gray,
+                },
+                {
+                  borderColor: isAllAgreed
+                    ? Colors.burn_red
+                    : Colors.slightly_burn,
+                },
+              ]}
+              onPress={handleAgree}
+              disabled={!isAllAgreed}
+            >
+              <Text
+                style={[
+                  styles.modalNextButtonText,
+                  {
+                    color: isAllAgreed ? Colors.background_yellow : Colors.burn,
+                  },
+                ]}
+              >
+                회원가입 완료
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -248,52 +342,71 @@ export default SignUpScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "red",
+    backgroundColor: Colors.point_red,
     justifyContent: "flex-end",
     alignItems: "center",
     width: "100%",
-    paddingHorizontal: 10,
-    paddingBottom: 57,
+    gap: 12,
+    paddingHorizontal: 12,
   },
-  mainContainer: {
+  headerContainer: {
+    position: "absolute",
+    width: "100%",
+    alignItems: "center",
+  },
+  goBackButton: {
+    position: "absolute",
+    left: 12,
+  },
+  registerText: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 18,
+    color: Colors.light_red,
+  },
+  inputContainer: {
     width: "100%",
   },
-  titleText: {
+  inputFieldText: {
     fontFamily: "NanumSquareRoundEB",
-    fontSize: 17,
-    marginTop: 24,
+    fontSize: 16,
     marginBottom: 6,
     color: Colors.light_red,
     marginLeft: 20,
   },
-  inputBg: {
+  inputWrapper: {
     width: "100%",
-    padding: 20,
-    marginBottom: 6,
-    borderRadius: 20,
-    backgroundColor: "#FFF",
-    alignSelf: "center",
-    justifyContent: "center",
-  },
-  inputText: {
-    borderWidth: 0,
-    fontSize: 17,
-    fontFamily: "NanumSquareB",
-    backgroundColor: "transparent",
-    padding: 0,
-    color: "#000",
-    textAlignVertical: "center",
-  },
-  descContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 11,
-    marginLeft: 18,
+    backgroundColor: Colors.background_white,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    height: 60,
   },
-  descText: {
+  flexInput: {
+    flex: 1,
+    height: "100%",
+    fontSize: 16,
+    fontFamily: "NanumSquareB",
+    color: Colors.burn,
+  },
+  iconButton: {
+    marginLeft: 10,
+    padding: 5,
+  },
+  statusMessageContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingLeft: 16,
+    marginTop: 6,
+  },
+  statusMessageText: {
     color: Colors.background_yellow,
     fontSize: 13,
     fontFamily: "NanumSquareRoundB",
+    marginTop: 2,
+    marginLeft: 6,
   },
   checkText: {
     fontSize: 13,
@@ -302,19 +415,24 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     width: "100%",
-    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
-    marginTop: 72,
-    marginBottom: 90,
+    marginTop: 64,
+    marginBottom: 100,
     paddingVertical: 16,
+    borderRadius: 24,
+    borderColor: Colors.slightly_burn,
     borderWidth: 1,
   },
   nextButtonText: {
-    fontSize: 17,
+    fontSize: 16,
     fontFamily: "NanumSquareB",
     color: Colors.burn,
+  },
+  modal: {
+    justifyContent: "flex-end",
+    margin: 0,
   },
   modalContent: {
     display: "flex",
@@ -322,34 +440,46 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
-    marginHorizontal: 20,
-    paddingHorizontal: 25,
-    paddingVertical: 30,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    paddingBottom: 84,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  grabBar: {
+    width: 36,
+    height: 5,
+    backgroundColor: Colors.light_gray,
+    borderRadius: 3,
+    marginBottom: 48,
   },
   modalTitle: {
     fontFamily: "NanumSquareEB",
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.light_red,
     marginBottom: 30,
   },
-  checkboxContainer: {
+  checkboxWrapper: {
     width: "100%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
     marginBottom: 30,
-    paddingLeft: 12,
+    marginLeft: 48,
+    padding: 4,
+    gap: 16,
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   termsText: {
     fontFamily: "NanumSquareRoundB",
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.burn,
+    textDecorationLine: "underline",
   },
   modalNextButton: {
     width: "100%",
-    padding: 16,
+    paddingVertical: 16,
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
