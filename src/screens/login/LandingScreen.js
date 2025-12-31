@@ -111,13 +111,13 @@ const LandingScreen = () => {
       </TouchableOpacity>
 
       <View style={styles.socialButtonsRow}>
-        <View
+        <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "white" }]}
           onPress={onGoogleLoginPress}
         >
           <GoogleIcon width={22} height={22} />
-        </View>
-        <View
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[
             styles.socialButton,
             { backgroundColor: Colors.kakao_yellow },
@@ -125,13 +125,13 @@ const LandingScreen = () => {
           onPress={onKakaoLoginPress}
         >
           <KakaoIcon width={24} height={24} />
-        </View>
-        <View
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "black" }]}
           onPress={onAppleLoginPress}
         >
           <AppleIcon width={24} height={24} />
-        </View>
+        </TouchableOpacity>
       </View>
 
       <Text
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: -4,
   },
   signUpButtonText: {
     color: Colors.burn,

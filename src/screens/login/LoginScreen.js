@@ -5,132 +5,124 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import ChevronIcon from "../../assets/icons/chevron.svg";
+import EyeOpenIcon from "../../assets/icons/eye-open.svg";
+import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
+
 import api from "../../api/api";
+import { handleLogin } from "../../services/auth";
 
 import Colors from "../../constants/colors";
-import DebugButton from "../../components/DebugButton";
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
-  const [pwCondition, setPwCondition] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const isCompleted = pwCondition && email.length > 0;
+  const insets = useSafeAreaInsets();
 
-  const handleLogin = async () => {
-    if (loading) return;
-    setLoading(true);
+  const [loading, setLoading] = useState(false);
+
+  const [username, setUsername] = useState("");
+  const [pw, setPw] = useState("");
+  const [isPwVisible, setIsPwVisible] = useState(false);
+  const isComplete = username.length > 0 && pw.length > 0;
+
+  const onLoginPress = async () => {
+    if (!isComplete || loading) return;
 
     try {
-      const response = await api.post("/auth/login", {
-        email: email,
-        password: pw,
-      });
+      const success = await handleLogin(username, pw);
+      setLoading(false);
 
-      const token = response.data?.token;
-
-      if (token) {
-        await AsyncStorage.setItem("jwt_token", token);
-        console.log("Token:", token);
-
-        // 일단 이메일 인증은 빼고
+      if (success) {
         navigation.navigate("Main");
       } else {
-        console.log("로그인은 했는데 토큰이 없음");
+        console.log("Login failed");
       }
-    } catch (e) {
-      if (e.response) {
-        console.log("Server error:", e.response.data);
-      } else if (e.request) {
-        console.log("Network error:", e.request);
-      } else {
-        console.log("Error:", e.message);
-      }
+    } catch (error) {
+      console.log("Login page error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
-    setPwCondition(regex.test(pw));
-
-    // 임시로 아무 비번이나 되게 설정
-    setPwCondition(true);
-  }, [pw]);
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.titleText}>E-mail</Text>
-      <View style={styles.inputBg}>
-        <TextInput
-          style={styles.inputText}
-          placeholder="이메일을 입력해주세요..."
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.headerContainer, { top: insets.top + 8 }]}>
+          <TouchableOpacity
+            style={styles.goBackButton}
+            onPress={() => navigation.replace("Landing")}
+          >
+            <ChevronIcon width={24} height={24} />
+          </TouchableOpacity>
+          <Text style={styles.loginText}>로그인</Text>
+        </View>
 
-      <Text style={styles.titleText}>Password</Text>
-      <View style={styles.inputBg}>
-        <TextInput
-          style={styles.inputText}
-          placeholder="비밀번호를 입력해주세요..."
-          secureTextEntry
-          value={pw}
-          onChangeText={setPw}
-          autoCapitalize="none"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputFieldText}>ID</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.flexInput}
+              placeholder="아이디를 입력해주세요..."
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              placeholderTextColor={Colors.placeholder_gray}
+            />
+          </View>
+        </View>
 
-      <View style={styles.descContainer}>
-        <Text
-          style={[
-            styles.checkText,
-            { color: pwCondition ? Colors.point_green : Colors.burn },
-          ]}
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputFieldText}>Password</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.flexInput}
+              placeholder="비밀번호를 입력해주세요..."
+              value={pw}
+              onChangeText={setPw}
+              autoCapitalize="none"
+              secureTextEntry={!isPwVisible}
+              placeholderTextColor={Colors.placeholder_gray}
+              textContentType="password"
+            />
+            <TouchableOpacity
+              onPress={() => setIsPwVisible(!isPwVisible)}
+              style={styles.iconButton}
+            >
+              {isPwVisible ? (
+                <EyeOpenIcon width={24} height={24} />
+              ) : (
+                <EyeClosedIcon width={24} height={24} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={onLoginPress}
+          disabled={!isComplete || loading}
         >
-          {pwCondition ? "✓" : "✗"}
-        </Text>
-        <Text style={styles.descText}>
-          대문자, 소문자, 특수기호 포함 8자 이상
-        </Text>
-      </View>
+          <Text style={styles.loginButtonText}>로그인</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[
-          styles.loginButton,
-          {
-            backgroundColor: isCompleted
-              ? Colors.background_yellow
-              : Colors.slightly_burn,
-          },
-        ]}
-        onPress={handleLogin}
-        disabled={!isCompleted || loading}
-      >
-        <Text style={styles.loginButtonText}>로그인</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => navigation.navigate("SignUp")}
-        disabled={loading}
-      >
-        <Text style={styles.backToSignupText}>회원가입 하러가기</Text>
-      </TouchableOpacity>
-
-      <DebugButton
-        index={0}
-        label={"Go to Landing"}
-        onPress={() => navigation.replace("Landing")}
-      />
-    </View>
+        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <Text style={styles.backToSignupText}>
+            계정이 없나요?{" "}
+            <Text style={{ textDecorationLine: "underline" }}>
+              회원가입 하러가기
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -138,55 +130,57 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-end",
     flex: 1,
-    paddingHorizontal: 10,
-    paddingBottom: 57,
     backgroundColor: Colors.point_red,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    width: "100%",
+    gap: 12,
+    paddingHorizontal: 12,
   },
-  titleText: {
-    fontSize: 17,
-    fontFamily: "NanumSquareRoundEB",
+  headerContainer: {
+    position: "absolute",
+    width: "100%",
+    alignItems: "center",
+  },
+  goBackButton: {
+    position: "absolute",
+    left: 12,
+  },
+  loginText: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 18,
     color: Colors.light_red,
-    marginTop: 36,
+  },
+  inputContainer: {
+    width: "100%",
+  },
+  inputFieldText: {
+    fontFamily: "NanumSquareRoundEB",
+    fontSize: 16,
     marginBottom: 6,
+    color: Colors.light_red,
     marginLeft: 20,
   },
-  inputBg: {
+  inputWrapper: {
     width: "100%",
-    padding: 20,
-    marginBottom: 6,
-    borderRadius: 20,
-    backgroundColor: "#FFF",
-    alignSelf: "center",
-    justifyContent: "center",
-  },
-  inputText: {
-    borderWidth: 0,
-    fontSize: 17,
-    fontFamily: "NanumSquareB",
-    backgroundColor: "transparent",
-    padding: 0,
-    color: "#000",
-    textAlignVertical: "center",
-  },
-  descContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 11,
-    marginLeft: 18,
+    backgroundColor: Colors.background_white,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    height: 60,
   },
-  descText: {
-    color: Colors.background_yellow,
-    fontSize: 13,
-    fontFamily: "NanumSquareRoundB",
+  flexInput: {
+    flex: 1,
+    height: "100%",
+    fontSize: 16,
+    fontFamily: "NanumSquareB",
+    color: Colors.burn,
   },
-  checkText: {
-    fontSize: 13,
-    fontWeight: "bold",
-    marginRight: 6,
+  iconButton: {
+    marginLeft: 10,
+    padding: 5,
   },
   loginButton: {
     width: "100%",
@@ -194,21 +188,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
+    backgroundColor: Colors.background_yellow,
     paddingVertical: 16,
     borderWidth: 1,
-    marginTop: 130,
-    marginBottom: 90,
+    marginTop: 144,
+    marginBottom: 16,
   },
   loginButtonText: {
     color: Colors.burn,
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 17,
+    fontSize: 16,
   },
   backToSignupText: {
     color: Colors.light_red,
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 15,
+    fontSize: 16,
+    marginBottom: 48,
   },
 });

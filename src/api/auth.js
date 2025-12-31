@@ -22,6 +22,15 @@ export const fetchMyInfoApi = async () => {
   }
 };
 
+export const loginApi = async (username, password) => {
+  const response = await api.post("/auth/login", {
+    username: username,
+    password: password,
+  });
+
+  return response.data;
+};
+
 export const loginWithGoogleApi = async (idToken) => {
   const response = await api.post("/auth/google", {
     idToken: idToken,

@@ -5,6 +5,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { login, logout as kakaoLogout } from "@react-native-seoul/kakao-login";
 
 import {
+  loginApi,
   loginWithAppleApi,
   loginWithGoogleApi,
   loginWithKakaoApi,
@@ -16,6 +17,24 @@ import {
 } from "@env";
 
 import useAuthStore from "../stores/authStore";
+
+export const handleLogin = async (username, password) => {
+  try {
+    const result = await loginApi(username, password);
+
+    if (result.accessToken) {
+      await useAuthStore.getState().setLogin(result.user, result.accessToken);
+
+      console.log("Login Success:", result.user.email);
+      console.log("Token:", result.accessToken);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const initGoogleLogin = () => {
   GoogleSignin.configure({

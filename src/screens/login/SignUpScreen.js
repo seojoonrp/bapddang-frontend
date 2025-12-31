@@ -28,30 +28,20 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-const CustomCheckBox = ({ value, onValueChange }) => {
-  return (
-    <TouchableOpacity
-      onPress={() => onValueChange(!value)}
-      style={{
-        width: 20,
-        height: 20,
-        borderWidth: 1,
-        borderColor: "gray",
-        backgroundColor: value ? "#4caf50" : "white",
-        marginRight: 8,
-      }}
-    />
-  );
-};
-
-const StatusMessage = ({ okMessage, errorMessage, isError }) => {
+const StatusMessage = ({
+  okMessage,
+  errorMessage,
+  isError,
+  withIcon = true,
+}) => {
   return (
     <View style={styles.statusMessageContainer}>
-      {isError ? (
-        <CheckNoIcon width={16} height={16} />
-      ) : (
-        <CheckYesIcon width={16} height={16} />
-      )}
+      {withIcon &&
+        (isError ? (
+          <CheckNoIcon width={16} height={16} />
+        ) : (
+          <CheckYesIcon width={16} height={16} />
+        ))}
       <Text style={styles.statusMessageText}>
         {isError ? errorMessage : okMessage}
       </Text>
@@ -60,7 +50,7 @@ const StatusMessage = ({ okMessage, errorMessage, isError }) => {
 };
 
 const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?-]).{8,}$/;
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -68,14 +58,21 @@ const SignUpScreen = () => {
   const insets = useSafeAreaInsets();
 
   const [username, setUsername] = useState("");
+  const [usernameCondition, setUsernameCondition] = useState(false);
+  const [isUsernameChecked, setIsUsernameChecked] = useState(false);
+  const [usernameExists, setUsernameExists] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+
   const [pw, setPw] = useState("");
+  const [pwCondition, setPwCondition] = useState(false);
 
   const [pwConfirm, setPwConfirm] = useState("");
-  const [pwCondition, setPwCondition] = useState(false);
   const [pwSame, setPwSame] = useState(false);
 
+  const isComplete =
+    usernameCondition && !usernameExists && pwCondition && pwSame;
+
   const [loading, setLoading] = useState(false);
-  const isCompleted = pwCondition && pwSame && username.length > 0;
 
   const [isPwVisible, setIsPwVisible] = useState(false);
   const [isPwConfirmVisible, setIsPwConfirmVisible] = useState(false);
@@ -93,42 +90,55 @@ const SignUpScreen = () => {
   };
 
   useEffect(() => {
-    setPwCondition(PASSWORD_REGEX.test(pw));
-    setPwSame(pw === pwConfirm && pw.length > 0);
+    setUsernameCondition(username.length >= 3 && username.length <= 15);
+    setIsUsernameChecked(false);
+    setUsernameExists(false);
+  }, [username]);
 
-    // 임시로 아무 비번이나 되게 설정
-    setPwCondition(true);
-  }, [pw, pwConfirm]);
+  const checkUsernameAvailability = async () => {
+    if (!usernameCondition) return;
 
-  const handleNextPress = () => {
-    setAgreedApp(false);
-    setAgreedPrivacy(false);
+    setCheckingUsername(true);
+    try {
+      const response = await api.get("/auth/check-username", {
+        params: { username },
+      });
 
-    setShowTerms(true);
+      setUsernameExists(response.data.exists);
+      setIsUsernameChecked(true);
+    } catch (e) {
+      console.log("Username check error:", e);
+    } finally {
+      setCheckingUsername(false);
+    }
   };
 
+  useEffect(() => {
+    setPwCondition(PASSWORD_REGEX.test(pw));
+    setPwSame(pw === pwConfirm && pw.length > 0);
+  }, [pw, pwConfirm]);
+
   const handleAgree = async () => {
-    // await handleSignUp();
-    setShowTerms(false);
-    navigation.navigate("Welcome");
+    const success = await handleSignUp();
+    if (success) {
+      setShowTerms(false);
+      navigation.navigate("Welcome");
+    }
   };
 
   const handleSignUp = async () => {
-    if (loading) return;
+    if (loading || !isComplete || !isAllAgreed) return;
     setLoading(true);
 
     try {
-      const userName = username.split("@")[0];
-
       const response = await api.post("/auth/signup", {
-        email: username,
+        username: username,
         password: pw,
-        userName: userName,
       });
 
       if (response.status === 201) {
-        console.log("SignUp successful:", response.data);
-        navigation.navigate("Login");
+        console.log("Signup successful:", response.data);
+        return true;
       }
     } catch (e) {
       if (e.response) {
@@ -138,6 +148,7 @@ const SignUpScreen = () => {
       } else {
         console.log("Error:", e.message);
       }
+      return false;
     } finally {
       setLoading(false);
     }
@@ -156,7 +167,7 @@ const SignUpScreen = () => {
           <Text style={styles.registerText}>회원가입</Text>
         </View>
 
-        <View style={[styles.inputContainer, { marginBottom: 16 }]}>
+        <View style={[styles.inputContainer, { marginBottom: 8 }]}>
           <Text style={styles.inputFieldText}>ID</Text>
           <View style={styles.inputWrapper}>
             <TextInput
@@ -164,14 +175,27 @@ const SignUpScreen = () => {
               placeholder="아이디를 입력해주세요..."
               value={username}
               onChangeText={setUsername}
+              onBlur={checkUsernameAvailability}
               autoCapitalize="none"
               placeholderTextColor={Colors.placeholder_gray}
             />
           </View>
           <StatusMessage
-            okMessage="중복되지 않는 아이디입니다."
+            okMessage="3자 이상 15자 이하"
+            errorMessage="3자 이상 15자 이하"
+            isError={!usernameCondition}
+          />
+          <StatusMessage
+            okMessage={
+              isUsernameChecked
+                ? "사용 가능한 아이디입니다."
+                : checkingUsername
+                ? "아이디 중복 확인 중..."
+                : ""
+            }
             errorMessage="중복되는 아이디입니다."
-            isError={false}
+            isError={usernameExists}
+            withIcon={isUsernameChecked}
           />
         </View>
 
@@ -199,8 +223,8 @@ const SignUpScreen = () => {
             </TouchableOpacity>
           </View>
           <StatusMessage
-            okMessage="영문 대문자, 소문자, 숫자, 특수문자 포함 8자 이상"
-            errorMessage="영문 대문자, 소문자, 숫자, 특수문자 포함 8자 이상"
+            okMessage="영문, 숫자, 특수문자 포함 8자 이상"
+            errorMessage="영문, 숫자, 특수문자 포함 8자 이상"
             isError={!pwCondition}
           />
         </View>
@@ -238,13 +262,13 @@ const SignUpScreen = () => {
           style={[
             styles.nextButton,
             {
-              backgroundColor: isCompleted
+              backgroundColor: isComplete
                 ? Colors.background_yellow
                 : Colors.slightly_burn,
             },
           ]}
-          onPress={handleNextPress}
-          disabled={!isCompleted}
+          onPress={() => setShowTerms(true)}
+          disabled={!isComplete}
         >
           <Text style={styles.nextButtonText}>다음</Text>
         </TouchableOpacity>
