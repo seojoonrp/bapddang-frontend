@@ -9,31 +9,23 @@ import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "../../constants/colors";
-
 import useModeStore from "../../stores/modeStore";
-
 import ModeSwitch from "../ModeSwitch";
 
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
-import Character from "../svg/Character";
+import Stick from "../svg/Stick";
+import Fire from "../svg/Fire";
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
+const StatusBanner = ({ scrollY, scrollThreshold }) => {
   const navigation = useNavigation();
-
   const { mode, toggleMode, modeColor } = useModeStore();
 
   const borderRadius = scrollY.interpolate({
     inputRange: [scrollThreshold * 0.7, scrollThreshold],
     outputRange: [20, 0],
-    extrapolate: "clamp",
-  });
-
-  const containerHeight = scrollY.interpolate({
-    inputRange: [0, scrollThreshold],
-    outputRange: heightRange,
     extrapolate: "clamp",
   });
 
@@ -53,7 +45,7 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
     <Animated.View
       style={[
         styles.container,
-        { borderRadius, height: containerHeight, backgroundColor: modeColor },
+        { borderRadius, backgroundColor: modeColor },
       ]}
     >
       <AnimatedLinearGradient
@@ -64,7 +56,6 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
           styles.container,
           {
             borderRadius,
-            height: containerHeight,
             overflow: "hidden",
           },
         ]}
@@ -75,6 +66,14 @@ const StatusBanner = ({ scrollY, scrollThreshold, heightRange }) => {
           </Text>
           <ModeSwitch value={mode === "fast"} onValueChange={toggleMode} />
         </Animated.View>
+
+        <View style={styles.fireContainer}>
+          <Fire scale={1.0} />
+        </View>
+
+        <View style={styles.stickContainer}>
+          <Stick scale={0.4} />
+        </View>
 
         <Animated.View
           style={[styles.bottomContainer, { bottom: bottomPosition }]}
@@ -102,10 +101,10 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     width: "100%",
+    height: 230,
     flexDirection: "column",
     justifyContent: "center",
   },
-
   switchContainer: {
     position: "absolute",
     top: 14,
@@ -113,13 +112,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    zIndex: 10,
   },
   modeText: {
     color: Colors.background_yellow,
     fontFamily: "KCCGanpan",
     fontSize: 18,
   },
-
+  fireContainer: {
+    position: "absolute",
+    left: 110,
+    bottom: 0,
+    zIndex: 1,
+  },
+  stickContainer: {
+    position: "absolute",
+    left: 120,
+    top: -50,
+    justifyContent: "center",
+    alignItems: "center",
+    transform: [{ rotate: "100deg" }],
+    zIndex: 2,
+  },
   bottomContainer: {
     position: "absolute",
     width: "100%",
@@ -128,6 +142,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     gap: 8,
+    zIndex: 10,
   },
   iconButton: {
     width: 40,
