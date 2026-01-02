@@ -8,7 +8,7 @@ import {
   Ionicons,
 } from "react-native";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 import ReviewStar from "../svg/ReviewStar";
 
 const ReviewCard = ({ review, onEdit }) => {

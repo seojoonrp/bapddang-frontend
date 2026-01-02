@@ -1,7 +1,7 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 const IconBar = ({ onClose }) => {
   return (

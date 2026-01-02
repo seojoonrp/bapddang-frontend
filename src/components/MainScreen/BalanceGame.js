@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 
 import { fetchMainFeedFoods } from "../../services/food";
 

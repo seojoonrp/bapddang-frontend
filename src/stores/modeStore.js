@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import Colors from "../styles/colors";
+import Colors from "../constants/colors";
 
 const useModeStore = create((set) => ({
   mode: "fast",

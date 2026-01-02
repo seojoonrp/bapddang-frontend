@@ -5,8 +5,8 @@ import MainScreen from "./screens/MainScreen";
 import DietLogScreen from "./screens/DietLogScreen";
 import LoginScreen from "./screens/login/LoginScreen";
 import SignUpScreen from "./screens/login/SignUpScreen";
-import EmailVerifyScreen from "./screens/login/EmailVerifyScreen";
 import LandingScreen from "./screens/login/LandingScreen";
+import WelcomeScreen from "./screens/login/WelcomeScreen";
 
 import TestScreen from "./screens/TestScreen";
 
@@ -16,7 +16,7 @@ const StackScreen = () => {
   return (
     <Stack.Navigator
       initialRouteName="Landing"
-      // screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
         name="Main"
@@ -44,11 +44,10 @@ const StackScreen = () => {
         options={{ title: "회원가입 화면" }}
       />
       <Stack.Screen
-        name="EmailVerify"
-        component={EmailVerifyScreen}
-        options={{ title: "이메일 인증 화면" }}
+        name="Welcome"
+        component={WelcomeScreen}
+        options={{ title: "환영 화면" }}
       />
-
       <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );

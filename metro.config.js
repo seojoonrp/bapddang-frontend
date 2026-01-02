@@ -1,11 +1,25 @@
-// woff2 인식용 config
-
 const { getDefaultConfig } = require("expo/metro-config");
 
-const config = getDefaultConfig(__dirname);
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
 
-const defaultAssetExts = config.resolver.assetExts;
+  const { transformer, resolver } = config;
 
-config.resolver.assetExts = [...defaultAssetExts, "woff", "woff2"];
+  config.transformer = {
+    ...transformer,
+    babelTransformerPath: require.resolve("react-native-svg-transformer"),
+  };
 
-module.exports = config;
+  config.resolver = {
+    ...resolver,
+    assetExts: [
+      ...resolver.assetExts.filter((ext) => ext !== "svg"),
+      "woff",
+      "woff2",
+    ],
+
+    sourceExts: [...resolver.sourceExts, "svg"],
+  };
+
+  return config;
+})();

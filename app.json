@@ -1,9 +1,11 @@
 {
   "expo": {
-    "name": "bobttaeng",
+    "name": "밥땡",
     "slug": "bobttaeng",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./src/assets/app-icon.png",
+    "scheme": "bobttaeng",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -12,19 +14,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "usesAppleSignIn": true,
       "supportsTablet": true,
       "bundleIdentifier": "com.happetite.bobttaeng",
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": [
-              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
-            ]
-          },
-          {
-            "CFBundleURLSchemes": [
-              "kakaoe8dcae88e87ed3b8a084375fce4ca957"
-            ]
+            "CFBundleURLSchemes": ["kakaoe8dcae88e87ed3b8a084375fce4ca957"]
           }
         ],
         "ITSAppUsesNonExemptEncryption": false
@@ -38,7 +34,7 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/favicon.png"
     },
     "plugins": [
       "expo-dev-client",

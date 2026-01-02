@@ -21,7 +21,7 @@ import { pickImage } from "../../utils/imagePicker";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-import Colors from "../../styles/colors";
+import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 
@@ -37,10 +37,10 @@ const CreateReviewModal = ({
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
   const timeMapping = {
-    "아침": "breakfast",
-    "점심": "lunch",
-    "저녁": "dinner",
-    "기타": "snack"
+    아침: "breakfast",
+    점심: "lunch",
+    저녁: "dinner",
+    기타: "snack",
   };
   // TODO : 태그 생성 기능
   const [tagOption, setTagOption] = useState([
@@ -76,8 +76,8 @@ const CreateReviewModal = ({
 
   useEffect(() => {
     if (intent === "create") {
-      const names = Array.isArray(foods) 
-        ? foods.map(f => (typeof f === 'object' ? f.name : f)).join(" & ")
+      const names = Array.isArray(foods)
+        ? foods.map((f) => (typeof f === "object" ? f.name : f)).join(" & ")
         : "";
       setName(names);
     }
@@ -104,7 +104,7 @@ const CreateReviewModal = ({
         foodId: f.foodId,
         foodType: f.foodType,
       }));
-      
+
       const payload = pruneUndefined({
         name,
         foods: foodsPayload,
@@ -129,7 +129,6 @@ const CreateReviewModal = ({
       Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
     }
   };
-
 
   return (
     <View style={styles.overlay}>
@@ -228,14 +227,21 @@ const CreateReviewModal = ({
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={[styles.bottomButton, { backgroundColor: reviewMode === "fast" ? Colors.point_red : Colors.point_green }]}
+              style={[
+                styles.bottomButton,
+                {
+                  backgroundColor:
+                    reviewMode === "fast"
+                      ? Colors.point_red
+                      : Colors.point_green,
+                },
+              ]}
               onPress={submit}
             >
               <Text style={[styles.bottomButtonText]}>
                 {intent === "edit" ? "수정 저장" : "후기 등록"}
               </Text>
             </TouchableOpacity>
-
           </View>
         </ScrollView>
       </View>
