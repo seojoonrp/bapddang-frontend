@@ -38,8 +38,8 @@ export const handleLogin = async (username, password) => {
 
 export const initGoogleLogin = () => {
   GoogleSignin.configure({
-    webClientId: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    iosClientId: EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    webClientId: "636208679388-b89kfh97065p2pg8furebbge59kcun3h.apps.googleusercontent.com",
+    iosClientId: "636208679388-4aa1ldr2j227cgki5oh5a3f2o9qqb9ip.apps.googleusercontent.com",
   });
 };
 
