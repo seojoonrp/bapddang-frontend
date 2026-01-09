@@ -130,8 +130,7 @@ const MainScreen = () => {
 
   const bottomSheetTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    // 0일 때는 [스크롤길이 - 핸들바] 만큼 내려가 있다가, 스크롤하면 0으로 올라옴
-    outputRange: [SCROLL_THRESHOLD - BOTTOM_SHEET_HANDLE_HEIGHT, 0], 
+    outputRange: [SCROLL_THRESHOLD, 0], 
     extrapolate: "clamp",
   });
 
