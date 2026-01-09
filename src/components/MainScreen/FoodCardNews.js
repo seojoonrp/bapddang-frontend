@@ -16,7 +16,7 @@ import useModeStore from "../../stores/modeStore";
 
 import FoodInfoBox from "./FoodInfoBox";
 
-const MARGIN_MULTIPLIER = 1.04;
+//const MARGIN_MULTIPLIER = 1.04;
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
@@ -35,6 +35,8 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
     }
   };
 
+  const sidePadding = (containerWidth - containerHeight) / 2;
+  const snapInterval = containerHeight;
   const [selectedItem, setSelectedItem] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -50,54 +52,16 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   // card scroll animation
   const listRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const itemWidth = containerHeight * MARGIN_MULTIPLIER;
+  const itemWidth = containerHeight;
 
   const filteredData = useMemo(
     () => foodsData.filter((item) => item.speed === mode),
     [foodsData, mode]
   );
-
-  const loopData = useMemo(() => {
-    if (filteredData.length <= 1) return filteredData; // 0~1개면 루프 의미 없음
-    const first = filteredData[0];
-    const last = filteredData[filteredData.length - 1];
-    return [last, ...filteredData, first];
-  }, [filteredData]);
-
-  useEffect(() => {
-    if (!containerHeight) return;
-    if (loopData.length <= 1) return;
-
-    const startOffset = itemWidth * 1; // index 1
-    listRef.current?.scrollToOffset({ offset: startOffset, animated: false });
-    scrollX.setValue(startOffset); // scale 보간값도 즉시 동기화(깜빡임 방지)
-  }, [containerHeight, itemWidth, loopData.length]);
-
-  const handleMomentumEnd = (e) => {
-    if (loopData.length <= 1) return;
-
-    const offsetX = e.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / itemWidth);
-
-    const lastIndex = loopData.length - 1;
-
-    // index 0 (앞에 붙인 last) -> 진짜 마지막(= filteredData의 마지막) 위치로 점프
-    if (index === 0) {
-      const targetIndex = filteredData.length; // loopData에서 진짜 마지막은 이 인덱스
-      const targetOffset = targetIndex * itemWidth;
-      listRef.current?.scrollToOffset({ offset: targetOffset, animated: false });
-      scrollX.setValue(targetOffset);
-      return;
-    }
-
-    // index lastIndex (뒤에 붙인 first) -> 진짜 처음(= index 1)로 점프
-    if (index === lastIndex) {
-      const targetIndex = 1;
-      const targetOffset = targetIndex * itemWidth;
-      listRef.current?.scrollToOffset({ offset: targetOffset, animated: false });
-      scrollX.setValue(targetOffset);
-    }
-  };
+  const position = useMemo(() => {
+    if (!snapInterval) return null;
+    return Animated.divide(scrollX, snapInterval);
+  }, [scrollX, snapInterval]);
 
   const renderItem = ({ item, index }) => {
     if (!containerHeight) return null;
@@ -121,7 +85,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         style={[
           styles.cardContainer,
           {
-            width: containerHeight * MARGIN_MULTIPLIER,
+            width: containerHeight,
             height: containerHeight,
             transform: [{ scale }]
           },
@@ -134,32 +98,62 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
       </AnimatedTouchable>
     );
   }
+  const renderPaginationDots = () => {
+    if (!position || filteredData.length <= 1) return null;
 
+    return (
+      <View style={[styles.pagination] }>
+        {filteredData.map((_, i) => {
+          const opacity = position.interpolate({
+            inputRange: [i - 1, i, i + 1],
+            outputRange: [0.25, 1.0, 0.25],
+            extrapolate: "clamp",
+          });
+
+          const scale = position.interpolate({
+            inputRange: [i - 1, i, i + 1],
+            outputRange: [0.9, 1.35, 0.9],
+            extrapolate: "clamp",
+          });
+
+          return (
+            <Animated.View
+              key={`dot-${i}`}
+              style={[styles.dot, { bottom: -containerHeight/2-16, opacity, transform: [{ scale }] }]}
+            />
+          );
+        })}
+      </View>
+    );
+  };
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {isLoading ? (
         <ActivityIndicator size="large" color="#007BFF" />
       ) : foodsData.length > 0 ? (
+        <>
         <AnimatedFlatList
           ref={listRef}
-          contentContainerStyle={{ paddingHorizontal: pad }}
-          data={loopData}
+          contentContainerStyle={{ paddingHorizontal: sidePadding }}
+          data={filteredData}
           //data={foodsData.filter((item) => item.speed === mode)}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => `${item.id ?? "x"}-${idx}`}
+          keyExtractor={(item) => item.id.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
-          snapToInterval={containerHeight * MARGIN_MULTIPLIER}
+          snapToInterval={containerHeight}
           decelerationRate="fast"
           scrollEventThrottle={16}
-          onMomentumScrollEnd={handleMomentumEnd}
+          initialNumToRender={0}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: true }
           )}
         />
+        {renderPaginationDots()}
+      </>
       ) : (
-        <Text>표시할 음식이 없습니다.</Text>
+      <Text>표시할 음식이 없습니다.</Text>
       )}
 
       <Modal
@@ -186,7 +180,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardContainer: {
-    width :300,
+    width: 300,
     height: 300,
     justifyContent: "center",
     alignItems: "center",
@@ -206,6 +200,20 @@ const styles = StyleSheet.create({
     padding: 5,
     color: "white",
     fontSize: 24,
+  },
+  pagination: {
+    position: "absolute",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "black",
+    marginHorizontal: 4,
   },
   backdrop: {
     position: "absolute",
