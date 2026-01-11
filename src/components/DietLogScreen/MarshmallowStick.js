@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
 
 import Marshmallow from "../svg/Marshmallow";
-import marshmallowData from "../../data/MarshmallowData.json";
+import marshmallowData from "../../constants/data/MarshmallowData.json";
 import Colors from "../../constants/colors";
 
 const ITEM_HEIGHT = 180;

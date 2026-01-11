@@ -18,8 +18,9 @@ import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
-  const { user } = useAuthStore();
-  const [likedFoods, setLikedFoods] = useState([]);
+  const user = useAuthStore((state) => state.user);
+
+  const [likedFoodNames, setLikedFoodNames] = useState([]);
 
   // 입력 단계 상태
   const [inputList, setInputList] = useState(
@@ -41,12 +42,13 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
     fetchLikedFoods()
       .then((data) => {
-        console.log("Fetched liked foods:", data.liked_foods);
         if (data.liked_foods) {
           const names = data.liked_foods.map((food) => food.name);
-          setLikedFoods(names);
+          console.log("Fetched liked foods:", names);
+          setLikedFoodNames(names);
         } else {
-          setLikedFoods([]);
+          console.log("No liked foods found.");
+          setLikedFoodNames([]);
         }
       })
       .catch((error) => {
@@ -239,7 +241,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
             <Text style={styles.subTitle}>좋아요한 음식</Text>
             <TagContainer
-              tags={likedFoods}
+              tags={likedFoodNames}
               mode="assign"
               onPress={(food) => updateInput(curInputIndex, food)}
               containerStyle={{ marginBottom: 20 }}
