@@ -8,7 +8,7 @@ export const fetchMyInfoApi = async () => {
     const token = await AsyncStorage.getItem("jwt_token");
     if (!token) return null;
 
-    const response = await api.get("/auth/me");
+    const response = await api.get("/users/me");
 
     if (response.status === 200) {
       return response.data;
@@ -16,7 +16,7 @@ export const fetchMyInfoApi = async () => {
 
     return null;
   } catch (error) {
-    console.log("세션 검증 실패:", error.message);
+    console.log("Failed to fetch user info:", error.message);
     await AsyncStorage.removeItem("jwt_token");
     return null;
   }

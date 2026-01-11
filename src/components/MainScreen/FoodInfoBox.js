@@ -18,7 +18,7 @@ import Star from "../svg/Star";
 
 const FoodInfoBox = ({ item, mode, onClose }) => {
   const navigation = useNavigation();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
 
   const handleLike = () => {
     if (!user) {

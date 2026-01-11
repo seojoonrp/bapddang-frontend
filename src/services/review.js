@@ -6,30 +6,26 @@ export const createReview = async ({
   speed,
   mealTime,
   tags,
-  imageUrl,
+  imageURL,
   comment,
   rating,
 }) => {
   try {
     const response = await api.post("/reviews", {
-      name,
-      foods,
-      speed,
-      mealTime,
-      tags,
-      imageUrl,
-      comment,
-      rating,
+      name: name,
+      foods: foods,
+      speed: speed,
+      mealTime: mealTime,
+      tags: tags,
+      imageURL: imageURL,
+      comment: comment,
+      rating: rating,
     });
 
     return response.data;
   } catch (error) {
-    console.log("🔴 createReview error status:", error.response?.status);
-  console.log(
-    "🔴 createReview error data:",
-    JSON.stringify(error.response?.data, null, 2)
-  );
-  throw error;
+    console.error("Failed to create review:", error);
+    throw error;
   }
 };
 
@@ -37,13 +33,13 @@ export const editReview = async (reviewId, updatedData) => {};
 
 export const fetchReviewsByDay = async (day) => {
   try {
-    const response = await api.get("/reviews/me", {
+    const response = await api.get("/users/me/reviews", {
       params: { day },
     });
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching reviews by day:", error);
+    console.error("Failed to fetch reviews by day:", error);
     return [];
   }
 };

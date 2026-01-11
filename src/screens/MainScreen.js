@@ -29,7 +29,7 @@ const BOTTOM_SHEET_HANDLE_HEIGHT = 70;
 const MainScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  
+
   // 화면 전체 높이와 너비 가져오기
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
@@ -38,7 +38,8 @@ const MainScreen = () => {
 
   // 2. 동적 스크롤 임계값 계산 (핵심!)
   // 전체 화면에서 [헤더]와 [핸들바]를 뺀 나머지 공간만큼만 스크롤 가능하게 함
-  const SCROLL_THRESHOLD = screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
+  const SCROLL_THRESHOLD =
+    screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
 
   const bannerHeightRange = [230, headerHeight];
   const cardNewsSize = 300;
@@ -103,14 +104,14 @@ const MainScreen = () => {
         },
       }),
     // SCROLL_THRESHOLD가 바뀌면 PanResponder도 새로 만들어야 함
-    [scrollY, SCROLL_THRESHOLD] 
+    [scrollY, SCROLL_THRESHOLD]
   );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchMainFeedFoods({ type: "meal", speed: "fast" });
-        setMainFeedData(data || []);
+        const data = await fetchMainFeedFoods({ speed: "fast" });
+        setMainFeedData(data.foods || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -124,13 +125,13 @@ const MainScreen = () => {
 
   const heroTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [0, -headerHeight], 
+    outputRange: [0, -headerHeight],
     extrapolate: "clamp",
   });
 
   const bottomSheetTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [SCROLL_THRESHOLD, 0], 
+    outputRange: [SCROLL_THRESHOLD, 0],
     extrapolate: "clamp",
   });
 
@@ -253,7 +254,7 @@ const MainScreen = () => {
         style={[
           styles.bottomSheetWrapper,
           // 여기서 height를 동적으로 설정해줍니다.
-          { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT }, 
+          { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT },
           { transform: [{ translateY: bottomSheetTranslateY }] },
         ]}
       >

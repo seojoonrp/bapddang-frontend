@@ -41,9 +41,9 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
     fetchLikedFoods()
       .then((data) => {
-        console.log("Fetched liked foods:", data.likedFoods);
-        if (data) {
-          const names = data.map((food) => food.name);
+        console.log("Fetched liked foods:", data.liked_foods);
+        if (data.liked_foods) {
+          const names = data.liked_foods.map((food) => food.name);
           setLikedFoods(names);
         } else {
           setLikedFoods([]);

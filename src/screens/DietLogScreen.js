@@ -25,12 +25,15 @@ import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
+import DebugButton from "../components/DebugButton";
 
 //weekandday 동기화
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { syncUserWeekAndDay } from "../services/user";
 
 const DietLogScreen = () => {
+  const navigation = useNavigation();
+
   // 추가버튼 관련
   const { user } = useAuthStore();
 
@@ -316,6 +319,14 @@ const DietLogScreen = () => {
           reviewId={selectedReviewId}
         />
       </Modal>
+
+      <DebugButton
+        index={0}
+        label={"Go back"}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      />
     </LinearGradient>
   );
 };

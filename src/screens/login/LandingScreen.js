@@ -40,25 +40,23 @@ const LandingScreen = () => {
   };
 
   const [checking, setChecking] = useState(true);
+  const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
 
-  // const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
+  useEffect(() => {
+    const from = route.params?.from;
 
-  // useEffect(() => {
-  //   const from = route.params?.from;
+    const checkLoginStatus = async () => {
+      if (from) return; // 온 곳이 있으면 로그아웃이므로 검사 X
 
-  //   const checkLoginStatus = async () => {
-  //     // 온 곳이 있으면 로그아웃이므로 검사 X
-  //     if (from) return;
+      const isLoggedIn = await checkLoginSession();
 
-  //     const isLoggedIn = await checkLoginSession();
+      if (isLoggedIn) {
+        navigation.replace("Main");
+      }
+    };
 
-  //     if (isLoggedIn) {
-  //       navigation.replace("Main");
-  //     }
-  //   };
-
-  //   checkLoginStatus();
-  // }, [navigation, route.params]);
+    checkLoginStatus();
+  }, [navigation, route.params]);
 
   const onGoogleLoginPress = async () => {
     try {
