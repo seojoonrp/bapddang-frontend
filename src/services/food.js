@@ -23,6 +23,19 @@ export const fetchFoodById = async (foodId) => {
   }
 };
 
+export const fetchFoodItemsByNames = async (foodNames) => {
+  try {
+    const response = await api.post("/foods/resolve", {
+      names: foodNames,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("Failed to fetch food items by names:", error);
+    throw error;
+  }
+};
+
 export const fetchRankedFoods = () => {
   return []; // Temporarily disable ranking feature
 };

@@ -5,7 +5,6 @@ export const createReview = async ({
   foods,
   speed,
   mealTime,
-  tags,
   imageURL,
   comment,
   rating,
@@ -16,12 +15,12 @@ export const createReview = async ({
       foods: foods,
       speed: speed,
       mealTime: mealTime,
-      tags: tags,
       imageURL: imageURL,
       comment: comment,
       rating: rating,
     });
 
+    console.log("Review created successfully:", response.data.review);
     return response.data;
   } catch (error) {
     console.error("Failed to create review:", error);
@@ -37,7 +36,13 @@ export const fetchReviewsByDay = async (day) => {
       params: { day },
     });
 
-    return response.data;
+    const reviews = response.data?.reviews ?? [];
+
+    console.log(
+      `Successfully fetched ${reviews.length} reviews on day ${day}.`
+    );
+
+    return reviews;
   } catch (error) {
     console.error("Failed to fetch reviews by day:", error);
     return [];

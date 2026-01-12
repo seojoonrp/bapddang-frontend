@@ -14,7 +14,6 @@ import Animated, {
   interpolate,
   withTiming,
   Easing,
-  setDynamicFeatureFlag,
 } from "react-native-reanimated";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
@@ -35,7 +34,7 @@ const DietLogScreen = () => {
   const navigation = useNavigation();
 
   // 추가버튼 관련
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
 
   const [displayMonth, setDisplayMonth] = useState(null);
   const [weekDates, setWeekDates] = useState([]);
@@ -132,6 +131,7 @@ const DietLogScreen = () => {
       console.log(
         `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`
       );
+
       try {
         const reviews = await fetchReviewsByDay(targetAbsoluteDay);
         setDailyReviews(reviews || []);
@@ -195,6 +195,9 @@ const DietLogScreen = () => {
   };
 
   const handleEditReview = (reviewId) => {
+    console.log("Editing review with ID:", reviewId);
+    return; // temp
+
     setSelectedReviewId(reviewId);
     setActiveModal("review");
   };
@@ -313,10 +316,8 @@ const DietLogScreen = () => {
         <CreateReviewModal
           onClose={handleCloseModal}
           onBack={handleBack}
-          foods={selectedFoods}
+          foodNames={selectedFoods}
           reviewMode={selectedMode}
-          intent={selectedReviewId ? "edit" : "create"}
-          reviewId={selectedReviewId}
         />
       </Modal>
 

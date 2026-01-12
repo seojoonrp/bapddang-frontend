@@ -25,7 +25,7 @@ const ReviewCard = ({ review, onEdit }) => {
       </TouchableOpacity>
 
       <Text style={styles.reviewText}>
-        {review.time}으로 <Text style={styles.foodText}>{review.name}</Text>
+        {review.mealTime}으로 <Text style={styles.foodText}>{review.name}</Text>
         을(를) 먹었어요!
       </Text>
 
@@ -40,18 +40,12 @@ const ReviewCard = ({ review, onEdit }) => {
         </View>
       ) : null}
 
-      {review.imageUrl ? (
-        <Image source={{ uri: review.imageUrl }} style={styles.reviewImage} />
-      ) : null}
-
-      {review.tags ? (
-        <Text style={styles.tagText}>
-          {review.tags.map((tag) => `#${tag}`).join(" ")}
-        </Text>
+      {review.imageURL ? (
+        <Image source={{ uri: review.imageURL }} style={styles.reviewImage} />
       ) : null}
 
       {review.comment ? (
-        <Text style={styles.commentText}>“{review.comment}”</Text>
+        <Text style={styles.commentText}>{'"' + review.comment + '"'}</Text>
       ) : null}
     </View>
   );

@@ -11,11 +11,8 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-import {
-  createReview,
-  editReview,
-  fetchReviewById,
-} from "../../services/review";
+import { fetchFoodItemsByNames } from "../../services/food";
+import { createReview } from "../../services/review";
 import { pickImage } from "../../utils/imagePicker";
 
 import IconBar from "./IconBar";
@@ -25,105 +22,64 @@ import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 
-const CreateReviewModal = ({
-  onClose,
-  foods,
-  reviewMode,
-  onBack,
-  intent = "create",
-  reviewId = null,
-}) => {
+const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
   const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
-  const timeMapping = {
-    아침: "breakfast",
-    점심: "lunch",
-    저녁: "dinner",
-    기타: "snack",
-  };
-  // TODO : 태그 생성 기능
-  const [tagOption, setTagOption] = useState([
-    "혼밥",
-    "매콤해요",
-    "건강해요",
-    "푸짐해요",
-    "가성비 좋아요",
-  ]);
 
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [foodItems, setFoodItems] = useState([]);
+  const [selectedTime, setSelectedTime] = useState("");
+  const [imageURL, setImageURL] = useState("");
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
+  const mainColor =
+    reviewMode === "fast" ? Colors.point_red : Colors.point_green;
+
+  // foodItems 받아오기
   useEffect(() => {
-    if (intent === "edit" && reviewId) {
-      const fetchData = async () => {
-        const reviewData = await fetchReviewById(reviewId);
-
-        setName(reviewData.name ?? "");
-        setSelectedTime(reviewData.time ?? null);
-        setSelectedTags(reviewData.tags ?? []);
-        setImageUrl(reviewData.imageUrl ?? null);
-        setComment(reviewData.comment ?? "");
-        setRating(reviewData.rating ?? 0);
-      };
-
-      fetchData();
+    if (!foodNames || foodNames.length === 0) {
+      console.log("No food names provided");
+      return;
     }
-  }, [intent, reviewId]);
 
+    const fetchFoods = async () => {
+      try {
+        const data = await fetchFoodItemsByNames(foodNames);
+        setFoodItems(data.food_items);
+      } catch (error) {
+        console.error("음식 데이터를 불러오는 데 실패했습니다:", error);
+      }
+    };
+
+    fetchFoods();
+  }, [foodNames]);
+
+  // 이름 설정
   useEffect(() => {
-    if (intent === "create") {
-      const names = Array.isArray(foods)
-        ? foods.map((f) => (typeof f === "object" ? f.name : f)).join(" & ")
-        : "";
-      setName(names);
-    }
-  }, [intent, foods]);
-  const handleTagPress = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
+    const names = foodItems.map((f) => f.foodName).join(" & ");
+    setName(names);
+  }, [foodItems]);
 
-  /* TODO: 태그 생성 */
-
-  const pruneUndefined = (obj) =>
-    Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
-
-  const submit = async () => {
+  const handleSubmit = async () => {
     try {
       if (!selectedTime || rating <= 0) {
-        // 사용 중인 알림 방식에 맞게 교체 (Alert, Toast, Snackbar 등)
-        Alert.alert("필수 항목 누락", "시간대, 별점을 모두 선택해주세요.");
+        console.log("Please select both time and rating");
         return;
       }
-      const foodsPayload = (foods || []).map((f) => ({
-        foodId: f.foodId,
-        foodType: f.foodType,
-      }));
 
-      const payload = pruneUndefined({
-        name,
-        foods: foodsPayload,
+      await createReview({
+        name: name,
+        foods: foodItems,
         speed: reviewMode,
-        mealTime: timeMapping[selectedTime],
-        tags: selectedTags ?? [],
-        imageUrl: imageUrl ?? "",
-        comment: comment ?? "",
-        rating: Number(rating ?? 0),
+        mealTime: selectedTime,
+        imageURL: imageURL,
+        comment: comment,
+        rating: Number(rating),
       });
 
-      if (intent === "edit" && reviewId) {
-        await editReview(reviewId, payload);
-        Alert.alert("리뷰 수정 완료", "리뷰가 성공적으로 수정되었습니다.");
-      } else {
-        await createReview(payload);
-        Alert.alert("리뷰 등록 완료", "리뷰가 성공적으로 등록되었습니다.");
-      }
-      onClose?.();
+      Alert.alert("리뷰 등록 완료", "리뷰가 성공적으로 등록되었습니다.");
+      onClose();
     } catch (error) {
       console.error("리뷰 저장 실패: ", error);
       Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
@@ -134,15 +90,7 @@ const CreateReviewModal = ({
     <View style={styles.overlay}>
       <IconBar onClose={onClose} />
 
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor:
-              reviewMode === "fast" ? Colors.point_red : Colors.point_green,
-          },
-        ]}
-      >
+      <View style={[styles.header, { backgroundColor: mainColor }]}>
         <Star />
         <Text
           style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 30 }]}
@@ -158,7 +106,7 @@ const CreateReviewModal = ({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* 시간대 선택 */}
+          {/* 시간대 */}
           <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
           <TagContainer
             tags={timeOption}
@@ -168,25 +116,15 @@ const CreateReviewModal = ({
             containerStyle={{ marginBottom: 20 }}
           />
 
-          {/* 태그 선택 */}
-          <Text style={styles.subtitle}>음식에 어울리는 태그를 골라보세요</Text>
-          <TagContainer
-            tags={tagOption}
-            mode="select_multi"
-            onPress={(tag) => handleTagPress(tag)}
-            selectedTags={selectedTags}
-            containerStyle={{ marginBottom: 20 }}
-          />
-
-          {/* 이미지 선택 */}
+          {/* 이미지 */}
           <View>
             <TouchableOpacity
-              onPress={() => pickImage({ setImageUrl })}
+              onPress={() => pickImage({ setImageUrl: setImageURL })}
               style={styles.imageBox}
             >
-              {imageUrl ? (
+              {imageURL !== "" ? (
                 <Image
-                  source={{ uri: imageUrl }}
+                  source={{ uri: imageURL }}
                   style={styles.imagePreview}
                   resizeMode="cover"
                 />
@@ -201,14 +139,16 @@ const CreateReviewModal = ({
             </TouchableOpacity>
           </View>
 
-          {/* 한줄평 및 별점 */}
-          <Text style={styles.subtitle}>한줄평을 남겨주세요!</Text>
+          {/* 한줄평 */}
+          <Text style={styles.subtitle}>한줄평을 남겨보세요!</Text>
           <TextInput
             style={styles.input}
             placeholder="후기 남기기..."
             value={comment}
             onChangeText={setComment}
           />
+
+          {/* 별점 */}
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((i) => (
               <TouchableOpacity key={i} onPress={() => setRating(i)}>
@@ -218,29 +158,17 @@ const CreateReviewModal = ({
           </View>
 
           <View style={styles.buttonRow}>
-            {intent !== "edit" && (
-              <TouchableOpacity
-                style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
-                onPress={onBack}
-              >
-                <Text style={styles.bottomButtonText}>뒤로가기</Text>
-              </TouchableOpacity>
-            )}
             <TouchableOpacity
-              style={[
-                styles.bottomButton,
-                {
-                  backgroundColor:
-                    reviewMode === "fast"
-                      ? Colors.point_red
-                      : Colors.point_green,
-                },
-              ]}
-              onPress={submit}
+              style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
+              onPress={onBack}
             >
-              <Text style={[styles.bottomButtonText]}>
-                {intent === "edit" ? "수정 저장" : "후기 등록"}
-              </Text>
+              <Text style={styles.bottomButtonText}>뒤로가기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.bottomButton, { backgroundColor: mainColor }]}
+              onPress={handleSubmit}
+            >
+              <Text style={[styles.bottomButtonText]}>리뷰 등록하기</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
