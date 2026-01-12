@@ -9,32 +9,34 @@ import {
 } from "react-native";
 
 import useAuthStore from "../../stores/authStore";
+
+import { getBestMatches } from "../../utils/nameCheck.js";
+import { standardFoodNames } from "../../constants/data/standardFoodNames.js";
+
 import { fetchLikedFoods } from "../../services/user";
-import { validateFoods } from "../../services/food";
-import { createCustomFood } from "../../services/food";
 
 import Colors from "../../constants/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
+const SCORE_THRESHOLD = 0.7;
+
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const user = useAuthStore((state) => state.user);
 
-  const [likedFoodNames, setLikedFoodNames] = useState([]);
-
   // 입력 단계 상태
+  const [likedFoodNames, setLikedFoodNames] = useState([]);
   const [inputList, setInputList] = useState(
     Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""]
   );
   const [curInputIndex, setCurInputIndex] = useState(0);
 
-  // 서버 요청 진행 상태
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [pendingMode, setPendingMode] = useState(null);
-
+  // 검사 관련
   const [isInCheckMode, setIsInCheckMode] = useState(false);
   const [suggestionQueue, setSuggestionQueue] = useState([]);
-  const [resolvedItems, setResolvedItems] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [finalNames, setFinalNames] = useState([]);
+  const [currentMode, setCurrentMode] = useState("fast");
 
   // 좋아요한 음식 불러오기
   useEffect(() => {
@@ -56,6 +58,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
       });
   }, [user]);
 
+  // 입력 로직
   const updateInput = (index, value) => {
     const next = [...inputList];
     next[index] = value;
@@ -67,108 +70,72 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     setCurInputIndex(inputList.length);
   };
 
-  const startCheck = async (mode) => {
-    const filtered = inputList
+  // 검사 시작
+  const startCheck = (mode) => {
+    const rawFiltered = inputList
       .map((s) => (s || "").trim())
       .filter((s) => s.length > 0);
-    if (!filtered.length) return;
-    if (!user) {
-      alert("로그인이 필요합니다.");
+    const filtered = [...new Set(rawFiltered)]; // 중복 제거
+
+    if (!filtered.length) {
+      console.log("음식을 한 개 이상 선택해주세요");
       return;
     }
-    try {
-      setIsSubmitting(true);
-      setPendingMode(mode);
 
-      const results = await validateFoods(filtered);
+    const queue = [];
+    const autoResolvedNames = [];
 
-      const toResolve = [];
-      const toCheck = [];
+    filtered.forEach((name) => {
+      const result = getBestMatches(name, standardFoodNames, 3);
+      const topMatch = result.best;
 
-      results.forEach((item, idx) => {
-        const fallbackName = item.originalName ?? filtered[idx];
-        if (item.status === "suggestion") {
-          toCheck.push({ ...item, fallbackName });
-        } else {
-          const output = item.okOutput || item.newOutput || {};
-          toResolve.push({
-            name: output.name ?? fallbackName,
-            foodId: output.id,
-            foodType:
-              output.type || (item.status === "new" ? "new" : "general"),
-          });
-        }
-      });
-
-      setResolvedItems(toResolve);
-      setSuggestionQueue(toCheck);
-
-      if (toCheck.length > 0) {
-        setIsInCheckMode(true);
+      if (topMatch && topMatch.score === 1) {
+        // 완전 일치
+        autoResolvedNames.push(topMatch.name);
       } else {
-        completeSelection(toResolve, mode);
+        const validSuggestions = result.top.filter(
+          (opt) => opt.score >= SCORE_THRESHOLD
+        );
+
+        queue.push({
+          originalName: name,
+          suggestions: validSuggestions,
+        });
       }
-    } catch (error) {
-      alert("음식 확인 중 오류가 발생했습니다. 다시 시도해주세요.");
-      console.error("Error in startCheck:", error);
-    } finally {
-      setIsSubmitting(false);
+    });
+
+    if (queue.length === 0) {
+      completeSelection(autoResolvedNames, mode);
+      return;
     }
+
+    setSuggestionQueue(queue);
+    setCurrentIndex(0);
+    setFinalNames(autoResolvedNames);
+    setCurrentMode(mode);
+    setIsInCheckMode(true);
   };
-  const handleResolveSuggestion = (choiceItem) => {
-    const newItem = {
-      name: choiceItem.name,
-      foodId: choiceItem.id,
-      foodType: choiceItem.type,
-    };
-    const nextResolved = [...resolvedItems, newItem];
-    setResolvedItems(nextResolved);
-    const nextQueue = suggestionQueue.slice(1);
-    setSuggestionQueue(nextQueue);
-    if (nextQueue.length === 0) {
-      completeSelection(nextResolved, pendingMode);
-    }
-  };
-  const handleCreateCustom = async () => {
-    const currentItem = suggestionQueue[0];
-    if (!currentItem) return;
 
-    try {
-      setIsSubmitting(true);
+  const handleSelectName = (selectedName) => {
+    const nextFinalNames = [...finalNames, selectedName];
 
-      const newFoodData = await createCustomFood(currentItem.fallbackName);
-
-      const newItem = {
-        name: newFoodData.name,
-        foodId: newFoodData.id,
-        foodType: "custom",
-      };
-      moveToNext(newItem);
-    } catch (error) {
-      alert("음식 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
-      console.error("Error in handleCreateCustom:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  const moveToNext = (newItem) => {
-    const nextResolved = [...resolvedItems, newItem];
-    setResolvedItems(nextResolved);
-
-    const nextQueue = suggestionQueue.slice(1);
-    setSuggestionQueue(nextQueue);
-
-    if (nextQueue.length === 0) {
-      completeSelection(nextResolved, pendingMode);
+    if (currentIndex + 1 < suggestionQueue.length) {
+      setCurrentIndex(currentIndex + 1);
+      setFinalNames(nextFinalNames);
+    } else {
+      const uniqueFinalNames = [...new Set(nextFinalNames)];
+      completeSelection(uniqueFinalNames, currentMode);
     }
   };
 
-  const completeSelection = (finalFoods, mode) => {
-    onSelect(finalFoods, mode);
-    onClose?.();
+  const completeSelection = (finalFoodNames, mode) => {
+    console.log("Final selected food names:", finalFoodNames);
+    onSelect(finalFoodNames, mode);
+    onClose();
   };
 
-  const currentTarget = suggestionQueue[0];
+  const currentTarget = suggestionQueue[currentIndex] || {};
+
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
@@ -179,39 +146,45 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
             <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
 
             <Text style={styles.checkHint}>
-              {resolvedItems.length + 1} /{" "}
-              {resolvedItems.length + suggestionQueue.length} 번째 음식 확인 중
+              {currentIndex + 1} / {suggestionQueue.length} 번째 음식 확인 중
             </Text>
 
             <View style={styles.checkBox}>
               <Text style={styles.checkTitle}>입력한 음식</Text>
               <Text style={styles.checkInputName}>
-                {currentTarget.fallbackName}
+                {currentTarget.originalName}
               </Text>
             </View>
 
             <View style={{ width: "100%", marginTop: 20 }}>
               <Text style={styles.subTitle}>추천 검색 결과</Text>
               <View style={styles.suggestionContainer}>
-                {currentTarget.suggestionOutputs?.map((opt) => (
+                {currentTarget.suggestions?.map((opt, idx) => (
                   <TouchableOpacity
-                    key={opt.id}
+                    key={idx}
                     style={styles.suggestionChip}
-                    onPress={() => handleResolveSuggestion(opt)}
+                    onPress={() => handleSelectName(opt.name)}
                   >
-                    <Text style={styles.suggestionText}>{opt.name}</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Text style={styles.suggestionText}>{opt.name}</Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
 
-            {/* 원본 유지 버튼 */}
             <TouchableOpacity
               style={[
                 styles.confirmButton,
-                { backgroundColor: Colors.slightly_burn, marginTop: 30 },
+                {
+                  backgroundColor: Colors.slightly_burn,
+                  marginTop: 30,
+                  width: "100%",
+                },
               ]}
-              onPress={handleCreateCustom}
+              onPress={() => handleSelectName(currentTarget.originalName)}
             >
               <Text style={styles.confirmText}>원문 그대로 사용</Text>
             </TouchableOpacity>
@@ -277,7 +250,6 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
 
 export default FoodSelectModal;
 
-// ---------------- Styles ----------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,

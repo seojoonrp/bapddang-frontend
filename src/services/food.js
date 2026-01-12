@@ -23,26 +23,6 @@ export const fetchFoodById = async (foodId) => {
   }
 };
 
-export const validateFoods = async (names) => {
-  try {
-    const res = await api.post("/foods/validate", { names });
-    return res.data.results ?? [];
-  } catch (error) {
-    console.error("Error validating foods:", error);
-    throw error;
-  }
-};
-
-export const createCustomFood = async (name) => {
-  try {
-    const response = await api.post("/custom-foods", { name });
-    return response.data;
-  } catch (error) {
-    console.error("Error creating custom food:", error);
-    throw error;
-  }
-};
-
 export const fetchRankedFoods = () => {
   return []; // Temporarily disable ranking feature
 };

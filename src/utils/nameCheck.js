@@ -1,16 +1,87 @@
-// NameCheckModal.js  (모달 UI 제거, 알고리즘 유틸 전용)
-
 const normalizeBasic = (s) =>
-  (s || "")
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/\s+/g, "");
+  (s || "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
 
-const LTable = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-const VTable = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
-const TTable = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-const SBase = 0xac00, LCount = 19, VCount = 21, TCount = 28;
-const NCount = VCount * TCount, SCount = 11172;
+const LTable = [
+  "ㄱ",
+  "ㄲ",
+  "ㄴ",
+  "ㄷ",
+  "ㄸ",
+  "ㄹ",
+  "ㅁ",
+  "ㅂ",
+  "ㅃ",
+  "ㅅ",
+  "ㅆ",
+  "ㅇ",
+  "ㅈ",
+  "ㅉ",
+  "ㅊ",
+  "ㅋ",
+  "ㅌ",
+  "ㅍ",
+  "ㅎ",
+];
+const VTable = [
+  "ㅏ",
+  "ㅐ",
+  "ㅑ",
+  "ㅒ",
+  "ㅓ",
+  "ㅔ",
+  "ㅕ",
+  "ㅖ",
+  "ㅗ",
+  "ㅘ",
+  "ㅙ",
+  "ㅚ",
+  "ㅛ",
+  "ㅜ",
+  "ㅝ",
+  "ㅞ",
+  "ㅟ",
+  "ㅠ",
+  "ㅡ",
+  "ㅢ",
+  "ㅣ",
+];
+const TTable = [
+  "",
+  "ㄱ",
+  "ㄲ",
+  "ㄳ",
+  "ㄴ",
+  "ㄵ",
+  "ㄶ",
+  "ㄷ",
+  "ㄹ",
+  "ㄺ",
+  "ㄻ",
+  "ㄼ",
+  "ㄽ",
+  "ㄾ",
+  "ㄿ",
+  "ㅀ",
+  "ㅁ",
+  "ㅂ",
+  "ㅄ",
+  "ㅅ",
+  "ㅆ",
+  "ㅇ",
+  "ㅈ",
+  "ㅊ",
+  "ㅋ",
+  "ㅌ",
+  "ㅍ",
+  "ㅎ",
+];
+
+const SBase = 0xac00,
+  LCount = 19,
+  VCount = 21,
+  TCount = 28;
+const NCount = VCount * TCount,
+  SCount = 11172;
 
 const toJamoString = (str) => {
   const out = [];
@@ -35,7 +106,8 @@ const toJamoString = (str) => {
 
 const jaro = (s1, s2) => {
   if (s1 === s2) return 1;
-  const len1 = s1.length, len2 = s2.length;
+  const len1 = s1.length,
+    len2 = s2.length;
   if (len1 === 0 || len2 === 0) return 0;
   const matchDist = Math.max(Math.floor(Math.max(len1, len2) / 2) - 1, 0);
   const s1Matches = new Array(len1).fill(false);
@@ -56,7 +128,8 @@ const jaro = (s1, s2) => {
   }
   if (matches === 0) return 0;
 
-  let k = 0, transpositions = 0;
+  let k = 0,
+    transpositions = 0;
   for (let i = 0; i < len1; i++) {
     if (!s1Matches[i]) continue;
     while (!s2Matches[k]) k++;

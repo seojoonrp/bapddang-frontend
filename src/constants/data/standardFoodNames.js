@@ -1,4 +1,4 @@
-export const foodNames = [
+export const standardFoodNames = [
   "키토김밥",
   "쌀국수",
   "마라크림파스타",
