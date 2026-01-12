@@ -13,12 +13,11 @@ import {
 import Modal from "react-native-modal";
 
 import useModeStore from "../../stores/modeStore";
-
 import FoodInfoBox from "./FoodInfoBox";
 
-//const MARGIN_MULTIPLIER = 1.04;
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+
 const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   const { mode } = useModeStore();
 
@@ -87,22 +86,21 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
           {
             width: containerHeight,
             height: containerHeight,
-            transform: [{ scale }]
+            transform: [{ scale }],
           },
         ]}
       >
-        <Image
-          source={{ uri: item.imageURL }} style={styles.cardImage}
-        />
+        <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
         <Text style={styles.foodText}>{item.name}</Text>
       </AnimatedTouchable>
     );
-  }
+  };
+
   const renderPaginationDots = () => {
     if (!position || filteredData.length <= 1) return null;
 
     return (
-      <View style={[styles.pagination] }>
+      <View style={[styles.pagination]}>
         {filteredData.map((_, i) => {
           const opacity = position.interpolate({
             inputRange: [i - 1, i, i + 1],
@@ -119,41 +117,49 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
           return (
             <Animated.View
               key={`dot-${i}`}
-              style={[styles.dot, { bottom: -containerHeight/2-16, opacity, transform: [{ scale }] }]}
+              style={[
+                styles.dot,
+                {
+                  bottom: -containerHeight / 2 - 16,
+                  opacity,
+                  transform: [{ scale }],
+                },
+              ]}
             />
           );
         })}
       </View>
     );
   };
+
   return (
     <View style={styles.container} onLayout={handleLayout}>
       {isLoading ? (
         <ActivityIndicator size="large" color="#007BFF" />
       ) : foodsData.length > 0 ? (
         <>
-        <AnimatedFlatList
-          ref={listRef}
-          contentContainerStyle={{ paddingHorizontal: sidePadding }}
-          data={filteredData}
-          //data={foodsData.filter((item) => item.speed === mode)}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={containerHeight}
-          decelerationRate="fast"
-          scrollEventThrottle={16}
-          initialNumToRender={0}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true }
-          )}
-        />
-        {renderPaginationDots()}
-      </>
+          <AnimatedFlatList
+            ref={listRef}
+            contentContainerStyle={{ paddingHorizontal: sidePadding }}
+            data={filteredData}
+            //data={foodsData.filter((item) => item.speed === mode)}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={containerHeight}
+            decelerationRate="fast"
+            scrollEventThrottle={16}
+            initialNumToRender={0}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+          />
+          {renderPaginationDots()}
+        </>
       ) : (
-      <Text>표시할 음식이 없습니다.</Text>
+        <Text>표시할 음식이 없습니다.</Text>
       )}
 
       <Modal
@@ -192,6 +198,8 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
     borderRadius: 16,
+    borderColor: "#A87C66",
+    borderWidth: 1.5,
   },
   foodText: {
     position: "absolute",
@@ -206,7 +214,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    
   },
   dot: {
     width: 8,

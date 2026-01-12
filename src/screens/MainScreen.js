@@ -15,29 +15,27 @@ import useAuthStore from "../stores/authStore";
 import { fetchMainFeedFoods } from "../services/food";
 import { handleLogout } from "../services/auth";
 
-import StatusBanner from "../components/MainScreen/StatusBanner";
+import Hero from "../components/MainScreen/Hero";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import BalanceGame from "../components/MainScreen/BalanceGame";
+import DebugButton from "../components/DebugButton";
 
 import Bell from "../components/svg/Bell";
 import Settings from "../components/svg/Settings";
 import Colors from "../constants/colors";
 
-// 바텀시트 핸들바(항상 보이는 부분)의 높이
-const BOTTOM_SHEET_HANDLE_HEIGHT = 70;
+const HEADER_HEIGHT = 48;
+const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
+const HERO_MARGIN = 18;
 
 const MainScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
-  // 화면 전체 높이와 너비 가져오기
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  // 1. 헤더 높이 계산 (상단바 + 60)
-  const headerHeight = insets.top + 60;
+  const headerHeight = insets.top + HEADER_HEIGHT;
 
-  // 2. 동적 스크롤 임계값 계산 (핵심!)
-  // 전체 화면에서 [헤더]와 [핸들바]를 뺀 나머지 공간만큼만 스크롤 가능하게 함
   const SCROLL_THRESHOLD =
     screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
 
@@ -57,7 +55,7 @@ const MainScreen = () => {
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (evt, gestureState) => {
-          return Math.abs(gestureState.dy) > 10;
+          return Math.abs(gestureState.dy) > 40;
         },
         onPanResponderGrant: () => {
           offsetY.current = scrollY._value || 0;
@@ -103,7 +101,7 @@ const MainScreen = () => {
           });
         },
       }),
-    // SCROLL_THRESHOLD가 바뀌면 PanResponder도 새로 만들어야 함
+
     [scrollY, SCROLL_THRESHOLD]
   );
 
@@ -125,7 +123,7 @@ const MainScreen = () => {
 
   const heroTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [0, -headerHeight],
+    outputRange: [0, -(headerHeight + HERO_MARGIN)],
     extrapolate: "clamp",
   });
 
@@ -136,18 +134,18 @@ const MainScreen = () => {
   });
 
   const middleContentOpacity = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD * 0.4],
+    inputRange: [0, SCROLL_THRESHOLD * 0.5],
     outputRange: [1, 0],
     extrapolate: "clamp",
   });
 
-  const headerContentColor = scrollY.interpolate({
+  const bapddangTextColor = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [Colors.point_red, "white"],
+    outputRange: [Colors.point_red, Colors.yellow],
     extrapolate: "clamp",
   });
 
-  const iconOpacity = scrollY.interpolate({
+  const iconOverlayOpacity = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
     outputRange: [0, 1],
     extrapolate: "clamp",
@@ -159,74 +157,77 @@ const MainScreen = () => {
   };
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
+    <View
+      style={[styles.container, { paddingTop: insets.top }]}
+      {...panResponder.panHandlers}
+    >
       {/* Header Container */}
-      <View style={[styles.headerContainer, { marginTop: insets.top + 10 }]}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Animated.Text
-            style={[styles.logoText, { color: headerContentColor }]}
-          >
-            밥땡
-          </Animated.Text>
-          <TouchableOpacity onPress={onLogoutPress}>
-            <Animated.Text
-              style={{
-                fontSize: 14,
-                fontWeight: "bold",
-                color: headerContentColor,
-              }}
-            >
-              로그아웃
-            </Animated.Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.headerContainer}>
+        <Animated.Text style={[styles.logoText, { color: bapddangTextColor }]}>
+          밥땡
+        </Animated.Text>
 
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={() => {}}>
             <View>
-              <Bell color={Colors.point_red} width={24} height={24} />
+              <Bell color={Colors.yellow} width={24} height={24} />
               <Animated.View
-                style={[StyleSheet.absoluteFill, { opacity: iconOpacity }]}
+                style={[
+                  StyleSheet.absoluteFill,
+                  { opacity: iconOverlayOpacity },
+                ]}
               >
-                <Bell color="white" width={24} height={24} />
+                <Bell color={Colors.background_yellow} width={24} height={24} />
               </Animated.View>
             </View>
-            {hasNotifications && <View style={styles.notificationCircle} />}
+            {hasNotifications && (
+              <Animated.View
+                style={[
+                  styles.notificationCircle,
+                  { backgroundColor: bapddangTextColor },
+                ]}
+              />
+            )}
           </TouchableOpacity>
-
           <TouchableOpacity onPress={() => {}}>
             <View>
-              <Settings color={Colors.point_red} width={24} height={24} />
+              <Settings color={Colors.yellow} width={24} height={24} />
               <Animated.View
-                style={[StyleSheet.absoluteFill, { opacity: iconOpacity }]}
+                style={[
+                  StyleSheet.absoluteFill,
+                  { opacity: iconOverlayOpacity },
+                ]}
               >
-                <Settings color="white" width={24} height={24} />
+                <Settings
+                  color={Colors.background_yellow}
+                  width={24}
+                  height={24}
+                />
               </Animated.View>
             </View>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Red Banner */}
+      {/* 히어로 */}
       <Animated.View
         style={[
           styles.heroContainer,
-          { top: headerHeight }, // 헤더 높이만큼 띄우기
+          { top: headerHeight + HERO_MARGIN },
           { transform: [{ translateY: heroTranslateY }] },
         ]}
       >
-        <StatusBanner
+        <Hero
           scrollY={scrollY}
           scrollThreshold={SCROLL_THRESHOLD}
           heightRange={bannerHeightRange}
         />
       </Animated.View>
 
-      {/* Middle Content */}
+      {/* 중간 콘텐츠 */}
       <Animated.View
         style={[
           styles.middleContentContainer,
-          { top: insets.top + 310 }, // 이 값은 디자인에 맞춰 고정하거나 비율로 조정
           { opacity: middleContentOpacity },
         ]}
       >
@@ -235,9 +236,6 @@ const MainScreen = () => {
             <Text style={styles.categoryPillText}>점심식사</Text>
           </View>
           <Text style={styles.questionText}>를 고민 중인가요?</Text>
-        </View>
-        <View style={styles.subTextRow}>
-          <Text style={styles.subOptionText}>이미 점심을 먹었다면?</Text>
         </View>
 
         <View style={styles.cardNewsWrapper}>
@@ -249,11 +247,10 @@ const MainScreen = () => {
         </View>
       </Animated.View>
 
-      {/* Bottom Sheet */}
+      {/* 바텀시트 */}
       <Animated.View
         style={[
           styles.bottomSheetWrapper,
-          // 여기서 height를 동적으로 설정해줍니다.
           { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT },
           { transform: [{ translateY: bottomSheetTranslateY }] },
         ]}
@@ -269,6 +266,8 @@ const MainScreen = () => {
           <BalanceGame />
         </View>
       </Animated.View>
+
+      {/* <DebugButton index={0} label="Logout" onPress={onLogoutPress} /> */}
     </View>
   );
 };
@@ -278,20 +277,22 @@ export default MainScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFCF5",
+    backgroundColor: Colors.background_yellow,
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     zIndex: 20,
-    marginBottom: 10,
-    height: 40,
+    height: HEADER_HEIGHT,
+    borderBottomColor: Colors.text_gray,
+    borderBottomWidth: 0.3,
   },
   logoText: {
+    marginTop: -3,
     fontFamily: "KCCGanpan",
-    fontSize: 26,
+    fontSize: 32,
   },
   headerIcons: {
     flexDirection: "row",
@@ -301,22 +302,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -2,
     right: -2,
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: 4,
-    backgroundColor: Colors.point_red,
-    borderWidth: 1.5,
-    borderColor: "#FFFCF5",
   },
   heroContainer: {
     position: "absolute",
     width: "100%",
+    alignItems: "center",
     zIndex: 10,
   },
   middleContentContainer: {
     position: "absolute",
+    bottom: BOTTOM_SHEET_HANDLE_HEIGHT,
     width: "100%",
-    paddingBottom: 100,
+    justifyContent: "flex-end",
   },
   textRow: {
     flexDirection: "row",
@@ -349,15 +349,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  subOptionText: {
-    fontSize: 13,
-    color: "#999",
-    textDecorationLine: "underline",
-  },
   cardNewsWrapper: {
     height: 320,
   },
-  // bottomSheetWrapper에서 고정 height 제거 (inline style로 이동)
   bottomSheetWrapper: {
     position: "absolute",
     bottom: 0,
@@ -379,23 +373,22 @@ const styles = StyleSheet.create({
     height: BOTTOM_SHEET_HANDLE_HEIGHT,
     width: "100%",
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 10,
+    justifyContent: "flex-start",
+    paddingTop: 8,
+    gap: 16,
   },
   handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 2,
-    marginBottom: 10,
+    width: 36,
+    height: 5,
+    backgroundColor: Colors.slightly_burn,
+    borderRadius: 99,
   },
   handleText: {
-    color: "#999",
-    fontSize: 14,
-    fontWeight: "600",
+    color: Colors.slightly_burn,
+    fontSize: 16,
+    fontFamily: "NanumSquareRoundEB",
   },
   bottomSheetContent: {
     flex: 1,
-    padding: 20,
   },
 });

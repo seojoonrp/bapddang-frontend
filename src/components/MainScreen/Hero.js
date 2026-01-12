@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Text,
   Animated,
+  useWindowDimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,25 +20,29 @@ import Fire from "../svg/Fire";
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const StatusBanner = ({ scrollY, scrollThreshold }) => {
+const HORIZONTAL_PADDING = 12;
+
+const Hero = ({ scrollY, scrollThreshold }) => {
   const navigation = useNavigation();
   const { mode, toggleMode, modeColor } = useModeStore();
 
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  const textOpacity = scrollY.interpolate({
+    inputRange: [0, scrollThreshold * 0.5],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  const containerWidth = scrollY.interpolate({
+    inputRange: [0, scrollThreshold],
+    outputRange: [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
+    extrapolate: "clamp",
+  });
+
   const borderRadius = scrollY.interpolate({
     inputRange: [scrollThreshold * 0.7, scrollThreshold],
-    outputRange: [20, 0],
-    extrapolate: "clamp",
-  });
-
-  const topPosition = scrollY.interpolate({
-    inputRange: [0, scrollThreshold],
-    outputRange: [14, 66],
-    extrapolate: "clamp",
-  });
-
-  const bottomPosition = scrollY.interpolate({
-    inputRange: [0, scrollThreshold],
-    outputRange: [10, 30],
+    outputRange: [24, 0],
     extrapolate: "clamp",
   });
 
@@ -45,11 +50,15 @@ const StatusBanner = ({ scrollY, scrollThreshold }) => {
     <Animated.View
       style={[
         styles.container,
-        { borderRadius, backgroundColor: modeColor },
+        {
+          borderRadius,
+          backgroundColor: modeColor,
+          width: containerWidth,
+        },
       ]}
     >
       <AnimatedLinearGradient
-        colors={[`rgba(0, 0, 0, 0)`, `rgba(0, 0, 0, 0.25)`]}
+        colors={[`rgba(0, 0, 0, 0)`, `rgba(0, 0, 0, 0.2)`]}
         start={{ x: 0, y: 0.2 }}
         end={{ x: 0, y: 1 }}
         style={[
@@ -60,24 +69,21 @@ const StatusBanner = ({ scrollY, scrollThreshold }) => {
           },
         ]}
       >
-        <Animated.View style={[styles.switchContainer, { top: topPosition }]}>
-          <Text style={styles.modeText}>
-            {mode === "fast" ? "고속" : "저속"}노화모드
-          </Text>
+        <Animated.View style={styles.switchContainer}>
+          <Animated.Text style={[styles.modeText, { opacity: textOpacity }]}>
+            {mode === "fast" ? "고속" : "저속"}노화
+          </Animated.Text>
           <ModeSwitch value={mode === "fast"} onValueChange={toggleMode} />
         </Animated.View>
 
-        <View style={styles.fireContainer}>
+        {/* <View style={styles.fireContainer}>
           <Fire scale={1.0} />
         </View>
-
         <View style={styles.stickContainer}>
           <Stick scale={0.4} />
-        </View>
+        </View> */}
 
-        <Animated.View
-          style={[styles.bottomContainer, { bottom: bottomPosition }]}
-        >
+        <Animated.View style={styles.bottomContainer}>
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: modeColor }]}
             onPress={() => navigation.navigate("DietLog")}
@@ -95,12 +101,11 @@ const StatusBanner = ({ scrollY, scrollThreshold }) => {
   );
 };
 
-export default StatusBanner;
+export default Hero;
 
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    width: "100%",
     height: 230,
     flexDirection: "column",
     justifyContent: "center",
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
   switchContainer: {
     position: "absolute",
     top: 14,
-    left: 18,
+    left: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,

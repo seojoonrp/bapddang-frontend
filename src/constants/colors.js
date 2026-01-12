@@ -10,6 +10,7 @@ const Colors = {
   background_white: "#FEFDFA",
   burn_red: "#BE0A20",
   light_text_gray: "#F3EFEF",
+  yellow: "#FFC77D",
   icon_gray: "#CCC",
   light_red: "#FF7873",
   pressed_button: "#A94946",
