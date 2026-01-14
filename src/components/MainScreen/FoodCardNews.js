@@ -7,35 +7,26 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
-  ActivityIndicator,
   Animated,
 } from "react-native";
 import Modal from "react-native-modal";
+import PaginationDot from "react-native-animated-pagination-dot";
 
-import useModeStore from "../../stores/modeStore";
 import FoodInfoBox from "./FoodInfoBox";
+import Colors from "../../constants/colors";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
-const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
-  const { mode } = useModeStore();
+const FoodCardNews = ({
+  foodsData,
+  screenWidth,
+  size,
+  isLoading,
+  paginationHeight,
+}) => {
+  const sidePadding = (screenWidth - size) / 2;
 
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(0);
-
-  const handleLayout = (event) => {
-    const { width, height } = event.nativeEvent.layout;
-    if (width > 0 && containerWidth === 0) {
-      setContainerWidth(width);
-    }
-    if (height > 0 && containerHeight === 0) {
-      setContainerHeight(height);
-    }
-  };
-
-  const sidePadding = (containerWidth - containerHeight) / 2;
-  const snapInterval = containerHeight;
   const [selectedItem, setSelectedItem] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -51,25 +42,20 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
   // card scroll animation
   const listRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const itemWidth = containerHeight;
+  const [curPage, setCurPage] = useState(0);
 
-  const filteredData = useMemo(
-    () => foodsData.filter((item) => item.speed === mode),
-    [foodsData, mode]
-  );
-  const position = useMemo(() => {
-    if (!snapInterval) return null;
-    return Animated.divide(scrollX, snapInterval);
-  }, [scrollX, snapInterval]);
+  const handleScroll = (event) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const pageIndex = Math.round(offsetX / size);
+    if (pageIndex !== curPage) {
+      setCurPage(pageIndex);
+    }
+  };
 
   const renderItem = ({ item, index }) => {
-    if (!containerHeight) return null;
+    if (!size) return null;
 
-    const inputRange = [
-      (index - 1) * itemWidth,
-      index * itemWidth,
-      (index + 1) * itemWidth,
-    ];
+    const inputRange = [(index - 1) * size, index * size, (index + 1) * size];
 
     const scale = scrollX.interpolate({
       inputRange,
@@ -84,8 +70,8 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         style={[
           styles.cardContainer,
           {
-            width: containerHeight,
-            height: containerHeight,
+            width: size,
+            height: size,
             transform: [{ scale }],
           },
         ]}
@@ -96,71 +82,36 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
     );
   };
 
-  const renderPaginationDots = () => {
-    if (!position || filteredData.length <= 1) return null;
-
-    return (
-      <View style={[styles.pagination]}>
-        {filteredData.map((_, i) => {
-          const opacity = position.interpolate({
-            inputRange: [i - 1, i, i + 1],
-            outputRange: [0.25, 1.0, 0.25],
-            extrapolate: "clamp",
-          });
-
-          const scale = position.interpolate({
-            inputRange: [i - 1, i, i + 1],
-            outputRange: [0.9, 1.35, 0.9],
-            extrapolate: "clamp",
-          });
-
-          return (
-            <Animated.View
-              key={`dot-${i}`}
-              style={[
-                styles.dot,
-                {
-                  bottom: -containerHeight / 2 - 16,
-                  opacity,
-                  transform: [{ scale }],
-                },
-              ]}
-            />
-          );
-        })}
-      </View>
-    );
-  };
+  if (isLoading) return null;
 
   return (
-    <View style={styles.container} onLayout={handleLayout}>
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#007BFF" />
-      ) : foodsData.length > 0 ? (
-        <>
-          <AnimatedFlatList
-            ref={listRef}
-            contentContainerStyle={{ paddingHorizontal: sidePadding }}
-            data={filteredData}
-            //data={foodsData.filter((item) => item.speed === mode)}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={containerHeight}
-            decelerationRate="fast"
-            scrollEventThrottle={16}
-            initialNumToRender={0}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true }
-            )}
-          />
-          {renderPaginationDots()}
-        </>
-      ) : (
-        <Text>표시할 음식이 없습니다.</Text>
-      )}
+    <View style={styles.container}>
+      <AnimatedFlatList
+        ref={listRef}
+        contentContainerStyle={{ paddingHorizontal: sidePadding }}
+        data={foodsData}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        disableIntervalMomentum={true}
+        snapToInterval={size}
+        decelerationRate="fast"
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false, listener: handleScroll }
+        )}
+      />
+
+      <View style={[styles.paginationContainer, { height: paginationHeight }]}>
+        <PaginationDot
+          activeDotColor={Colors.burn}
+          curPage={curPage}
+          maxPage={foodsData.length}
+          sizeRatio={1.0}
+        />
+      </View>
 
       <Modal
         isVisible={showInfo}
@@ -171,7 +122,7 @@ const FoodCardNews = ({ pad, foodsData = [], isLoading }) => {
         style={{ margin: 0 }}
       >
         <Pressable style={styles.backdrop} onPress={handleClose} />
-        <FoodInfoBox item={selectedItem} mode={mode} onClose={handleClose} />
+        <FoodInfoBox item={selectedItem} onClose={handleClose} />
       </Modal>
     </View>
   );
@@ -186,20 +137,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardContainer: {
-    width: 300,
-    height: 300,
     justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden",
+    borderColor: "#A87C66",
+    borderWidth: 2,
     borderRadius: 16,
+    overflow: "hidden",
   },
   cardImage: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
-    borderRadius: 16,
-    borderColor: "#A87C66",
-    borderWidth: 1.5,
   },
   foodText: {
     position: "absolute",
@@ -209,18 +156,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
   },
-  pagination: {
-    position: "absolute",
-    flexDirection: "row",
-    justifyContent: "center",
+  paginationContainer: {
+    justifyContent: "flex-start",
     alignItems: "center",
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "black",
-    marginHorizontal: 4,
+    paddingTop: 8,
   },
   backdrop: {
     position: "absolute",

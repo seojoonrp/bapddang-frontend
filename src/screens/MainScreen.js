@@ -27,6 +27,7 @@ import Colors from "../constants/colors";
 const HEADER_HEIGHT = 48;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
 const HERO_MARGIN = 18;
+const PAGINATION_HEIGHT = 32;
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -40,7 +41,6 @@ const MainScreen = () => {
     screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
 
   const bannerHeightRange = [230, headerHeight];
-  const cardNewsSize = 300;
 
   const [isLoading, setIsLoading] = useState(true);
   const [mainFeedData, setMainFeedData] = useState([]);
@@ -108,7 +108,7 @@ const MainScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchMainFeedFoods({ speed: "fast" });
+        const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
         setMainFeedData(data.foods || []);
       } catch (error) {
         console.error(error);
@@ -118,8 +118,6 @@ const MainScreen = () => {
     };
     fetchData();
   }, []);
-
-  const cardNewsPadding = screenWidth / 2 - (cardNewsSize / 2) * 1.04;
 
   const heroTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
@@ -238,13 +236,13 @@ const MainScreen = () => {
           <Text style={styles.questionText}>를 고민 중인가요?</Text>
         </View>
 
-        <View style={styles.cardNewsWrapper}>
-          <FoodCardNews
-            pad={cardNewsPadding}
-            foodsData={mainFeedData}
-            isLoading={isLoading}
-          />
-        </View>
+        <FoodCardNews
+          foodsData={mainFeedData}
+          screenWidth={screenWidth}
+          size={300}
+          isLoading={isLoading}
+          paginationHeight={PAGINATION_HEIGHT}
+        />
       </Animated.View>
 
       {/* 바텀시트 */}
@@ -348,9 +346,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-  },
-  cardNewsWrapper: {
-    height: 320,
   },
   bottomSheetWrapper: {
     position: "absolute",

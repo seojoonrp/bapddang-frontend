@@ -1,9 +1,9 @@
 import api from "../api/api";
 
-export const fetchMainFeedFoods = async ({ speed }) => {
+export const fetchMainFeedFoods = async ({ speed, count }) => {
   try {
     const response = await api.get("/foods/main-feed", {
-      params: { speed, count: 4 },
+      params: { speed, count },
     });
 
     return response.data;
