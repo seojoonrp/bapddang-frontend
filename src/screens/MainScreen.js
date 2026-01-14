@@ -9,9 +9,9 @@ import {
   PanResponder,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
-import useAuthStore from "../stores/authStore";
+import useFoodStore from "../stores/foodStore";
 import { fetchMainFeedFoods } from "../services/food";
 import { handleLogout } from "../services/auth";
 
@@ -30,6 +30,7 @@ const HERO_MARGIN = 18;
 const PAGINATION_HEIGHT = 32;
 
 const MainScreen = () => {
+  const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -43,7 +44,9 @@ const MainScreen = () => {
   const bannerHeightRange = [230, headerHeight];
 
   const [isLoading, setIsLoading] = useState(true);
-  const [mainFeedData, setMainFeedData] = useState([]);
+  const { mainFeedFoods, setMainFeedFoodData, loadPersistedData, clearData } =
+    useFoodStore();
+
   const hasNotifications = true;
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -106,17 +109,26 @@ const MainScreen = () => {
   );
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
-        setMainFeedData(data.foods || []);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
+    const initMainFeedFoods = async () => {
+      setIsLoading(true);
+
+      const isFromLanding = route.params?.from === "Landing";
+      const savedData = await loadPersistedData();
+
+      if (!savedData) {
+        try {
+          console.log("Fetching main feed foods from API...");
+          const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
+          await setMainFeedFoodData(data.foods || [], 0);
+        } catch (error) {
+          console.error("Failed to fetch main feed foods on init:", error);
+        }
       }
+
+      setIsLoading(false);
     };
-    fetchData();
+
+    initMainFeedFoods();
   }, []);
 
   const heroTranslateY = scrollY.interpolate({
@@ -151,6 +163,7 @@ const MainScreen = () => {
 
   const onLogoutPress = async () => {
     await handleLogout();
+    await clearData();
     navigation.replace("Landing");
   };
 
@@ -237,7 +250,7 @@ const MainScreen = () => {
         </View>
 
         <FoodCardNews
-          foodsData={mainFeedData}
+          foodsData={mainFeedFoods}
           screenWidth={screenWidth}
           size={300}
           isLoading={isLoading}
@@ -265,7 +278,7 @@ const MainScreen = () => {
         </View>
       </Animated.View>
 
-      {/* <DebugButton index={0} label="Logout" onPress={onLogoutPress} /> */}
+      <DebugButton index={0} label="Logout" onPress={onLogoutPress} />
     </View>
   );
 };

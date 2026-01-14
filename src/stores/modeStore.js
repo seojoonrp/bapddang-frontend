@@ -1,3 +1,5 @@
+// src/stores/modeStore.js
+
 import { create } from "zustand";
 
 import Colors from "../constants/colors";

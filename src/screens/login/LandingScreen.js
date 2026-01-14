@@ -51,7 +51,7 @@ const LandingScreen = () => {
       const isLoggedIn = await checkLoginSession();
 
       if (isLoggedIn) {
-        navigation.replace("Main");
+        navigation.replace("Main", { from: "Landing" });
       }
     };
 
@@ -62,7 +62,7 @@ const LandingScreen = () => {
     try {
       const success = await handleGoogleLogin();
       if (success) {
-        navigation.navigate("Main");
+        navigation.navigate("Main", { from: "Landing" });
       }
     } catch (error) {
       console.log("Landing Screen Google Login Error:", error);
@@ -73,7 +73,7 @@ const LandingScreen = () => {
     try {
       const success = await handleKakaoLogin();
       if (success) {
-        navigation.navigate("Main");
+        navigation.navigate("Main", { from: "Landing" });
       }
     } catch (error) {
       console.log("Landing Screen Kakao Login Error:", error);
@@ -84,7 +84,7 @@ const LandingScreen = () => {
     try {
       const success = await handleAppleLogin();
       if (success) {
-        navigation.navigate("Main");
+        navigation.navigate("Main", { from: "Landing" });
       }
     } catch (error) {
       console.log("Landing Screen Apple Login Error:", error);
@@ -97,13 +97,13 @@ const LandingScreen = () => {
 
       <TouchableOpacity
         style={styles.guestButton}
-        onPress={() => navigation.navigate("Main")}
+        onPress={() => navigation.navigate("Main", { from: "Landing" })}
       >
         <Text style={styles.guestButtonText}>게스트로 둘러보기</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.signUpButton}
-        onPress={() => navigation.navigate("SignUp")}
+        onPress={() => navigation.navigate("SignUp", { from: "Landing" })}
       >
         <Text style={styles.signUpButtonText}>회원가입</Text>
       </TouchableOpacity>
@@ -134,7 +134,7 @@ const LandingScreen = () => {
 
       <Text
         style={styles.loginButtonText}
-        onPress={() => navigation.navigate("Login")}
+        onPress={() => navigation.navigate("Login", { from: "Landing" })}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         accessibilityRole="button"
       >
