@@ -16,6 +16,7 @@ import Modal from "react-native-modal";
 
 import FoodInfoBox from "./FoodInfoBox";
 import Colors from "../../constants/colors";
+import Pagination from "../common/Pagination";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -134,19 +135,22 @@ const FoodCardNews = ({
         keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
-        disableIntervalMomentum={true}
         snapToInterval={size}
         decelerationRate="fast"
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
+          { useNativeDriver: true }
         )}
         onScrollEndDrag={handleEndSwipe}
       />
 
       <View style={[styles.paginationContainer, { height: paginationHeight }]}>
-        <Text>Pagination</Text>
+        <Pagination
+          total={foodsData.length}
+          scrollX={scrollX}
+          cardSize={size}
+        />
       </View>
 
       <Modal
@@ -204,6 +208,7 @@ const styles = StyleSheet.create({
     width: OVER_SCROLL_THRESHOLD,
     justifyContent: "center",
     alignItems: "center",
+    borderColor: Colors.light_gray,
     borderTopLeftRadius: 16,
     borderBottomLeftRadius: 16,
     borderWidth: 1.5,

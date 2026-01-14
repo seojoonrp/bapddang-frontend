@@ -125,7 +125,7 @@ const MainScreen = () => {
       if (!savedData || isFirstLoad.current) {
         try {
           console.log("Fetching main feed foods from API...");
-          const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
+          const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
           if (data.foods && data.foods.length > 0) {
             await setMainFeedFoodData(data.foods, 0);
           }
@@ -148,7 +148,7 @@ const MainScreen = () => {
 
     try {
       console.log("Fetching more main feed foods from API...");
-      const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
+      const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
       if (data.foods && data.foods.length > 0) {
         await appendMainFeedFoodData(data.foods);
       }
