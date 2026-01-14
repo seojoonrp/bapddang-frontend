@@ -1,25 +1,18 @@
-// src/components/MainScreen/FoodCardNews.js
-
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-  Image,
-  Animated,
-  ActivityIndicator,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedScrollHandler,
+  interpolate,
+  interpolateColor,
+  Extrapolation,
+  runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
+} from "react-native-reanimated";
 import Modal from "react-native-modal";
-
 import FoodInfoBox from "./FoodInfoBox";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
-
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 const OVER_SCROLL_THRESHOLD = 80;
 
@@ -33,116 +26,89 @@ const FoodCardNews = ({
   isExtraLoading,
 }) => {
   const sidePadding = (screenWidth - size) / 2;
-
   const [selectedItem, setSelectedItem] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
-  const handleCardPress = (item) => {
-    setSelectedItem(item);
-    setShowInfo(true);
-  };
+  const scrollX = useSharedValue(0);
 
-  const handleClose = () => {
-    setShowInfo(false);
-  };
-
-  // card scroll animation
-  const listRef = useRef(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
-
-  const handleEndSwipe = (event) => {
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-
-    const overScroll =
-      contentOffset.x + layoutMeasurement.width - contentSize.width;
-    if (overScroll > OVER_SCROLL_THRESHOLD) {
-      onEndSwipe();
-    }
-  };
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+    onEndDrag: (event) => {
+      const overScroll =
+        event.contentOffset.x +
+        event.layoutMeasurement.width -
+        event.contentSize.width;
+      if (overScroll > OVER_SCROLL_THRESHOLD) {
+        runOnJS(onEndSwipe)();
+      }
+    },
+  });
 
   const maxScrollX = size * (foodsData.length - 1);
-  const footerTranslateX = scrollX.interpolate({
-    inputRange: [
-      maxScrollX - sidePadding + 4,
-      maxScrollX + OVER_SCROLL_THRESHOLD,
-    ],
-    outputRange: [OVER_SCROLL_THRESHOLD, 0],
-    extrapolate: "clamp",
-  });
-  const footerColor = scrollX.interpolate({
-    inputRange: [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-    outputRange: [Colors.light_gray, Colors.point_red],
-    extrapolate: "clamp",
-  });
 
-  const renderItem = ({ item, index }) => {
-    if (!size) return null;
-
-    const inputRange = [(index - 1) * size, index * size, (index + 1) * size];
-
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.88, 1.0, 0.88],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <AnimatedTouchable
-        onPress={() => handleCardPress(item)}
-        activeOpacity={0.7}
-        style={[
-          styles.cardContainer,
-          {
-            width: size,
-            height: size,
-            transform: [{ scale }],
-          },
-        ]}
-      >
-        <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
-        <Text style={styles.foodText}>{item.name}</Text>
-      </AnimatedTouchable>
+  const animatedFooterStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      scrollX.value,
+      [maxScrollX - sidePadding + 4, maxScrollX + OVER_SCROLL_THRESHOLD],
+      [OVER_SCROLL_THRESHOLD, 0],
+      Extrapolation.CLAMP
     );
-  };
+    const borderColor = interpolateColor(
+      scrollX.value,
+      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+      [Colors.light_gray, Colors.point_red]
+    );
+
+    return {
+      borderColor,
+      transform: [{ translateX }, { translateY: size * 0.1 }],
+    };
+  });
+
+  const animatedFooterTextStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      scrollX.value,
+      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+      [Colors.light_gray, Colors.point_red]
+    ),
+  }));
 
   if (isLoading) return null;
 
   return (
     <View style={styles.container}>
       <Animated.View
-        style={[
-          styles.footer,
-          {
-            borderColor: footerColor,
-            transform: [
-              { translateX: footerTranslateX },
-              { translateY: size * 0.1 },
-            ],
-            height: size * 0.8,
-          },
-        ]}
+        style={[styles.footer, { height: size * 0.8 }, animatedFooterStyle]}
       >
-        <Animated.Text style={[styles.footerText, { color: footerColor }]}>
+        <Animated.Text style={[styles.footerText, animatedFooterTextStyle]}>
           당겨서{"\n"}음식{"\n"}더 보기
         </Animated.Text>
       </Animated.View>
 
-      <AnimatedFlatList
-        ref={listRef}
-        contentContainerStyle={{ paddingHorizontal: sidePadding }}
+      <Animated.FlatList
         data={foodsData}
-        renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={size}
         decelerationRate="fast"
+        contentContainerStyle={{ paddingHorizontal: sidePadding }}
         scrollEventThrottle={16}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
+        onScroll={scrollHandler}
+        renderItem={({ item, index }) => (
+          <CardItem
+            item={item}
+            index={index}
+            scrollX={scrollX}
+            size={size}
+            onPress={() => {
+              setSelectedItem(item);
+              setShowInfo(true);
+            }}
+          />
         )}
-        onScrollEndDrag={handleEndSwipe}
       />
 
       <View style={[styles.paginationContainer, { height: paginationHeight }]}>
@@ -161,21 +127,45 @@ const FoodCardNews = ({
         onModalHide={() => setSelectedItem(null)}
         style={{ margin: 0 }}
       >
-        <Pressable style={styles.backdrop} onPress={handleClose} />
-        <FoodInfoBox item={selectedItem} onClose={handleClose} />
+        <Pressable style={styles.backdrop} onPress={() => setShowInfo(false)} />
+        <FoodInfoBox item={selectedItem} onClose={() => setShowInfo(false)} />
       </Modal>
     </View>
   );
 };
 
-export default FoodCardNews;
+const CardItem = React.memo(({ item, index, scrollX, size, onPress }) => {
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: interpolate(
+          scrollX.value,
+          [(index - 1) * size, index * size, (index + 1) * size],
+          [0.88, 1.0, 0.88],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  }));
+
+  return (
+    <Pressable onPress={onPress}>
+      <Animated.View
+        style={[
+          styles.cardContainer,
+          { width: size, height: size },
+          animatedStyle,
+        ]}
+      >
+        <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
+        <Text style={styles.foodText}>{item.name}</Text>
+      </Animated.View>
+    </Pressable>
+  );
+});
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
   cardContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -184,10 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  cardImage: {
-    width: "100%",
-    height: "100%",
-  },
+  cardImage: { width: "100%", height: "100%" },
   foodText: {
     position: "absolute",
     bottom: 15,
@@ -227,3 +214,5 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
+
+export default FoodCardNews;
