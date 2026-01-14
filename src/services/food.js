@@ -1,3 +1,5 @@
+// src/services/food.js
+
 import api from "../api/api";
 
 export const fetchMainFeedFoods = async ({ speed, count }) => {

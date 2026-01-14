@@ -13,6 +13,24 @@ const useFoodStore = create((set, get) => ({
     await AsyncStorage.setItem("main_feed_current_index", index.toString());
   },
 
+  appendMainFeedFoodData: async (data) => {
+    const currentFoods = get().mainFeedFoods;
+
+    const uniqueNewFoods = data.filter(
+      (newFood) =>
+        !currentFoods.some((existingFood) => existingFood.id === newFood.id)
+    );
+    if (uniqueNewFoods.length === 0) return;
+
+    if (uniqueNewFoods.length < data.length) {
+      console.log("Duplicate foods detected. Removing...");
+    }
+
+    const updatedFoods = [...currentFoods, ...uniqueNewFoods];
+    set({ mainFeedFoods: updatedFoods });
+    await AsyncStorage.setItem("main_feed_foods", JSON.stringify(updatedFoods));
+  },
+
   updateIndex: async (index) => {
     set({ currentIndex: index });
     await AsyncStorage.setItem("main_feed_current_index", index.toString());

@@ -1,3 +1,5 @@
+// src/components/MainScreen/FoodCardNews.js
+
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   View,
@@ -8,9 +10,9 @@ import {
   Pressable,
   Image,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import Modal from "react-native-modal";
-import PaginationDot from "react-native-animated-pagination-dot";
 
 import FoodInfoBox from "./FoodInfoBox";
 import Colors from "../../constants/colors";
@@ -18,12 +20,16 @@ import Colors from "../../constants/colors";
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
+const OVER_SCROLL_THRESHOLD = 80;
+
 const FoodCardNews = ({
   foodsData,
   screenWidth,
   size,
   isLoading,
   paginationHeight,
+  onEndSwipe,
+  isExtraLoading,
 }) => {
   const sidePadding = (screenWidth - size) / 2;
 
@@ -42,15 +48,31 @@ const FoodCardNews = ({
   // card scroll animation
   const listRef = useRef(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const [curPage, setCurPage] = useState(0);
 
-  const handleScroll = (event) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const pageIndex = Math.round(offsetX / size);
-    if (pageIndex !== curPage) {
-      setCurPage(pageIndex);
+  const handleEndSwipe = (event) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+
+    const overScroll =
+      contentOffset.x + layoutMeasurement.width - contentSize.width;
+    if (overScroll > OVER_SCROLL_THRESHOLD) {
+      onEndSwipe();
     }
   };
+
+  const maxScrollX = size * (foodsData.length - 1);
+  const footerTranslateX = scrollX.interpolate({
+    inputRange: [
+      maxScrollX - sidePadding + 4,
+      maxScrollX + OVER_SCROLL_THRESHOLD,
+    ],
+    outputRange: [OVER_SCROLL_THRESHOLD, 0],
+    extrapolate: "clamp",
+  });
+  const footerColor = scrollX.interpolate({
+    inputRange: [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+    outputRange: [Colors.light_gray, Colors.point_red],
+    extrapolate: "clamp",
+  });
 
   const renderItem = ({ item, index }) => {
     if (!size) return null;
@@ -86,6 +108,24 @@ const FoodCardNews = ({
 
   return (
     <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.footer,
+          {
+            borderColor: footerColor,
+            transform: [
+              { translateX: footerTranslateX },
+              { translateY: size * 0.1 },
+            ],
+            height: size * 0.8,
+          },
+        ]}
+      >
+        <Animated.Text style={[styles.footerText, { color: footerColor }]}>
+          당겨서{"\n"}음식{"\n"}더 보기
+        </Animated.Text>
+      </Animated.View>
+
       <AnimatedFlatList
         ref={listRef}
         contentContainerStyle={{ paddingHorizontal: sidePadding }}
@@ -100,17 +140,13 @@ const FoodCardNews = ({
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false, listener: handleScroll }
+          { useNativeDriver: false }
         )}
+        onScrollEndDrag={handleEndSwipe}
       />
 
       <View style={[styles.paginationContainer, { height: paginationHeight }]}>
-        <PaginationDot
-          activeDotColor={Colors.burn}
-          curPage={curPage}
-          maxPage={foodsData.length}
-          sizeRatio={1.0}
-        />
+        <Text>Pagination</Text>
       </View>
 
       <Modal
@@ -160,6 +196,24 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingTop: 8,
+  },
+  footer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: OVER_SCROLL_THRESHOLD,
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderWidth: 1.5,
+    borderRightWidth: 0,
+  },
+  footerText: {
+    textAlign: "left",
+    fontSize: 14,
+    fontFamily: "NanumSquareRoundR",
+    lineHeight: 20,
   },
   backdrop: {
     position: "absolute",

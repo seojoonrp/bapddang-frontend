@@ -1,3 +1,5 @@
+// src/screens/MainScreen.js
+
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   StyleSheet,
@@ -30,22 +32,18 @@ const HERO_MARGIN = 18;
 const PAGINATION_HEIGHT = 32;
 
 const MainScreen = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const headerHeight = insets.top + HEADER_HEIGHT;
+  const bannerHeightRange = [230, headerHeight];
 
   const SCROLL_THRESHOLD =
     screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
-
-  const bannerHeightRange = [230, headerHeight];
-
-  const [isLoading, setIsLoading] = useState(true);
-  const { mainFeedFoods, setMainFeedFoodData, loadPersistedData, clearData } =
-    useFoodStore();
 
   const hasNotifications = true;
 
@@ -108,18 +106,30 @@ const MainScreen = () => {
     [scrollY, SCROLL_THRESHOLD]
   );
 
+  // 카뉴 음식 관련
+
+  const isFirstLoad = useRef(route.params?.from === "Landing");
+  const {
+    mainFeedFoods,
+    setMainFeedFoodData,
+    appendMainFeedFoodData,
+    loadPersistedData,
+    clearData,
+  } = useFoodStore();
+
   useEffect(() => {
     const initMainFeedFoods = async () => {
       setIsLoading(true);
 
-      const isFromLanding = route.params?.from === "Landing";
       const savedData = await loadPersistedData();
-
-      if (!savedData) {
+      if (!savedData || isFirstLoad.current) {
         try {
           console.log("Fetching main feed foods from API...");
           const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
-          await setMainFeedFoodData(data.foods || [], 0);
+          if (data.foods && data.foods.length > 0) {
+            await setMainFeedFoodData(data.foods, 0);
+          }
+          isFirstLoad.current = false;
         } catch (error) {
           console.error("Failed to fetch main feed foods on init:", error);
         }
@@ -131,6 +141,26 @@ const MainScreen = () => {
     initMainFeedFoods();
   }, []);
 
+  const [isExtraLoading, setIsExtraLoading] = useState(false);
+  const handleLoadMore = async () => {
+    if (isExtraLoading) return;
+    setIsExtraLoading(true);
+
+    try {
+      console.log("Fetching more main feed foods from API...");
+      const data = await fetchMainFeedFoods({ speed: "fast", count: 10 });
+      if (data.foods && data.foods.length > 0) {
+        await appendMainFeedFoodData(data.foods);
+      }
+    } catch (error) {
+      console.error("Failed to fetch more main feed foods:", error);
+    } finally {
+      setIsExtraLoading(false);
+    }
+  };
+
+  // 애니메이션 값 설정
+
   const heroTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
     outputRange: [0, -(headerHeight + HERO_MARGIN)],
@@ -140,12 +170,6 @@ const MainScreen = () => {
   const bottomSheetTranslateY = scrollY.interpolate({
     inputRange: [0, SCROLL_THRESHOLD],
     outputRange: [SCROLL_THRESHOLD, 0],
-    extrapolate: "clamp",
-  });
-
-  const middleContentOpacity = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD * 0.5],
-    outputRange: [1, 0],
     extrapolate: "clamp",
   });
 
@@ -236,12 +260,7 @@ const MainScreen = () => {
       </Animated.View>
 
       {/* 중간 콘텐츠 */}
-      <Animated.View
-        style={[
-          styles.middleContentContainer,
-          { opacity: middleContentOpacity },
-        ]}
-      >
+      <View style={[styles.middleContentContainer]}>
         <View style={styles.textRow}>
           <View style={styles.categoryPill}>
             <Text style={styles.categoryPillText}>점심식사</Text>
@@ -255,8 +274,10 @@ const MainScreen = () => {
           size={300}
           isLoading={isLoading}
           paginationHeight={PAGINATION_HEIGHT}
+          onEndSwipe={handleLoadMore}
+          isExtraLoading={isExtraLoading}
         />
-      </Animated.View>
+      </View>
 
       {/* 바텀시트 */}
       <Animated.View
@@ -278,7 +299,7 @@ const MainScreen = () => {
         </View>
       </Animated.View>
 
-      <DebugButton index={0} label="Logout" onPress={onLogoutPress} />
+      {/* <DebugButton index={0} label="Logout" onPress={onLogoutPress} /> */}
     </View>
   );
 };
