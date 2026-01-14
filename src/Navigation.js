@@ -8,8 +8,6 @@ import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 import WelcomeScreen from "./screens/login/WelcomeScreen";
 
-import TestScreen from "./screens/TestScreen";
-
 const Stack = createStackNavigator();
 
 const StackScreen = () => {
@@ -48,7 +46,6 @@ const StackScreen = () => {
         component={WelcomeScreen}
         options={{ title: "환영 화면" }}
       />
-      <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );
 };

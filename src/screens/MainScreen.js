@@ -1,17 +1,24 @@
 // src/screens/MainScreen.js
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
-  Animated,
   useWindowDimensions,
-  PanResponder,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  interpolate,
+  interpolateColor,
+  withSpring,
+  Extrapolation,
+} from "react-native-reanimated";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 
 import useFoodStore from "../stores/foodStore";
 import { fetchMainFeedFoods } from "../services/food";
@@ -19,8 +26,6 @@ import { handleLogout } from "../services/auth";
 
 import Hero from "../components/MainScreen/Hero";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
-import BalanceGame from "../components/MainScreen/BalanceGame";
-import DebugButton from "../components/DebugButton";
 
 import Bell from "../components/svg/Bell";
 import Settings from "../components/svg/Settings";
@@ -33,82 +38,43 @@ const PAGINATION_HEIGHT = 32;
 
 const MainScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
-
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const headerHeight = insets.top + HEADER_HEIGHT;
-  const bannerHeightRange = [230, headerHeight];
-
   const SCROLL_THRESHOLD =
     screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
 
-  const hasNotifications = true;
+  const scrollY = useSharedValue(0);
+  const startY = useSharedValue(0);
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const isBottomSheetOpen = useRef(false);
-  const offsetY = useRef(0);
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      startY.value = scrollY.value;
+    })
+    .onUpdate((e) => {
+      const newValue = startY.value - e.translationY;
+      scrollY.value = Math.max(0, Math.min(newValue, SCROLL_THRESHOLD));
+    })
+    .onEnd((e) => {
+      const velocity = -e.velocityY;
+      let toValue = 0;
+      if (
+        velocity > 500 ||
+        (scrollY.value > SCROLL_THRESHOLD / 2 && velocity > -500)
+      ) {
+        toValue = SCROLL_THRESHOLD;
+      }
+      scrollY.value = withSpring(toValue, {
+        damping: 20, // 튕기는 정도 -> 크게 상관없는듯
+        stiffness: 90, // 부드러운 정도 (낮을수록 부드러움)
+        mass: 1,
+        overshootClamping: true,
+      });
+    });
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: (evt, gestureState) => {
-          return Math.abs(gestureState.dy) > 40;
-        },
-        onPanResponderGrant: () => {
-          offsetY.current = scrollY._value || 0;
-        },
-        onPanResponderMove: (evt, gestureState) => {
-          const deltaY = -gestureState.dy;
-          const newValue = offsetY.current + deltaY;
-
-          if (newValue > SCROLL_THRESHOLD) {
-            scrollY.setValue(SCROLL_THRESHOLD);
-            return;
-          }
-          if (newValue < 0) {
-            scrollY.setValue(0);
-            return;
-          }
-          scrollY.setValue(newValue);
-        },
-        onPanResponderRelease: (evt, gestureState) => {
-          const { vy } = gestureState;
-          const velocity = -vy;
-          const currentValue = scrollY._value || 0;
-
-          let toValue = 0;
-          if (
-            velocity > 0.5 ||
-            (currentValue > SCROLL_THRESHOLD / 2 && velocity > -0.5)
-          ) {
-            toValue = SCROLL_THRESHOLD;
-          } else {
-            toValue = 0;
-          }
-
-          Animated.spring(scrollY, {
-            toValue: toValue,
-            velocity: velocity,
-            tension: 40,
-            friction: 9,
-            useNativeDriver: false,
-          }).start(() => {
-            isBottomSheetOpen.current = toValue === SCROLL_THRESHOLD;
-            offsetY.current = toValue;
-          });
-        },
-      }),
-
-    [scrollY, SCROLL_THRESHOLD]
-  );
-
-  // 카뉴 음식 관련
-
-  const isFirstLoad = useRef(route.params?.from === "Landing");
   const {
     mainFeedFoods,
     setMainFeedFoodData,
@@ -116,28 +82,23 @@ const MainScreen = () => {
     loadPersistedData,
     clearData,
   } = useFoodStore();
+  const isFirstLoad = useRef(route.params?.from === "Landing");
 
   useEffect(() => {
     const initMainFeedFoods = async () => {
       setIsLoading(true);
-
       const savedData = await loadPersistedData();
       if (!savedData || isFirstLoad.current) {
         try {
-          console.log("Fetching main feed foods from API...");
           const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
-          if (data.foods && data.foods.length > 0) {
-            await setMainFeedFoodData(data.foods, 0);
-          }
+          if (data.foods) await setMainFeedFoodData(data.foods, 0);
           isFirstLoad.current = false;
-        } catch (error) {
-          console.error("Failed to fetch main feed foods on init:", error);
+        } catch (e) {
+          console.error(e);
         }
       }
-
       setIsLoading(false);
     };
-
     initMainFeedFoods();
   }, []);
 
@@ -145,162 +106,154 @@ const MainScreen = () => {
   const handleLoadMore = async () => {
     if (isExtraLoading) return;
     setIsExtraLoading(true);
-
     try {
-      console.log("Fetching more main feed foods from API...");
       const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
-      if (data.foods && data.foods.length > 0) {
-        await appendMainFeedFoodData(data.foods);
-      }
-    } catch (error) {
-      console.error("Failed to fetch more main feed foods:", error);
+      if (data.foods) await appendMainFeedFoodData(data.foods);
     } finally {
       setIsExtraLoading(false);
     }
   };
 
-  // 애니메이션 값 설정
+  const animatedLogoStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      scrollY.value,
+      [0, SCROLL_THRESHOLD],
+      [Colors.point_red, Colors.yellow]
+    ),
+  }));
 
-  const heroTranslateY = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [0, -(headerHeight + HERO_MARGIN)],
-    extrapolate: "clamp",
-  });
+  const animatedIconOverlayStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, SCROLL_THRESHOLD],
+      [0, 1],
+      Extrapolation.CLAMP
+    ),
+  }));
 
-  const bottomSheetTranslateY = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [SCROLL_THRESHOLD, 0],
-    extrapolate: "clamp",
-  });
+  const animatedHeroStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, SCROLL_THRESHOLD],
+          [0, -(headerHeight + HERO_MARGIN)],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  }));
 
-  const bapddangTextColor = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [Colors.point_red, Colors.yellow],
-    extrapolate: "clamp",
-  });
+  const animatedBottomSheetStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, SCROLL_THRESHOLD],
+          [SCROLL_THRESHOLD, 0],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  }));
 
-  const iconOverlayOpacity = scrollY.interpolate({
-    inputRange: [0, SCROLL_THRESHOLD],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
-  });
-
-  const onLogoutPress = async () => {
-    await handleLogout();
-    await clearData();
-    navigation.replace("Landing");
-  };
+  const animatedCircleStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      scrollY.value,
+      [0, SCROLL_THRESHOLD],
+      [Colors.point_red, Colors.yellow]
+    ),
+  }));
 
   return (
-    <View
-      style={[styles.container, { paddingTop: insets.top }]}
-      {...panResponder.panHandlers}
-    >
-      {/* Header Container */}
-      <View style={styles.headerContainer}>
-        <Animated.Text style={[styles.logoText, { color: bapddangTextColor }]}>
-          밥땡
-        </Animated.Text>
-
-        <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => {}}>
-            <View>
-              <Bell color={Colors.yellow} width={24} height={24} />
+    <GestureDetector gesture={panGesture}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.headerContainer}>
+          <Animated.Text style={[styles.logoText, animatedLogoStyle]}>
+            밥땡
+          </Animated.Text>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity onPress={() => {}}>
+              <View>
+                <Bell color={Colors.yellow} width={24} height={24} />
+                <Animated.View
+                  style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
+                >
+                  <Bell
+                    color={Colors.background_yellow}
+                    width={24}
+                    height={24}
+                  />
+                </Animated.View>
+              </View>
               <Animated.View
-                style={[
-                  StyleSheet.absoluteFill,
-                  { opacity: iconOverlayOpacity },
-                ]}
-              >
-                <Bell color={Colors.background_yellow} width={24} height={24} />
-              </Animated.View>
-            </View>
-            {hasNotifications && (
-              <Animated.View
-                style={[
-                  styles.notificationCircle,
-                  { backgroundColor: bapddangTextColor },
-                ]}
+                style={[styles.notificationCircle, animatedCircleStyle]}
               />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
-            <View>
-              <Settings color={Colors.yellow} width={24} height={24} />
-              <Animated.View
-                style={[
-                  StyleSheet.absoluteFill,
-                  { opacity: iconOverlayOpacity },
-                ]}
-              >
-                <Settings
-                  color={Colors.background_yellow}
-                  width={24}
-                  height={24}
-                />
-              </Animated.View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* 히어로 */}
-      <Animated.View
-        style={[
-          styles.heroContainer,
-          { top: headerHeight + HERO_MARGIN },
-          { transform: [{ translateY: heroTranslateY }] },
-        ]}
-      >
-        <Hero
-          scrollY={scrollY}
-          scrollThreshold={SCROLL_THRESHOLD}
-          heightRange={bannerHeightRange}
-        />
-      </Animated.View>
-
-      {/* 중간 콘텐츠 */}
-      <View style={[styles.middleContentContainer]}>
-        <View style={styles.textRow}>
-          <View style={styles.categoryPill}>
-            <Text style={styles.categoryPillText}>점심식사</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {}}>
+              <View>
+                <Settings color={Colors.yellow} width={24} height={24} />
+                <Animated.View
+                  style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
+                >
+                  <Settings
+                    color={Colors.background_yellow}
+                    width={24}
+                    height={24}
+                  />
+                </Animated.View>
+              </View>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.questionText}>를 고민 중인가요?</Text>
         </View>
 
-        <FoodCardNews
-          foodsData={mainFeedFoods}
-          screenWidth={screenWidth}
-          size={300}
-          isLoading={isLoading}
-          paginationHeight={PAGINATION_HEIGHT}
-          onEndSwipe={handleLoadMore}
-          isExtraLoading={isExtraLoading}
-        />
+        <Animated.View
+          style={[
+            styles.heroContainer,
+            { top: headerHeight + HERO_MARGIN },
+            animatedHeroStyle,
+          ]}
+        >
+          <Hero scrollY={scrollY} scrollThreshold={SCROLL_THRESHOLD} />
+        </Animated.View>
+
+        <View style={styles.middleContentContainer}>
+          <View style={styles.textRow}>
+            <View style={styles.categoryPill}>
+              <Text style={styles.categoryPillText}>점심식사</Text>
+            </View>
+            <Text style={styles.questionText}>를 고민 중인가요?</Text>
+          </View>
+          <FoodCardNews
+            foodsData={mainFeedFoods}
+            screenWidth={screenWidth}
+            size={300}
+            isLoading={isLoading}
+            paginationHeight={PAGINATION_HEIGHT}
+            onEndSwipe={handleLoadMore}
+            isExtraLoading={isExtraLoading}
+          />
+        </View>
+
+        <Animated.View
+          style={[
+            styles.bottomSheetWrapper,
+            { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT },
+            animatedBottomSheetStyle,
+          ]}
+        >
+          <View style={styles.bottomSheetHandle}>
+            <View style={styles.handleBar} />
+            <Text style={styles.handleText}>
+              카테고리별 추천 메뉴를 보려면 올려주세요!
+            </Text>
+          </View>
+          <View style={styles.bottomSheetContent}>
+            <Text>ㅎㅇ</Text>
+          </View>
+        </Animated.View>
       </View>
-
-      {/* 바텀시트 */}
-      <Animated.View
-        style={[
-          styles.bottomSheetWrapper,
-          { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT },
-          { transform: [{ translateY: bottomSheetTranslateY }] },
-        ]}
-      >
-        <View style={styles.bottomSheetHandle}>
-          <View style={styles.handleBar} />
-          <Text style={styles.handleText}>
-            카테고리별 추천 메뉴를 보려면 올려주세요!
-          </Text>
-        </View>
-
-        <View style={styles.bottomSheetContent}>
-          <BalanceGame />
-        </View>
-      </Animated.View>
-
-      {/* <DebugButton index={0} label="Logout" onPress={onLogoutPress} /> */}
-    </View>
+    </GestureDetector>
   );
 };
 

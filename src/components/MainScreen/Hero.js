@@ -1,102 +1,86 @@
+// src/components/MainScreen/Hero.js
+
+import React from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   Text,
-  Animated,
   useWindowDimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
+} from "react-native-reanimated";
 
 import Colors from "../../constants/colors";
 import useModeStore from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
-
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
-import Stick from "../svg/Stick";
-import Fire from "../svg/Fire";
-
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const HORIZONTAL_PADDING = 12;
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const navigation = useNavigation();
   const { mode, toggleMode, modeColor } = useModeStore();
+  const { width: screenWidth } = useWindowDimensions();
 
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-
-  const textOpacity = scrollY.interpolate({
-    inputRange: [0, scrollThreshold * 0.5],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    const width = interpolate(
+      scrollY.value,
+      [0, scrollThreshold],
+      [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
+      Extrapolation.CLAMP
+    );
+    const borderRadius = interpolate(
+      scrollY.value,
+      [scrollThreshold * 0.7, scrollThreshold],
+      [24, 0],
+      Extrapolation.CLAMP
+    );
+    return { width, borderRadius, backgroundColor: modeColor };
   });
 
-  const containerWidth = scrollY.interpolate({
-    inputRange: [0, scrollThreshold],
-    outputRange: [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
-    extrapolate: "clamp",
-  });
+  const animatedTextStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, scrollThreshold * 0.5],
+      [1, 0],
+      Extrapolation.CLAMP
+    ),
+  }));
 
-  const borderRadius = scrollY.interpolate({
-    inputRange: [scrollThreshold * 0.7, scrollThreshold],
-    outputRange: [24, 0],
-    extrapolate: "clamp",
-  });
+  const animatedIconButtonStyle = useAnimatedStyle(() => ({
+    backgroundColor: modeColor,
+  }));
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          borderRadius,
-          backgroundColor: modeColor,
-          width: containerWidth,
-        },
-      ]}
-    >
-      <AnimatedLinearGradient
-        colors={[`rgba(0, 0, 0, 0)`, `rgba(0, 0, 0, 0.2)`]}
-        start={{ x: 0, y: 0.2 }}
-        end={{ x: 0, y: 1 }}
-        style={[
-          styles.container,
-          {
-            borderRadius,
-            overflow: "hidden",
-          },
-        ]}
-      >
-        <Animated.View style={styles.switchContainer}>
-          <Animated.Text style={[styles.modeText, { opacity: textOpacity }]}>
+    <Animated.View style={[styles.container, animatedContainerStyle]}>
+      <Animated.View style={[styles.gradient, animatedContainerStyle]}>
+        <View style={styles.switchContainer}>
+          <Animated.Text style={[styles.modeText, animatedTextStyle]}>
             {mode === "fast" ? "고속" : "저속"}노화
           </Animated.Text>
           <ModeSwitch value={mode === "fast"} onValueChange={toggleMode} />
-        </Animated.View>
-
-        {/* <View style={styles.fireContainer}>
-          <Fire scale={1.0} />
         </View>
-        <View style={styles.stickContainer}>
-          <Stick scale={0.4} />
-        </View> */}
 
-        <Animated.View style={styles.bottomContainer}>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: modeColor }]}
-            onPress={() => navigation.navigate("DietLog")}
-          >
-            <Edit color="white" />
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("DietLog")}>
+            <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+              <Edit color="white" />
+            </Animated.View>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: modeColor }]}
-          >
-            <Favorite color="white" />
+          <TouchableOpacity onPress={() => {}}>
+            <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+              <Favorite color="white" />
+            </Animated.View>
           </TouchableOpacity>
-        </Animated.View>
-      </AnimatedLinearGradient>
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 };
