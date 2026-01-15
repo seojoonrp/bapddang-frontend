@@ -7,51 +7,55 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { likeFood } from "../../services/user";
 import useAuthStore from "../../stores/authStore";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../constants/colors";
-import Star from "../svg/Star";
+import CloseIcon from "../../assets/icons/close-x.svg";
 
 const FoodInfoBox = ({ item, onClose }) => {
-  const navigation = useNavigation();
-  const user = useAuthStore((state) => state.user);
+  const { user } = useAuthStore();
 
   const handleLike = () => {
     if (!user) {
-      console.log("로그인하거라");
+      console.log("user not logged in");
       return;
     }
 
     likeFood(item.id);
   };
 
-  const handleCalendar = () => {
-    onClose();
-    navigation.navigate("DietLog");
-  };
-
   if (!item) return null;
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { backgroundColor: Colors.point_red }]}>
-        <Star />
-        <Text style={styles.headerText}>{item.name}</Text>
-        <Star />
-      </View>
-
-      <View style={styles.contentBox}>
-        <TouchableOpacity
-          style={[styles.emojiButton, { backgroundColor: "#FFF" }]}
-          onPress={handleLike}
-        >
-          <Text style={styles.emojiText}>👍</Text>
+      <View style={styles.whiteContainer}>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <CloseIcon width={30} height={30} color={Colors.burn} />
         </TouchableOpacity>
-        <Text>좋아요 개수: {item.likeCount}</Text>
-        <Text>리뷰 개수: {item.reviewCount}</Text>
-        <Text>별점: {item.averageRating}</Text>
+        <View style={styles.contentContainer}>
+          <View style={styles.imageContainer}>
+            <Image style={styles.foodImage} source={{ uri: item.imageURL }} />
+          </View>
+          <Text style={styles.foodName}>{item.name}</Text>
+          <View style={styles.categoryRow}>
+            {item.categories.map((category) => (
+              <View key={category} style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>{category}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.mapContainer}>
+            <Text>지도임</Text>
+          </View>
+          <Text style={styles.distanceText}>
+            <Text
+              style={{ color: Colors.point_red, fontFamily: "NanumSquareEB" }}
+            >
+              2.1km{" "}
+            </Text>
+            떨어진 곳에 있어요!
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -64,97 +68,86 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-  },
-  iconBar: {
-    backgroundColor: "transparent",
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  iconLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconText: {
-    color: "white",
-    marginLeft: 4,
-    fontWeight: "bold",
-    fontSize: 13,
-  },
-  header: {
-    width: "100%",
-    flexDirection: "row",
-    paddingTop: 27,
-    paddingBottom: 11,
-    gap: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  headerText: {
-    fontFamily: "NanumSquareEB",
-    fontSize: 30,
-    color: "white",
-  },
-  contentBox: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 40,
+    marginTop: "24%",
+  },
+  whiteContainer: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: Colors.background_white,
+    borderRadius: 24,
+  },
+  contentContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    gap: 12,
+    borderColor: Colors.light_text_gray,
+    borderWidth: 1,
+    borderRadius: 12,
   },
   imageContainer: {
-    width: 292,
-    height: 250,
-    backgroundColor: "#ddd",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: "hidden",
+    borderColor: Colors.border_brown,
+    borderWidth: 1.5,
   },
-  image: {
+  foodImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 12,
-    resizeMode: "cover",
   },
-  placeholder: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    width: "100%",
-  },
-  placeholderText: {
-    fontSize: 20,
-    color: "#333",
-  },
-  brandText: {
-    color: "#a38888",
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  emojiButton: {
-    borderWidth: 0.4,
-    borderColor: "#D9D9D9",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    marginTop: 20,
-    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
-  },
-  emojiText: {
+  foodName: {
+    color: Colors.burn,
+    fontFamily: "NanumSquareRoundEB",
     fontSize: 24,
+    letterSpacing: -0.5,
+    marginTop: -4,
+  },
+  categoryRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 8,
+  },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 99,
+    borderColor: Colors.nurim,
+    borderWidth: 1,
+    boxShadow: "0 2px 0 0 #FDEDC0",
+  },
+  categoryText: {
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 12,
+    color: Colors.nurim,
+  },
+  mapContainer: {
+    width: "100%",
+    height: 240,
+    borderRadius: 12,
+    borderColor: Colors.light_text_gray,
+    borderWidth: 1.5,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  distanceText: {
+    fontFamily: "NanumSquareB",
+    fontSize: 14,
+    letterSpacing: -0.3,
+    color: Colors.slightly_burn,
+    marginBottom: 4,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 10,
   },
 });
