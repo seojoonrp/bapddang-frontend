@@ -1,6 +1,6 @@
 // src/screens/MainScreen.js
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -19,16 +19,13 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-
 import useFoodStore from "../stores/foodStore";
 import { fetchMainFeedFoods } from "../services/food";
 import { handleLogout } from "../services/auth";
-
 import Hero from "../components/MainScreen/Hero";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
-
-import Bell from "../components/svg/Bell";
-import Settings from "../components/svg/Settings";
+import BellIcon from "../assets/icons/bell.svg";
+import SettingsIcon from "../assets/icons/settings.svg";
 import Colors from "../constants/colors";
 
 const HEADER_HEIGHT = 48;
@@ -175,11 +172,11 @@ const MainScreen = () => {
           <View style={styles.headerIcons}>
             <TouchableOpacity onPress={() => {}}>
               <View>
-                <Bell color={Colors.yellow} width={24} height={24} />
+                <BellIcon color={Colors.yellow} width={24} height={24} />
                 <Animated.View
                   style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
                 >
-                  <Bell
+                  <BellIcon
                     color={Colors.background_yellow}
                     width={24}
                     height={24}
@@ -192,11 +189,11 @@ const MainScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => {}}>
               <View>
-                <Settings color={Colors.yellow} width={24} height={24} />
+                <SettingsIcon color={Colors.yellow} width={24} height={24} />
                 <Animated.View
                   style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
                 >
-                  <Settings
+                  <SettingsIcon
                     color={Colors.background_yellow}
                     width={24}
                     height={24}
@@ -273,6 +270,7 @@ const styles = StyleSheet.create({
     height: HEADER_HEIGHT,
     borderBottomColor: Colors.text_gray,
     borderBottomWidth: 0.3,
+    borderTopColor: "black",
   },
   logoText: {
     marginTop: -3,
