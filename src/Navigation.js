@@ -7,6 +7,7 @@ import LoginScreen from "./screens/login/LoginScreen";
 import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 import WelcomeScreen from "./screens/login/WelcomeScreen";
+import { PortalHost } from "@gorhom/portal";
 
 const Stack = createStackNavigator();
 
@@ -54,6 +55,7 @@ const Navigation = () => {
   return (
     <NavigationContainer>
       <StackScreen />
+      <PortalHost name="modal" />
     </NavigationContainer>
   );
 };

@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Navigation from "./Navigation";
 import { initGoogleLogin } from "./services/auth";
+import { PortalProvider } from "@gorhom/portal";
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -32,7 +33,9 @@ const App = () => {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Navigation />
+        <PortalProvider>
+          <Navigation />
+        </PortalProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

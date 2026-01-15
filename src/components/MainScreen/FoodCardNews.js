@@ -13,6 +13,7 @@ import Modal from "react-native-modal";
 import FoodInfoBox from "./FoodInfoBox";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
+import ReanimatedModal from "../common/ReanimatedModal";
 
 const OVER_SCROLL_THRESHOLD = 80;
 
@@ -119,17 +120,9 @@ const FoodCardNews = ({
         />
       </View>
 
-      <Modal
-        isVisible={showInfo}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        backdropOpacity={0}
-        onModalHide={() => setSelectedItem(null)}
-        style={{ margin: 0 }}
-      >
-        <Pressable style={styles.backdrop} onPress={() => setShowInfo(false)} />
+      <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
         <FoodInfoBox item={selectedItem} onClose={() => setShowInfo(false)} />
-      </Modal>
+      </ReanimatedModal>
     </View>
   );
 };

@@ -8,15 +8,13 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
 import { likeFood } from "../../services/user";
 import useAuthStore from "../../stores/authStore";
-
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 
-const FoodInfoBox = ({ item, mode, onClose }) => {
+const FoodInfoBox = ({ item, onClose }) => {
   const navigation = useNavigation();
   const user = useAuthStore((state) => state.user);
 
@@ -38,25 +36,7 @@ const FoodInfoBox = ({ item, mode, onClose }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.iconBar}>
-        <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-          <Ionicons name="chevron-back" size={22} color="#fff" />
-          <Text style={styles.iconText}>HOME</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleCalendar}>
-          <Ionicons name="calendar-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      <View
-        style={[
-          styles.header,
-          {
-            backgroundColor:
-              mode === "fast" ? Colors.point_red : Colors.point_green,
-          },
-        ]}
-      >
+      <View style={[styles.header, { backgroundColor: Colors.point_red }]}>
         <Star />
         <Text style={styles.headerText}>{item.name}</Text>
         <Star />
@@ -81,10 +61,9 @@ export default FoodInfoBox;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
   },
   iconBar: {
     backgroundColor: "transparent",
