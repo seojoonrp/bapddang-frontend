@@ -9,8 +9,7 @@ import Animated, {
   Extrapolation,
   runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
 } from "react-native-reanimated";
-import Modal from "react-native-modal";
-import FoodInfoBox from "./FoodInfoBox";
+import FoodInfoBox from "./FoodInfoModal";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";

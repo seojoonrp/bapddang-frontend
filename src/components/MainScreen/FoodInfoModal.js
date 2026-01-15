@@ -1,18 +1,22 @@
-import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from "react-native";
+// src/components/MainScreen/FoodInfoModal.js
+
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { likeFood } from "../../services/user";
 import useAuthStore from "../../stores/authStore";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
+import KakaoMap from "../common/KakaoMap";
+import { useEffect, useState } from "react";
+import Animated, {
+  ZoomIn,
+  ZoomInEasyDown,
+  ZoomOut,
+  ZoomOutEasyDown,
+} from "react-native-reanimated";
 
 const FoodInfoBox = ({ item, onClose }) => {
+  if (!item) return null;
+
   const { user } = useAuthStore();
 
   const handleLike = () => {
@@ -24,7 +28,20 @@ const FoodInfoBox = ({ item, onClose }) => {
     likeFood(item.id);
   };
 
-  if (!item) return null;
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [distance, setDistance] = useState("");
+  useEffect(() => {
+    if (selectedPlace) {
+      const d = selectedPlace.distance;
+      if (d < 1000) {
+        setDistance(`${d}m`);
+      } else {
+        setDistance(`${(d / 1000).toFixed(1)}km`);
+      }
+    } else {
+      setDistance("");
+    }
+  }, [selectedPlace]);
 
   return (
     <View style={styles.container}>
@@ -32,11 +49,14 @@ const FoodInfoBox = ({ item, onClose }) => {
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
           <CloseIcon width={30} height={30} color={Colors.burn} />
         </TouchableOpacity>
+
         <View style={styles.contentContainer}>
           <View style={styles.imageContainer}>
             <Image style={styles.foodImage} source={{ uri: item.imageURL }} />
           </View>
+
           <Text style={styles.foodName}>{item.name}</Text>
+
           <View style={styles.categoryRow}>
             {item.categories.map((category) => (
               <View key={category} style={styles.categoryBadge}>
@@ -44,17 +64,49 @@ const FoodInfoBox = ({ item, onClose }) => {
               </View>
             ))}
           </View>
+
           <View style={styles.mapContainer}>
-            <Text>지도임</Text>
+            <KakaoMap
+              keyword={item.name}
+              lat={37.3903}
+              lon={127.1263}
+              onSelectPlace={setSelectedPlace}
+            />
+
+            {selectedPlace && (
+              <Animated.View
+                entering={ZoomInEasyDown.duration(250)}
+                exiting={ZoomOutEasyDown.duration(200)}
+                style={styles.placeInfoContainer}
+              >
+                <Text style={styles.placeName}>{selectedPlace.place_name}</Text>
+                <Text style={styles.placeAddress}>
+                  {selectedPlace.address_name}
+                </Text>
+              </Animated.View>
+            )}
           </View>
-          <Text style={styles.distanceText}>
-            <Text
-              style={{ color: Colors.point_red, fontFamily: "NanumSquareEB" }}
-            >
-              2.1km{" "}
-            </Text>
-            떨어진 곳에 있어요!
-          </Text>
+
+          <View style={styles.distanceContainer}>
+            {distance !== "" && (
+              <Animated.View
+                entering={ZoomIn.duration(250)}
+                exiting={ZoomOut.duration(200)}
+              >
+                <Text style={styles.distanceText}>
+                  <Text
+                    style={{
+                      color: Colors.point_red,
+                      fontFamily: "NanumSquareEB",
+                    }}
+                  >
+                    {distance}{" "}
+                  </Text>
+                  떨어진 곳에 있어요!
+                </Text>
+              </Animated.View>
+            )}
+          </View>
         </View>
       </View>
     </View>
@@ -69,7 +121,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 12,
-    marginTop: "24%",
   },
   whiteContainer: {
     width: "100%",
@@ -130,19 +181,45 @@ const styles = StyleSheet.create({
   mapContainer: {
     width: "100%",
     height: 240,
-    borderRadius: 12,
+    borderRadius: 16,
     borderColor: Colors.light_text_gray,
     borderWidth: 1.5,
-    justifyContent: "flex-end",
-    alignItems: "center",
     overflow: "hidden",
+  },
+  placeInfoContainer: {
+    position: "absolute",
+    bottom: 12,
+    left: "4%",
+    width: "92%",
+    alignItems: "flex-start",
+    backgroundColor: Colors.background_white,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
+    gap: 8,
+    borderRadius: 16,
+    boxShadow: "0 6px 0 0 rgba(204, 204, 204, 0.50)",
+  },
+  placeName: {
+    fontFamily: "NanumSquareEB",
+    fontSize: 18,
+    color: Colors.burn,
+  },
+  placeAddress: {
+    fontFamily: "NanumSquareB",
+    fontSize: 14,
+    color: Colors.slightly_burn,
+  },
+  distanceContainer: {
+    height: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
   },
   distanceText: {
     fontFamily: "NanumSquareB",
     fontSize: 14,
     letterSpacing: -0.3,
     color: Colors.slightly_burn,
-    marginBottom: 4,
   },
   closeButton: {
     position: "absolute",
