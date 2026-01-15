@@ -1,6 +1,5 @@
 // src/components/MainScreen/Hero.js
 
-import React from "react";
 import {
   View,
   StyleSheet,
@@ -15,7 +14,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "../../constants/colors";
 import useModeStore from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
@@ -26,6 +25,7 @@ const HORIZONTAL_PADDING = 12;
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { mode, toggleMode, modeColor } = useModeStore();
   const { width: screenWidth } = useWindowDimensions();
 
@@ -36,22 +36,44 @@ const Hero = ({ scrollY, scrollThreshold }) => {
       [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
       Extrapolation.CLAMP
     );
+    const paddingHorizontal = interpolate(
+      scrollY.value,
+      [0, scrollThreshold],
+      [14, 14 + HORIZONTAL_PADDING],
+      Extrapolation.CLAMP
+    );
+    const paddingTop = interpolate(
+      scrollY.value,
+      [0, scrollThreshold],
+      [14, insets.top + 9],
+      Extrapolation.CLAMP
+    );
     const borderRadius = interpolate(
       scrollY.value,
       [scrollThreshold * 0.7, scrollThreshold],
       [24, 0],
       Extrapolation.CLAMP
     );
-    return { width, borderRadius, backgroundColor: modeColor };
+    return {
+      width,
+      paddingHorizontal,
+      paddingTop,
+      borderRadius,
+      backgroundColor: modeColor,
+    };
   });
 
   const animatedTextStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      scrollY.value,
-      [0, scrollThreshold * 0.5],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
+    transform: [
+      {
+        scale: interpolate(
+          scrollY.value,
+          [0, scrollThreshold * 0.8],
+          [1, 0],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
   }));
 
   const animatedIconButtonStyle = useAnimatedStyle(() => ({
@@ -60,27 +82,35 @@ const Hero = ({ scrollY, scrollThreshold }) => {
 
   return (
     <Animated.View style={[styles.container, animatedContainerStyle]}>
-      <Animated.View style={[styles.gradient, animatedContainerStyle]}>
-        <View style={styles.switchContainer}>
-          <Animated.Text style={[styles.modeText, animatedTextStyle]}>
-            {mode === "fast" ? "고속" : "저속"}노화
-          </Animated.Text>
-          <ModeSwitch value={mode === "fast"} onValueChange={toggleMode} />
-        </View>
+      <LinearGradient
+        colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.2)"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={styles.absoluteFill}
+      />
 
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("DietLog")}>
-            <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
-              <Edit color="white" />
-            </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
-            <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
-              <Favorite color="white" />
-            </Animated.View>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
+      <View style={styles.switchContainer}>
+        <Animated.Text style={[styles.modeText, animatedTextStyle]}>
+          {mode === "fast" ? "고속" : "저속"}노화
+        </Animated.Text>
+        <ModeSwitch
+          value={mode === "fast"}
+          onValueChange={() => toggleMode()}
+        />
+      </View>
+
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate("DietLog")}>
+          <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+            <Edit color="white" />
+          </Animated.View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {}}>
+          <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+            <Favorite color="white" />
+          </Animated.View>
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 };
@@ -92,15 +122,17 @@ const styles = StyleSheet.create({
     position: "relative",
     height: 230,
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    overflow: "hidden",
+  },
+  absoluteFill: {
+    ...StyleSheet.absoluteFillObject,
   },
   switchContainer: {
-    position: "absolute",
-    top: 14,
-    left: 16,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
     zIndex: 10,
   },
   modeText: {

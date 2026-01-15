@@ -128,6 +128,15 @@ const MainScreen = () => {
     ),
   }));
 
+  const animatedHeaderLineStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, SCROLL_THRESHOLD * 0.25],
+      [1, 0],
+      Extrapolation.CLAMP
+    ),
+  }));
+
   const animatedHeroStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -203,6 +212,7 @@ const MainScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+        <Animated.View style={[styles.headerLine, animatedHeaderLineStyle]} />
 
         <Animated.View
           style={[
@@ -268,9 +278,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     zIndex: 20,
     height: HEADER_HEIGHT,
-    borderBottomColor: Colors.text_gray,
-    borderBottomWidth: 0.3,
-    borderTopColor: "black",
   },
   logoText: {
     marginTop: -3,
@@ -288,6 +295,12 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
+  },
+  headerLine: {
+    width: "100%",
+    height: 0.4,
+    backgroundColor: Colors.light_text_gray,
+    zIndex: 15,
   },
   heroContainer: {
     position: "absolute",
