@@ -53,12 +53,12 @@ const FoodCardNews = ({
       scrollX.value,
       [maxScrollX - sidePadding + 4, maxScrollX + OVER_SCROLL_THRESHOLD],
       [OVER_SCROLL_THRESHOLD, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const borderColor = interpolateColor(
       scrollX.value,
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-      [Colors.light_gray, Colors.point_red]
+      [Colors.light_gray, Colors.point_red],
     );
 
     return {
@@ -71,7 +71,7 @@ const FoodCardNews = ({
     color: interpolateColor(
       scrollX.value,
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-      [Colors.light_gray, Colors.point_red]
+      [Colors.light_gray, Colors.point_red],
     ),
   }));
 
@@ -89,7 +89,7 @@ const FoodCardNews = ({
 
       <Animated.FlatList
         data={foodsData}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.food.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={size}
@@ -99,7 +99,7 @@ const FoodCardNews = ({
         onScroll={scrollHandler}
         renderItem={({ item, index }) => (
           <CardItem
-            item={item}
+            item={item.food}
             index={index}
             scrollX={scrollX}
             size={size}
@@ -120,7 +120,10 @@ const FoodCardNews = ({
       </View>
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
-        <FoodInfoBox item={selectedItem} onClose={() => setShowInfo(false)} />
+        <FoodInfoBox
+          item={selectedItem?.food}
+          onClose={() => setShowInfo(false)}
+        />
       </ReanimatedModal>
     </View>
   );
@@ -134,7 +137,7 @@ const CardItem = React.memo(({ item, index, scrollX, size, onPress }) => {
           scrollX.value,
           [(index - 1) * size, index * size, (index + 1) * size],
           [0.88, 1.0, 0.88],
-          Extrapolation.CLAMP
+          Extrapolation.CLAMP,
         ),
       },
     ],

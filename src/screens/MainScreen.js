@@ -86,14 +86,12 @@ const MainScreen = () => {
     const initMainFeedFoods = async () => {
       setIsLoading(true);
       const savedData = await loadPersistedData();
-      if (!savedData || isFirstLoad.current) {
-        try {
-          const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
-          if (data.foods) await setMainFeedFoodData(data.foods, 0);
-          isFirstLoad.current = false;
-        } catch (e) {
-          console.error(e);
-        }
+      try {
+        const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
+        if (data) await setMainFeedFoodData(data, 0);
+        isFirstLoad.current = false;
+      } catch (e) {
+        console.error(e);
       }
       setIsLoading(false);
     };
@@ -119,7 +117,6 @@ const MainScreen = () => {
       [Colors.point_red, Colors.yellow],
     ),
   }));
-
   const animatedIconOverlayStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
       scrollY.value,
@@ -128,7 +125,6 @@ const MainScreen = () => {
       Extrapolation.CLAMP,
     ),
   }));
-
   const animatedHeaderLineStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
       scrollY.value,
@@ -137,7 +133,6 @@ const MainScreen = () => {
       Extrapolation.CLAMP,
     ),
   }));
-
   const animatedHeroStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -150,7 +145,6 @@ const MainScreen = () => {
       },
     ],
   }));
-
   const animatedBottomSheetStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -163,7 +157,6 @@ const MainScreen = () => {
       },
     ],
   }));
-
   const animatedCircleStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(
       scrollY.value,
