@@ -27,6 +27,7 @@ import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import Colors from "../constants/colors";
+import DebugButton from "../components/DebugButton";
 
 const HEADER_HEIGHT = 48;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
@@ -259,6 +260,8 @@ const MainScreen = () => {
             <Text>ㅎㅇ</Text>
           </View>
         </Animated.View>
+
+        <DebugButton index={0} label="Logout" onPress={handleLogout} />
       </View>
     </GestureDetector>
   );

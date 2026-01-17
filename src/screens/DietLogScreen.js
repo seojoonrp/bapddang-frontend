@@ -16,10 +16,13 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuthStore from "../stores/authStore";
 import { fetchReviewsByDay } from "../services/review";
+import { syncUserWeekAndDay } from "../services/user";
 import Colors from "../constants/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -28,11 +31,6 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import DebugButton from "../components/DebugButton";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
-
-//weekandday 동기화
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { syncUserWeekAndDay } from "../services/user";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 220;
@@ -80,13 +78,13 @@ const DietLogScreen = () => {
       scrollY.value,
       [0, SCROLL_THRESHOLD * 0.9, SCROLL_THRESHOLD],
       [0.2, 0.2, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const elevationValue = interpolate(
       scrollY.value,
       [0, SCROLL_THRESHOLD * 0.9, SCROLL_THRESHOLD],
       [10, 10, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return {
       transform: [
@@ -95,7 +93,7 @@ const DietLogScreen = () => {
             scrollY.value,
             [0, SCROLL_THRESHOLD],
             [SCROLL_THRESHOLD, 0],
-            Extrapolation.CLAMP
+            Extrapolation.CLAMP,
           ),
         },
       ],
@@ -137,7 +135,7 @@ const DietLogScreen = () => {
         if (!uid) return;
 
         try {
-          await syncUserWeekAndDay(uid);
+          await syncUserWeekAndDay();
         } catch (e) {
           console.log("syncUserWeek failed:", e);
         }
@@ -161,7 +159,7 @@ const DietLogScreen = () => {
       return () => {
         alive = false;
       };
-    }, [user])
+    }, [user]),
   );
 
   useEffect(() => {
@@ -184,7 +182,7 @@ const DietLogScreen = () => {
     const fetchDailyData = async () => {
       const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
       console.log(
-        `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`
+        `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`,
       );
 
       try {

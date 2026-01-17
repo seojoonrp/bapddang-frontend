@@ -12,18 +12,40 @@ import {
   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 } from "@env";
 import useAuthStore from "../stores/authStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const fetchMyInfo = async () => {
+export const checkUsernameAvailability = async (username) => {
   try {
-    const token = await useAuthStore.getState().token;
-    if (!token) return null;
+    const result = await api.get("/auth/check-username", {
+      params: { username },
+    });
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleLoginSession = async () => {
+  try {
+    const token = await AsyncStorage.getItem("jwt_token");
+    if (!token) {
+      console.log("No stored token found.");
+      return false;
+    }
 
     const user = await api.get("/users/me");
-    return user;
+
+    if (user) {
+      await useAuthStore.getState().setLogin(user, token);
+      console.log("Session restored for:", user.email || user.username);
+      return true;
+    }
+
+    return false;
   } catch (error) {
-    console.log("Failed to fetch user info:", error.message);
+    console.log("Failed to restore login session:", error);
     await useAuthStore.getState().setLogout();
-    return null;
+    return false;
   }
 };
 

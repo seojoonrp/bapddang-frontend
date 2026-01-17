@@ -1,60 +1,53 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
-
+import { PortalHost } from "@gorhom/portal";
 import MainScreen from "./screens/MainScreen";
 import DietLogScreen from "./screens/DietLogScreen";
 import LoginScreen from "./screens/login/LoginScreen";
 import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 import WelcomeScreen from "./screens/login/WelcomeScreen";
-import { PortalHost } from "@gorhom/portal";
+import { handleLoginSession } from "./services/auth";
+import useAuthStore from "./stores/authStore";
+import { useEffect, useState } from "react";
 
 const Stack = createStackNavigator();
 
-const StackScreen = () => {
-  return (
-    <Stack.Navigator
-      initialRouteName="Landing"
-      screenOptions={{ headerShown: false }}
-    >
-      <Stack.Screen
-        name="Main"
-        component={MainScreen}
-        options={{ headerShown: false, title: "메인 화면" }}
-      />
-      <Stack.Screen
-        name="DietLog"
-        component={DietLogScreen}
-        options={{ title: "식단 기록 화면" }}
-      />
-      <Stack.Screen
-        name="Landing"
-        component={LandingScreen}
-        options={{ title: "랜딩화면" }}
-      />
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{ title: "로그인 화면" }}
-      />
-      <Stack.Screen
-        name="SignUp"
-        component={SignUpScreen}
-        options={{ title: "회원가입 화면" }}
-      />
-      <Stack.Screen
-        name="Welcome"
-        component={WelcomeScreen}
-        options={{ title: "환영 화면" }}
-      />
-    </Stack.Navigator>
-  );
-};
-
 const Navigation = () => {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initNavigation = async () => {
+      try {
+        await handleLoginSession();
+      } catch (error) {
+        console.log("Error during login session restoration:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initNavigation();
+  }, []);
+
   return (
     <NavigationContainer>
-      <StackScreen />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isLoggedIn ? (
+          <>
+            <Stack.Screen name="Main" component={MainScreen} />
+            <Stack.Screen name="DietLog" component={DietLogScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Landing" component={LandingScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          </>
+        )}
+      </Stack.Navigator>
       <PortalHost name="modal" />
     </NavigationContainer>
   );

@@ -11,9 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
-
-import api from "../../api/api";
-
+import { checkUsernameAvailability } from "../../services/auth";
 import ChevronIcon from "../../assets/icons/chevron.svg";
 import EyeOpenIcon from "../../assets/icons/eye-open.svg";
 import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
@@ -21,7 +19,6 @@ import CheckYesIcon from "../../assets/icons/check-yes.svg";
 import CheckNoIcon from "../../assets/icons/check-no.svg";
 import CheckCircleYesIcon from "../../assets/icons/check-circle-yes.svg";
 import CheckCircleNoIcon from "../../assets/icons/check-circle-no.svg";
-
 import Colors from "../../constants/colors";
 import {
   SafeAreaView,
@@ -95,16 +92,13 @@ const SignUpScreen = () => {
     setUsernameExists(false);
   }, [username]);
 
-  const checkUsernameAvailability = async () => {
+  const handleCheckUsername = async () => {
     if (!usernameCondition) return;
 
     setCheckingUsername(true);
     try {
-      const response = await api.get("/auth/check-username", {
-        params: { username },
-      });
-
-      setUsernameExists(response.data.exists);
+      const exists = await checkUsernameAvailability(username);
+      setUsernameExists(exists);
       setIsUsernameChecked(true);
     } catch (e) {
       console.log("Username check error:", e);
@@ -175,7 +169,7 @@ const SignUpScreen = () => {
               placeholder="아이디를 입력해주세요..."
               value={username}
               onChangeText={setUsername}
-              onBlur={checkUsernameAvailability}
+              onBlur={handleCheckUsername}
               autoCapitalize="none"
               placeholderTextColor={Colors.placeholder_gray}
             />
@@ -190,8 +184,8 @@ const SignUpScreen = () => {
               isUsernameChecked
                 ? "사용 가능한 아이디입니다."
                 : checkingUsername
-                ? "아이디 중복 확인 중..."
-                : ""
+                  ? "아이디 중복 확인 중..."
+                  : ""
             }
             errorMessage="중복되는 아이디입니다."
             isError={usernameExists}

@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
-import GoogleIcon from "../../assets/icons/google.svg";
-import KakaoIcon from "../../assets/icons/kakao.svg";
-import AppleIcon from "../../assets/icons/apple.svg";
-
-import useAuthStore from "../../stores/authStore";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   handleAppleLogin,
   handleGoogleLogin,
   handleKakaoLogin,
 } from "../../services/auth";
-import Colors from "../../constants/colors";
-import DebugButton from "../../components/DebugButton";
 import api from "../../api/api";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Colors from "../../constants/colors";
+import GoogleIcon from "../../assets/icons/google.svg";
+import KakaoIcon from "../../assets/icons/kakao.svg";
+import AppleIcon from "../../assets/icons/apple.svg";
+import DebugButton from "../../components/DebugButton";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
@@ -39,55 +35,27 @@ const LandingScreen = () => {
     }
   };
 
-  const [checking, setChecking] = useState(true);
-  const checkLoginSession = useAuthStore((state) => state.checkLoginStatus);
-
-  useEffect(() => {
-    const from = route.params?.from;
-
-    const checkLoginStatus = async () => {
-      if (from) return; // 온 곳이 있으면 로그아웃이므로 검사 X
-
-      const isLoggedIn = await checkLoginSession();
-
-      if (isLoggedIn) {
-        navigation.replace("Main", { from: "Landing" });
-      }
-    };
-
-    checkLoginStatus();
-  }, [navigation, route.params]);
-
   const onGoogleLoginPress = async () => {
     try {
-      const success = await handleGoogleLogin();
-      if (success) {
-        navigation.navigate("Main", { from: "Landing" });
-      }
+      await handleGoogleLogin();
     } catch (error) {
-      console.log("Landing Screen Google Login Error:", error);
+      console.log("Failed Google login:", error);
     }
   };
 
   const onKakaoLoginPress = async () => {
     try {
-      const success = await handleKakaoLogin();
-      if (success) {
-        navigation.navigate("Main", { from: "Landing" });
-      }
+      await handleKakaoLogin();
     } catch (error) {
-      console.log("Landing Screen Kakao Login Error:", error);
+      console.log("Failed Kakao login:", error);
     }
   };
 
   const onAppleLoginPress = async () => {
     try {
-      const success = await handleAppleLogin();
-      if (success) {
-        navigation.navigate("Main", { from: "Landing" });
-      }
+      await handleAppleLogin();
     } catch (error) {
-      console.log("Landing Screen Apple Login Error:", error);
+      console.log("Failed Apple login:", error);
     }
   };
 
@@ -97,7 +65,7 @@ const LandingScreen = () => {
 
       <TouchableOpacity
         style={styles.guestButton}
-        onPress={() => navigation.navigate("Main", { from: "Landing" })}
+        onPress={() => console.log("아직 게스트는 안만듬")}
       >
         <Text style={styles.guestButtonText}>게스트로 둘러보기</Text>
       </TouchableOpacity>
@@ -134,7 +102,7 @@ const LandingScreen = () => {
 
       <Text
         style={styles.loginButtonText}
-        onPress={() => navigation.navigate("Login", { from: "Landing" })}
+        onPress={() => navigation.navigate("Login")}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         accessibilityRole="button"
       >
