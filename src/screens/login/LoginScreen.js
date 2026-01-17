@@ -19,7 +19,7 @@ import EyeOpenIcon from "../../assets/icons/eye-open.svg";
 import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
 
 import api from "../../api/api";
-import { handleLogin } from "../../services/auth";
+import { handleLocalLogin } from "../../services/auth";
 
 import Colors from "../../constants/colors";
 
@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }) => {
     if (!isComplete || loading) return;
 
     try {
-      const success = await handleLogin(username, pw);
+      const success = await handleLocalLogin(username, pw);
       setLoading(false);
 
       if (success) {

@@ -1,31 +1,33 @@
+// src/services/like.js
+
 import api from "../api/api";
 
-export const likeFood = async (foodID) => {
+export const handleLike = async (foodID) => {
   try {
     await api.post(`/foods/${foodID}/likes`);
-
     console.log("Successfully liked food");
+    return true;
   } catch (error) {
-    console.error("Error liking food:", error);
+    throw error;
   }
 };
 
-export const unlikeFood = async (foodID) => {
+export const handleUnlike = async (foodID) => {
   try {
     await api.delete(`/foods/${foodID}/likes`);
-
     console.log("Successfully unliked food");
+    return true;
   } catch (error) {
-    console.error("Error unliking food:", error);
+    throw error;
   }
 };
 
 export const fetchLikedFoods = async () => {
   try {
-    const response = await api.get("/users/me/liked-foods");
-    return response.data;
+    const likedFoods = await api.get("/users/me/liked-foods");
+    return likedFoods || [];
   } catch (error) {
-    console.error("Error fetching liked foods:", error);
-    return [];
+    console.error("Failed to fetch liked foods");
+    throw error;
   }
 };

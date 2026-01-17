@@ -4,40 +4,31 @@ import api from "../api/api";
 
 export const fetchMainFeedFoods = async ({ speed, count }) => {
   try {
-    const response = await api.get("/foods/main-feed", {
+    const result = await api.get("/foods/main-feed", {
       params: { speed, count },
     });
-
-    return response.data;
+    return result;
   } catch (error) {
-    console.error("Error fetching main feed foods:", error);
-    return [];
+    throw error;
   }
 };
 
 export const fetchFoodById = async (foodId) => {
   try {
-    const response = await api.get(`/foods/${foodId}`);
-    return response.data;
+    const food = await api.get(`/foods/${foodId}`);
+    return food;
   } catch (error) {
-    console.error("Error fetching food by ID:", error);
-    return null;
+    throw error;
   }
 };
 
 export const fetchFoodItemsByNames = async (foodNames) => {
   try {
-    const response = await api.post("/foods/resolve", {
+    const foodItems = await api.post("/foods/resolve", {
       names: foodNames,
     });
-
-    return response.data;
+    return foodItems;
   } catch (error) {
-    console.log("Failed to fetch food items by names:", error);
     throw error;
   }
-};
-
-export const fetchRankedFoods = () => {
-  return []; // Temporarily disable ranking feature
 };

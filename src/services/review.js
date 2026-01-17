@@ -1,50 +1,37 @@
+// src/services/review.js
+
 import api from "../api/api";
 
-export const createReview = async ({
-  name,
-  foods,
-  speed,
-  mealTime,
-  imageURL,
-  comment,
-  rating,
-}) => {
+export const createReview = async (reviewData) => {
   try {
-    const response = await api.post("/reviews", {
-      name: name,
-      foods: foods,
-      speed: speed,
-      mealTime: mealTime,
-      imageURL: imageURL,
-      comment: comment,
-      rating: rating,
-    });
-
-    console.log("Review created successfully:", response.data.review);
-    return response.data;
+    const result = await api.post("/reviews", reviewData);
+    console.log("Review created successfully");
+    return result;
   } catch (error) {
-    console.error("Failed to create review:", error);
     throw error;
   }
 };
 
-export const editReview = async (reviewId, updatedData) => {};
+export const updateReview = async (reviewId, updatedData) => {
+  try {
+    const result = await api.patch(`/reviews/${reviewId}`, updatedData);
+    console.log("Review updated successfully");
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const fetchReviewsByDay = async (day) => {
   try {
-    const response = await api.get("/users/me/reviews", {
+    const reviews = await api.get("/users/me/reviews", {
       params: { day },
     });
-
-    const reviews = response.data?.reviews ?? [];
-
     console.log(
-      `Successfully fetched ${reviews.length} reviews on day ${day}.`
+      `Successfully fetched ${reviews.length} reviews on day ${day}.`,
     );
-
-    return reviews;
+    return reviews || [];
   } catch (error) {
-    console.error("Failed to fetch reviews by day:", error);
-    return [];
+    throw error;
   }
 };

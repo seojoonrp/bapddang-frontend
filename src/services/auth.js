@@ -2,35 +2,48 @@
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { login, logout as kakaoLogout } from "@react-native-seoul/kakao-login";
-
 import {
-  loginApi,
-  loginWithAppleApi,
-  loginWithGoogleApi,
-  loginWithKakaoApi,
-} from "../api/auth";
-
+  login as kakaoLogin,
+  logout as kakaoLogout,
+} from "@react-native-seoul/kakao-login";
+import api from "../api/api";
 import {
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 } from "@env";
-
 import useAuthStore from "../stores/authStore";
 
-export const handleLogin = async (username, password) => {
+export const fetchMyInfo = async () => {
   try {
-    const result = await loginApi(username, password);
+    const token = await useAuthStore.getState().token;
+    if (!token) return null;
 
-    if (result.accessToken) {
-      await useAuthStore.getState().setLogin(result.user, result.accessToken);
+    const user = await api.get("/users/me");
+    return user;
+  } catch (error) {
+    console.log("Failed to fetch user info:", error.message);
+    await useAuthStore.getState().setLogout();
+    return null;
+  }
+};
 
-      console.log("Login Success:", result.user.email);
-      console.log("Token:", result.accessToken);
-      return true;
-    }
+const processAuthResult = async (result, method) => {
+  if (result && result.accessToken) {
+    await useAuthStore.getState().setLogin(result.user, result.accessToken);
+    console.log(
+      `${method} Login Success:`,
+      result.user.email || result.user.username,
+    );
+    console.log("Token:", result.accessToken);
+    return true;
+  }
+  return false;
+};
 
-    return false;
+export const handleLocalLogin = async (username, password) => {
+  try {
+    const result = await api.post("/auth/login", { username, password });
+    return await processAuthResult(result, "Local");
   } catch (error) {
     throw error;
   }
@@ -38,8 +51,10 @@ export const handleLogin = async (username, password) => {
 
 export const initGoogleLogin = () => {
   GoogleSignin.configure({
-    webClientId: "636208679388-b89kfh97065p2pg8furebbge59kcun3h.apps.googleusercontent.com",
-    iosClientId: "636208679388-4aa1ldr2j227cgki5oh5a3f2o9qqb9ip.apps.googleusercontent.com",
+    webClientId:
+      "636208679388-b89kfh97065p2pg8furebbge59kcun3h.apps.googleusercontent.com",
+    iosClientId:
+      "636208679388-4aa1ldr2j227cgki5oh5a3f2o9qqb9ip.apps.googleusercontent.com",
   });
 };
 
@@ -48,40 +63,22 @@ export const handleGoogleLogin = async () => {
     await GoogleSignin.hasPlayServices();
     const { data } = await GoogleSignin.signIn();
 
-    const result = await loginWithGoogleApi(data.idToken);
-
-    if (result.accessToken) {
-      await useAuthStore.getState().setLogin(result.user, result.accessToken);
-
-      console.log("Google Login Success:", result.user.email);
-      console.log("Token:", result.accessToken);
-      return true;
-    }
-
-    return false;
+    const result = await api.post("/auth/google", { idToken: data.idToken });
+    return await processAuthResult(result, "Google");
   } catch (error) {
-    console.log("Google Login Service Error:", error);
     throw error;
   }
 };
 
 export const handleKakaoLogin = async () => {
   try {
-    const token = await login();
+    const token = await kakaoLogin();
 
-    const result = await loginWithKakaoApi(token.accessToken);
-
-    if (result.accessToken) {
-      await useAuthStore.getState().setLogin(result.user, result.accessToken);
-
-      console.log("Kakao Login Success:");
-      console.log("Token:", result.accessToken);
-      return true;
-    }
-
-    return false;
+    const result = await api.post("/auth/kakao", {
+      accessToken: token.accessToken,
+    });
+    return await processAuthResult(result, "Kakao");
   } catch (error) {
-    console.log("Kakao Login Service Error:", error);
     throw error;
   }
 };
@@ -95,25 +92,17 @@ export const handleAppleLogin = async () => {
       ],
     });
 
-    const result = await loginWithAppleApi(
-      credential.identityToken,
-      credential.fullName
-    );
-
-    if (result.accessToken) {
-      await useAuthStore.getState().setLogin(result.user, result.accessToken);
-      console.log("Apple Login Success:", result.user.email);
-      console.log("Token:", result.accessToken);
-      return true;
-    }
-
-    return false;
+    const result = await api.post("/auth/apple", {
+      identityToken: credential.identityToken,
+      fullName: credential.fullName,
+    });
+    return await processAuthResult(result, "Apple");
   } catch (error) {
     if (error.code === "ERR_REQUEST_CANCELED") {
       console.log("Apple Login Canceled by User");
       return false;
     }
-    console.log("Apple Login Service Error:", error);
+
     throw error;
   }
 };
@@ -130,11 +119,9 @@ export const handleLogout = async () => {
     }
 
     await useAuthStore.getState().setLogout();
-
     console.log(`Logout Success (${loginMethod})`);
   } catch (error) {
     console.log("Logout Service Error:", error);
-
     await useAuthStore.getState().setLogout();
     throw error;
   }

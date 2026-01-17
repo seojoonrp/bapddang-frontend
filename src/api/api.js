@@ -1,50 +1,62 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { EXPO_PUBLIC_API_BASE_URL } from "@env";
-
 const api = axios.create({
+  // 배포 서버
   baseURL: "https://43.201.22.91.sslip.io/api/v1",
+
+  // 로컬 서버 (ngrok)
   // baseURL: "https://nontheological-unpostered-addyson.ngrok-free.dev/api/v1",
   // headers: {
   //   "ngrok-skip-browser-warning": "69420",
   // },
+
+  timeout: 10000,
 });
 
+// JWT 토큰 자동 삽입
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("jwt_token");
-
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
+// 응답 구조 처리
 api.interceptors.response.use(
   (response) => {
+    if (response.data && response.data.success) {
+      return response.data.data;
+    }
     return response;
   },
   (error) => {
     if (error.response) {
-      console.log("===== [API Response Error] =====");
-      console.log("Status:", error.response.status);
-      console.log("Data  :", error.response.data.error);
-    } else if (error.request) {
-      console.log("===== [No Response Received] =====");
-      console.log(error.request);
+      const { method, url } = error.config;
+      const errorDetail = error.response.data.error;
+
+      console.log("===== [API ERROR] =====");
+      console.log("Endpoint:", `${method.toUpperCase()} ${url}`);
+      console.log("Status  :", error.response.status);
+      if (errorDetail) {
+        console.log("Code    :", errorDetail.code);
+        console.log("Message :", errorDetail.message);
+      }
+      console.log("=======================");
     } else {
-      console.log("===== [Request Setup Error] =====");
-      console.log("Error Message:", error.message);
+      console.log("===== [NETWORK ERROR] =====");
+      console.log("Message:", error.message);
+      console.log("===========================");
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

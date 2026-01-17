@@ -115,7 +115,7 @@ const MainScreen = () => {
     color: interpolateColor(
       scrollY.value,
       [0, SCROLL_THRESHOLD],
-      [Colors.point_red, Colors.yellow]
+      [Colors.point_red, Colors.yellow],
     ),
   }));
 
@@ -124,7 +124,7 @@ const MainScreen = () => {
       scrollY.value,
       [0, SCROLL_THRESHOLD],
       [0, 1],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     ),
   }));
 
@@ -133,7 +133,7 @@ const MainScreen = () => {
       scrollY.value,
       [0, SCROLL_THRESHOLD * 0.25],
       [1, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     ),
   }));
 
@@ -144,7 +144,7 @@ const MainScreen = () => {
           scrollY.value,
           [0, SCROLL_THRESHOLD],
           [0, -(headerHeight + HERO_MARGIN)],
-          Extrapolation.CLAMP
+          Extrapolation.CLAMP,
         ),
       },
     ],
@@ -157,7 +157,7 @@ const MainScreen = () => {
           scrollY.value,
           [0, SCROLL_THRESHOLD],
           [SCROLL_THRESHOLD, 0],
-          Extrapolation.CLAMP
+          Extrapolation.CLAMP,
         ),
       },
     ],
@@ -167,7 +167,7 @@ const MainScreen = () => {
     backgroundColor: interpolateColor(
       scrollY.value,
       [0, SCROLL_THRESHOLD],
-      [Colors.point_red, Colors.yellow]
+      [Colors.point_red, Colors.yellow],
     ),
   }));
 

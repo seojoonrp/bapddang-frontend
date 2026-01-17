@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-import { fetchRankedFoods } from "../../services/food";
-
 import Colors from "../../constants/colors";
 
 const Ranking = () => {
@@ -13,18 +11,18 @@ const Ranking = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const loadRankings = async () => {
-      try {
-        setLoading(true);
-        const fetchedRankings = await fetchRankedFoods();
+    // const loadRankings = async () => {
+    //   try {
+    //     setLoading(true);
+    //     const fetchedRankings = await fetchRankedFoods();
 
-        setRankings(fetchedRankings);
-      } catch (error) {
-        console.error("Failed to fetch rankings:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    //     setRankings(fetchedRankings);
+    //   } catch (error) {
+    //     console.error("Failed to fetch rankings:", error);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
     setRankings(["마라탕", "로제파스타", "돈가스"]); // temp
   }, []);

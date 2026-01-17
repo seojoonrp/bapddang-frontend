@@ -1,7 +1,7 @@
 // src/components/MainScreen/FoodInfoModal.js
 
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { likeFood } from "../../services/user";
+import { handleLike } from "../../services/like";
 import useAuthStore from "../../stores/authStore";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
@@ -25,7 +25,7 @@ const FoodInfoBox = ({ item, onClose }) => {
       return;
     }
 
-    likeFood(item.id);
+    handleLike(item.id);
   };
 
   const [selectedPlace, setSelectedPlace] = useState(null);
