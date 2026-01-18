@@ -4,10 +4,13 @@ import api from "../api/api";
 
 export const syncUserWeekAndDay = async () => {
   try {
-    await api.post(`/users/me/sync-day`);
+    
+    const result = await api.post("/users/me/sync-day");
     console.log("Successfully synced user week and day");
+    
     return result;
   } catch (error) {
+    console.log("FULL URL:", error?.config?.baseURL + error?.config?.url);
     throw error;
   }
 };

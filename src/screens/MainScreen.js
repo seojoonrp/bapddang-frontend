@@ -28,6 +28,7 @@ import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import Colors from "../constants/colors";
 import DebugButton from "../components/DebugButton";
+import { syncUserWeekAndDay } from "../services/user";
 
 const HEADER_HEIGHT = 48;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
@@ -85,6 +86,12 @@ const MainScreen = () => {
   useEffect(() => {
     const initMainFeedFoods = async () => {
       setIsLoading(true);
+      try{
+        await syncUserWeekAndDay();
+        console.log("synced user week/day");
+      } catch(e){
+        console.error("Failed to sync user week/day:", e);
+      }
       const savedData = await loadPersistedData();
       try {
         const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });

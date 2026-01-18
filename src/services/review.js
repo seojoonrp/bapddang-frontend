@@ -32,7 +32,6 @@ export const fetchReviewsByDay = async (day) => {
     );
     return reviews || [];
   } catch (error) {
-    console.error("BABAOOBOBOOBOBOO:", error);
     throw error;
   }
 };
