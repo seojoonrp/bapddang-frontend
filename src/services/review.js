@@ -28,10 +28,11 @@ export const fetchReviewsByDay = async (day) => {
       params: { day },
     });
     console.log(
-      `Successfully fetched ${reviews.length} reviews on day ${day}.`,
+      `Successfully fetched ${reviews} reviews on day ${day}.`,
     );
     return reviews || [];
   } catch (error) {
+    console.error("BABAOOBOBOOBOBOO:", error);
     throw error;
   }
 };

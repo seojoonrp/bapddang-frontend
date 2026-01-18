@@ -24,10 +24,10 @@ export const fetchFoodById = async (foodId) => {
 
 export const fetchFoodItemsByNames = async (foodNames) => {
   try {
-    const foodItems = await api.post("/foods/resolve", {
+    const res = await api.post("/foods/resolve", {
       names: foodNames,
     });
-    return foodItems;
+    return res;
   } catch (error) {
     throw error;
   }

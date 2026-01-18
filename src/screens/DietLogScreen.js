@@ -31,6 +31,8 @@ import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import DebugButton from "../components/DebugButton";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
+import Review from "../components/svg/Review.svg";
+import Liked from "../components/svg/Liked.svg";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 220;
@@ -142,8 +144,8 @@ const DietLogScreen = () => {
 
         // user의 day/week 읽어서 selectedWeek 세팅
         try {
-          const userDay = user?.day ?? 1;
-
+          const userDay = user?.Day ?? 1;
+          console.log("User day on focus:", userDay);
           const calculatedWeek = Math.ceil(userDay / 7);
           const currentDayofThisWeek = ((userDay - 1) % 7) + 1;
           if (alive) {
@@ -254,7 +256,7 @@ const DietLogScreen = () => {
     setSelectedReviewId(reviewId);
     setActiveModal("review");
   };
-
+  const fillRatio = Math.min(1, (selectedDay) / 7);
   return (
     <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
       {/* 헤더 */}
@@ -264,11 +266,11 @@ const DietLogScreen = () => {
         <View style={styles.headerContent}>
           <Text style={styles.logoText}>밥땡</Text>
           <View style={styles.headerIcons}>
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => { }}>
               <BellIcon color={Colors.yellow} width={24} height={24} />
               <View style={styles.notificationCircle} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => { }}>
               <SettingsIcon color={Colors.yellow} width={24} height={24} />
             </TouchableOpacity>
           </View>
@@ -280,13 +282,18 @@ const DietLogScreen = () => {
         selectedWeek={selectedWeek}
         onClick={handleMarshmallowClick}
       />
-
+      <TouchableOpacity
+        onPress={() => setActiveModal("foodSelect")}
+        style={styles.LikedButton}
+      >
+        <Liked />
+      </TouchableOpacity>
       {/* 추가버튼 */}
       <TouchableOpacity
         onPress={() => setActiveModal("foodSelect")}
-        style={styles.addButton}
+        style={styles.reviewButton}
       >
-        <Text style={styles.addButtonText}>추가</Text>
+        <Review />
       </TouchableOpacity>
 
       {/* 바텀시트 */}
@@ -302,28 +309,33 @@ const DietLogScreen = () => {
             <View style={styles.handleBar} />
             <Text style={styles.sheetTitleText}>주간 식단기록</Text>
             <Text style={styles.monthText}>{displayMonth}월</Text>
-
             <View style={styles.dayContainer}>
-              {[1, 2, 3, 4, 5, 6, 7].map((num, index) => (
-                <TouchableOpacity
-                  key={num}
-                  onPress={() => setSelectedDay(num)}
-                  activeOpacity={1}
-                  style={[
-                    styles.dayButton,
-                    selectedDay === num && { backgroundColor: "#521210" },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.dayText,
-                      selectedDay === num && { color: "white" },
-                    ]}
+              <LinearGradient
+                colors={["#FF5A1F", "#E92F05", "#B51200"]} // 왼쪽→오른쪽 진해짐
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.dayFill, { width: `${fillRatio * 100}%`  }]}
+              />
+              {[1, 2, 3, 4, 5, 6, 7].map((num, index) => {
+                const isFilled = num <= selectedDay;
+                return (
+                  <TouchableOpacity
+                    key={num}
+                    onPress={() => setSelectedDay(num)}
+                    activeOpacity={1}
+                    style={styles.dayButton}
                   >
-                    {weekDates[index]}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.dayText,
+                        [styles.dayText, isFilled && styles.dayTextFilled]
+                      ]}
+                    >
+                      {weekDates[index]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             <FlatList
@@ -436,21 +448,19 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 4,
   },
-  addButton: {
+  LikedButton: {
     position: "absolute",
-    top: 150,
-    right: 25,
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: Colors.burn,
+    right: 20,
+    bottom: 290,
     justifyContent: "center",
     alignItems: "center",
   },
-  addButtonText: {
-    color: "white",
-    fontSize: 22,
-    fontFamily: "NanumSquareB",
+  reviewButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 235,
+    justifyContent: "center",
+    alignItems: "center",
   },
   sheetContainer: {
     flex: 1,
@@ -501,10 +511,34 @@ const styles = StyleSheet.create({
     borderColor: "#D9D9D9",
     borderWidth: 1,
     borderRadius: 13,
+
+    position: "relative",
+    overflow: "hidden",
+  },
+  monthText: {
+    position: "absolute",
+    width : 73,
+    left: 30,
+    top: 80,
+    bottom: 14,
+    fontFamily: "NanumSquareB",
+    fontSize: 16,
+    color: "#D2C0C0",
+  },
+  dayTextFilled: {
+    color: "white",
+  },
+  dayFill: {
+    position: "absolute",
+    left: 2,
+    top: 2,
+    bottom: 2,
+    borderRadius: 11,
+    backgroundColor: Colors.point_red,
   },
   dayButton: {
-    width: 42,
-    height: 42,
+    flex: 1,
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 0,
@@ -512,7 +546,7 @@ const styles = StyleSheet.create({
   },
   dayText: {
     color: Colors.burn,
-    fontSize: 36,
+    fontSize: 28,
     fontFamily: "NanumSquareB",
     marginTop: 2,
   },

@@ -46,7 +46,7 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
     const fetchFoods = async () => {
       try {
         const data = await fetchFoodItemsByNames(foodNames);
-        setFoodItems(data.food_items);
+        setFoodItems(data);
       } catch (error) {
         console.error("음식 데이터를 불러오는 데 실패했습니다:", error);
       }

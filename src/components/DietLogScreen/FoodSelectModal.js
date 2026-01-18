@@ -13,7 +13,7 @@ import useAuthStore from "../../stores/authStore";
 import { getBestMatches } from "../../utils/nameCheck.js";
 import { standardFoodNames } from "../../constants/data/standardFoodNames.js";
 
-import { fetchLikedFoods } from "../../services/user";
+import { fetchLikedFoods } from "../../services/like.js";
 
 import Colors from "../../constants/colors";
 import IconBar from "./IconBar";
