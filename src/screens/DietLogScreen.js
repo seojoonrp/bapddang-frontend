@@ -144,7 +144,7 @@ const DietLogScreen = () => {
 
         // user의 day/week 읽어서 selectedWeek 세팅
         try {
-          const userDay = user?.Day ?? 1;
+          const userDay = user?.day ?? 1;
           console.log("User day on focus:", userDay);
           const calculatedWeek = Math.ceil(userDay / 7);
           const currentDayofThisWeek = ((userDay - 1) % 7) + 1;
@@ -311,7 +311,7 @@ const DietLogScreen = () => {
             <Text style={styles.monthText}>{displayMonth}월</Text>
             <View style={styles.dayContainer}>
               <LinearGradient
-                colors={["#FF5A1F", "#E92F05", "#B51200"]} // 왼쪽→오른쪽 진해짐
+                colors={["#FF5A1F", "#E92F05", "#B51200"]} 
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={[styles.dayFill, { width: `${fillRatio * 100}%`  }]}
