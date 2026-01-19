@@ -74,31 +74,17 @@ const MainScreen = () => {
       });
     });
 
-  const {
-    mainFeedFoods,
-    setMainFeedFoodData,
-    appendMainFeedFoodData,
-    loadPersistedData,
-    clearData,
-  } = useFoodStore();
-  const isFirstLoad = useRef(route.params?.from === "Landing");
+  const [mainFeedFoods, setMainFeedFoods] = useState([]);
 
   useEffect(() => {
     const initMainFeedFoods = async () => {
       setIsLoading(true);
-      try{
-        await syncUserWeekAndDay();
-        console.log("synced user week/day");
-      } catch(e){
-        console.error("Failed to sync user week/day:", e);
-      }
-      const savedData = await loadPersistedData();
+
       try {
         const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
-        if (data) await setMainFeedFoodData(data, 0);
-        isFirstLoad.current = false;
+        if (data) setMainFeedFoods(data);
       } catch (e) {
-        console.error(e);
+        console.log("Error fetching main feed foods:", e);
       }
       setIsLoading(false);
     };
@@ -111,7 +97,7 @@ const MainScreen = () => {
     setIsExtraLoading(true);
     try {
       const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
-      if (data.foods) await appendMainFeedFoodData(data.foods);
+      if (data) setMainFeedFoods((prev) => [...prev, ...data]);
     } finally {
       setIsExtraLoading(false);
     }
