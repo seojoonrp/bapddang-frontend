@@ -34,25 +34,25 @@ const Hero = ({ scrollY, scrollThreshold }) => {
       scrollY.value,
       [0, scrollThreshold],
       [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const paddingHorizontal = interpolate(
       scrollY.value,
       [0, scrollThreshold],
       [14, 14 + HORIZONTAL_PADDING],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const paddingTop = interpolate(
       scrollY.value,
       [0, scrollThreshold],
       [14, insets.top + 9],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const borderRadius = interpolate(
       scrollY.value,
       [scrollThreshold * 0.7, scrollThreshold],
       [24, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return {
       width,
@@ -70,7 +70,7 @@ const Hero = ({ scrollY, scrollThreshold }) => {
           scrollY.value,
           [0, scrollThreshold * 0.8],
           [1, 0],
-          Extrapolation.CLAMP
+          Extrapolation.CLAMP,
         ),
       },
     ],
@@ -99,16 +99,16 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         />
       </View>
 
-      <View style={styles.bottomContainer}>
+      <View style={styles.bottomContainer} pointerEvents="box-none">
         <TouchableOpacity onPress={() => navigation.navigate("DietLog")}>
-          <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+          <View style={[styles.iconButton, { backgroundColor: modeColor }]}>
             <Edit color="white" />
-          </Animated.View>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {}}>
-          <Animated.View style={[styles.iconButton, animatedIconButtonStyle]}>
+          <View style={[styles.iconButton, { backgroundColor: modeColor }]}>
             <Favorite color="white" />
-          </Animated.View>
+          </View>
         </TouchableOpacity>
       </View>
     </Animated.View>

@@ -28,7 +28,8 @@ import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import Colors from "../constants/colors";
 import DebugButton from "../components/DebugButton";
-import { syncUserWeekAndDay } from "../services/user";
+import useModeStore from "../stores/modeStore";
+import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 
 const HEADER_HEIGHT = 48;
 const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
@@ -41,6 +42,8 @@ const MainScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  const { modeColor } = useModeStore();
 
   const headerHeight = insets.top + HEADER_HEIGHT;
   const SCROLL_THRESHOLD =
@@ -81,7 +84,7 @@ const MainScreen = () => {
       setIsLoading(true);
 
       try {
-        const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
+        const data = await fetchMainFeedFoods({ speed: "fast", count: 2 });
         if (data) setMainFeedFoods(data);
       } catch (e) {
         console.log("Error fetching main feed foods:", e);
@@ -96,7 +99,7 @@ const MainScreen = () => {
     if (isExtraLoading) return;
     setIsExtraLoading(true);
     try {
-      const data = await fetchMainFeedFoods({ speed: "fast", count: 7 });
+      const data = await fetchMainFeedFoods({ speed: "fast", count: 2 });
       if (data) setMainFeedFoods((prev) => [...prev, ...data]);
     } finally {
       setIsExtraLoading(false);
@@ -162,7 +165,9 @@ const MainScreen = () => {
     <GestureDetector gesture={panGesture}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.headerContainer}>
-          <Animated.Text style={[styles.logoText, animatedLogoStyle]}>
+          <Animated.Text
+            style={[styles.logoText, animatedLogoStyle, { color: modeColor }]}
+          >
             밥땡
           </Animated.Text>
           <View style={styles.headerIcons}>
@@ -243,7 +248,7 @@ const MainScreen = () => {
             </Text>
           </View>
           <View style={styles.bottomSheetContent}>
-            <Text>ㅎㅇ</Text>
+            <MainBottomSheet />
           </View>
         </Animated.View>
 
@@ -287,7 +292,7 @@ const styles = StyleSheet.create({
   },
   headerLine: {
     width: "100%",
-    height: 0.4,
+    height: 0.7,
     backgroundColor: Colors.light_text_gray,
     zIndex: 15,
   },
@@ -338,7 +343,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    backgroundColor: "white",
+    backgroundColor: Colors.background_white,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     shadowColor: "#000",

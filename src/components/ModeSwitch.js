@@ -1,34 +1,39 @@
-import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
+import React, { useEffect } from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  interpolateColor,
+} from "react-native-reanimated";
 import Colors from "../constants/colors";
 
 const ModeSwitch = ({ value, onValueChange }) => {
-  const moveAnim = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    Animated.timing(moveAnim, {
-      toValue: value ? 1 : 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
+    progress.value = withTiming(value ? 1 : 0, { duration: 200 });
   }, [value]);
 
-  const backgroundColor = moveAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [Colors.point_green, "#C6341B"],
+  const animatedTrackStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolateColor(
+      progress.value,
+      [0, 1],
+      [Colors.point_green, "#C6341B"],
+    );
+    return { backgroundColor };
   });
 
-  const translateX = moveAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 19],
+  const animatedThumbStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(progress.value, [0, 1], [1, 19]);
+    return { transform: [{ translateX }] };
   });
 
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onValueChange}>
-      <Animated.View style={[styles.switchTrack, { backgroundColor }]}>
-        <Animated.View
-          style={[styles.switchThumb, { transform: [{ translateX }] }]}
-        />
+      <Animated.View style={[styles.switchTrack, animatedTrackStyle]}>
+        <Animated.View style={[styles.switchThumb, animatedThumbStyle]} />
       </Animated.View>
     </TouchableOpacity>
   );
@@ -43,14 +48,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1.5,
     borderColor: Colors.background_yellow,
-    boxShadow: "0 2px 1px 1px rgba(82, 18, 16, 0.25) inset",
+    shadowColor: "rgba(82, 18, 16, 0.25)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 1,
   },
   switchThumb: {
     width: 20,
     height: 20,
     borderRadius: 10,
     backgroundColor: Colors.background_yellow,
-    boxShadow: "0 2px 1px 0 rgba(82, 18, 16, 0.25)",
+    shadowColor: "rgba(82, 18, 16, 0.25)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 1,
   },
 });
 

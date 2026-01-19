@@ -11,6 +11,7 @@ import {
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 } from "@env";
+import { syncUserWeekAndDay } from "./user";
 import useAuthStore from "../stores/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -37,6 +38,7 @@ export const handleLoginSession = async () => {
 
     if (user) {
       await useAuthStore.getState().setLogin(user, token);
+      await syncUserWeekAndDay();
       console.log("Session restored for:", user.email || user.username);
       return true;
     }
@@ -52,6 +54,7 @@ export const handleLoginSession = async () => {
 const processAuthResult = async (result, method) => {
   if (result && result.accessToken) {
     await useAuthStore.getState().setLogin(result.user, result.accessToken);
+    await syncUserWeekAndDay();
     console.log(
       `${method} Login Success:`,
       result.user.email || result.user.username,
