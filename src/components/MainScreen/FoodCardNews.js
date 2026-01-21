@@ -1,14 +1,7 @@
 // src/components/MainScreen/FoodCardNews.js
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -196,11 +189,14 @@ const styles = StyleSheet.create({
   cardImage: { width: "100%", height: "100%" },
   foodText: {
     position: "absolute",
-    bottom: 15,
-    backgroundColor: "black",
-    padding: 5,
-    color: "white",
-    fontSize: 24,
+    bottom: 18,
+    color: Colors.background_white,
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 16,
+    textShadowColor: "black",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 50,
+    shadowOpacity: 1,
   },
   paginationContainer: {
     justifyContent: "flex-start",

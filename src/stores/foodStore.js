@@ -31,20 +31,36 @@ const useFoodStore = create((set, get) => ({
     await AsyncStorage.setItem("main_feed_foods", JSON.stringify(updatedFoods));
   },
 
-  updateIndex: async (index) => {
-    set({ currentIndex: index });
-    await AsyncStorage.setItem("main_feed_current_index", index.toString());
+  toggleLike: async (foodID) => {
+    const currentFoods = get().mainFeedFoods;
+    const updatedFoods = currentFoods.map((foodItem) => {
+      if (foodItem.food.id === foodID) {
+        const newIsLiked = !foodItem.isLiked;
+        return {
+          ...foodItem,
+          isLiked: newIsLiked,
+          food: {
+            ...foodItem.food,
+            likeCount: newIsLiked
+              ? foodItem.food.likeCount + 1
+              : Math.max(0, foodItem.food.likeCount - 1),
+          },
+        };
+      }
+      return foodItem;
+    });
+
+    set({ mainFeedFoods: updatedFoods });
+    await AsyncStorage.setItem("main_feed_foods", JSON.stringify(updatedFoods));
   },
 
   loadPersistedData: async () => {
     try {
       const foodsData = await AsyncStorage.getItem("main_feed_foods");
-      const indexData = await AsyncStorage.getItem("main_feed_current_index");
 
       if (foodsData) {
         const parsedFoods = JSON.parse(foodsData);
-        const parsedIndex = indexData ? parseInt(indexData, 10) : 0;
-        set({ mainFeedFoods: parsedFoods, currentIndex: parsedIndex });
+        set({ mainFeedFoods: parsedFoods });
         return true;
       }
     } catch (error) {
@@ -55,8 +71,7 @@ const useFoodStore = create((set, get) => ({
 
   clearData: async () => {
     await AsyncStorage.removeItem("main_feed_foods");
-    await AsyncStorage.removeItem("main_feed_current_index");
-    set({ mainFeedFoods: [], currentIndex: 0 });
+    set({ mainFeedFoods: [] });
   },
 }));
 

@@ -2,11 +2,11 @@
 
 import { TouchableOpacity, StyleSheet, View } from "react-native";
 import EditIcon from "../../assets/icons/edit.svg";
-import LikeIcon from "../../assets/icons/heart.svg";
 import Colors from "../../constants/colors";
 import useModeStore from "../../stores/modeStore";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import Animated from "react-native-reanimated";
+import HeartIcon from "../svg/HeartIcon";
 
 const EditAndLike = ({ onEdit, onLike, scrollY, scrollThreshold }) => {
   const { modeColor } = useModeStore();
@@ -28,7 +28,7 @@ const EditAndLike = ({ onEdit, onLike, scrollY, scrollThreshold }) => {
         style={[styles.button, { backgroundColor: modeColor }]}
         activeOpacity={0.7}
       >
-        <LikeIcon width={24} height={24} />
+        <HeartIcon size={24} fillColor={Colors.background_white} />
       </TouchableOpacity>
     </Animated.View>
   );

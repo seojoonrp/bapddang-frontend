@@ -1,10 +1,11 @@
 // src/components/MainScreen/FoodInfoModal.js
 
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { handleLike } from "../../services/like";
+import { handleLike, handleUnlike } from "../../services/like";
 import useAuthStore from "../../stores/authStore";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
+import HeartIcon from "../../components/svg/HeartIcon";
 import KakaoMap from "../common/KakaoMap";
 import { useEffect, useState } from "react";
 import Animated, {
@@ -13,21 +14,35 @@ import Animated, {
   ZoomOut,
   ZoomOutEasyDown,
 } from "react-native-reanimated";
+import useFoodStore from "../../stores/foodStore";
 
 const FoodInfoModal = ({ item, onClose }) => {
   if (!item) return null;
 
-  const food = item?.food;
+  const storeFoodItem = useFoodStore((state) =>
+    state.mainFeedFoods.find((f) => f.food.id === item.food.id),
+  );
+  const currentItem = storeFoodItem || item;
+  const { food, isLiked } = currentItem;
 
+  const { toggleLike } = useFoodStore();
   const { user } = useAuthStore();
 
-  const handleLike = () => {
-    if (!user) {
-      console.log("user not logged in");
-      return;
-    }
+  const onLikePress = async () => {
+    if (!user) return;
 
-    handleLike(food.id);
+    toggleLike(food.id);
+
+    try {
+      if (!isLiked) {
+        await handleLike(food.id);
+      } else {
+        handleUnlike(food.id);
+      }
+    } catch (error) {
+      console.error("Error updating like status:", error);
+      toggleLike(food.id);
+    }
   };
 
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -58,6 +73,24 @@ const FoodInfoModal = ({ item, onClose }) => {
           </View>
 
           <Text style={styles.foodName}>{food.name}</Text>
+
+          <TouchableOpacity
+            style={styles.likeRow}
+            onPress={onLikePress}
+            activeOpacity={1}
+          >
+            <HeartIcon
+              size={20}
+              fillColor={isLiked ? Colors.point_red : "transparent"}
+              strokeColor={isLiked ? Colors.point_red : Colors.text_gray}
+              strokeWidth={1.5}
+            />
+            <Text
+              style={[styles.likeCountText, isLiked && { color: Colors.burn }]}
+            >
+              {food.likeCount}
+            </Text>
+          </TouchableOpacity>
 
           <View style={styles.categoryRow}>
             {food.categories.map((category) => (
@@ -160,7 +193,18 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundEB",
     fontSize: 24,
     letterSpacing: -0.5,
-    marginTop: -4,
+  },
+  likeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: -6,
+  },
+  likeCountText: {
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 14,
+    color: Colors.text_gray,
+    marginTop: 2,
   },
   categoryRow: {
     flexDirection: "row",
