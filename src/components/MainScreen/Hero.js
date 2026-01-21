@@ -120,7 +120,7 @@ export default Hero;
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    height: 230,
+    height: "100%",
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "flex-start",

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+// src/components/MainScreen/FoodCardNews.js
+
+import React, { memo, useState } from "react";
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import Animated, {
   useSharedValue,
@@ -13,18 +15,13 @@ import FoodInfoBox from "./FoodInfoModal";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
+import { useMainFeedFood } from "../../hooks/useMainFeedFood";
 
 const OVER_SCROLL_THRESHOLD = 80;
 
-const FoodCardNews = ({
-  foodsData,
-  screenWidth,
-  size,
-  isLoading,
-  paginationHeight,
-  onEndSwipe,
-  isExtraLoading,
-}) => {
+const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
+  const { foods, isLoading, isExtraLoading, loadMore } = useMainFeedFood();
+
   const sidePadding = (screenWidth - size) / 2;
   const [selectedItem, setSelectedItem] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -41,12 +38,12 @@ const FoodCardNews = ({
         event.layoutMeasurement.width -
         event.contentSize.width;
       if (overScroll > OVER_SCROLL_THRESHOLD) {
-        runOnJS(onEndSwipe)();
+        runOnJS(loadMore)();
       }
     },
   });
 
-  const maxScrollX = size * (foodsData.length - 1);
+  const maxScrollX = size * (foods.length - 1);
 
   const animatedFooterStyle = useAnimatedStyle(() => {
     const translateX = interpolate(
@@ -75,6 +72,36 @@ const FoodCardNews = ({
     ),
   }));
 
+  const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          scale: interpolate(
+            scrollX.value,
+            [(index - 1) * size, index * size, (index + 1) * size],
+            [0.88, 1.0, 0.88],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    }));
+
+    return (
+      <Pressable onPress={onPress}>
+        <Animated.View
+          style={[
+            styles.cardContainer,
+            { width: size, height: size },
+            animatedStyle,
+          ]}
+        >
+          <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
+          <Text style={styles.foodText}>{item.name}</Text>
+        </Animated.View>
+      </Pressable>
+    );
+  });
+
   if (isLoading) return null;
 
   return (
@@ -88,7 +115,7 @@ const FoodCardNews = ({
       </Animated.View>
 
       <Animated.FlatList
-        data={foodsData}
+        data={foods}
         keyExtractor={(item) => item.food.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -111,12 +138,8 @@ const FoodCardNews = ({
         )}
       />
 
-      <View style={[styles.paginationContainer, { height: paginationHeight }]}>
-        <Pagination
-          total={foodsData.length}
-          scrollX={scrollX}
-          cardSize={size}
-        />
+      <View style={styles.paginationContainer}>
+        <Pagination total={foods.length} scrollX={scrollX} cardSize={size} />
       </View>
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
@@ -128,36 +151,6 @@ const FoodCardNews = ({
     </View>
   );
 };
-
-const CardItem = React.memo(({ item, index, scrollX, size, onPress }) => {
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          scrollX.value,
-          [(index - 1) * size, index * size, (index + 1) * size],
-          [0.88, 1.0, 0.88],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
-  return (
-    <Pressable onPress={onPress}>
-      <Animated.View
-        style={[
-          styles.cardContainer,
-          { width: size, height: size },
-          animatedStyle,
-        ]}
-      >
-        <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
-        <Text style={styles.foodText}>{item.name}</Text>
-      </Animated.View>
-    </Pressable>
-  );
-});
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center" },

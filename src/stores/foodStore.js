@@ -7,18 +7,18 @@ const useFoodStore = create((set, get) => ({
   mainFeedFoods: [],
   currentIndex: 0,
 
-  setMainFeedFoodData: async (data, index = 0) => {
+  setMainFeedFoods: async (data, index = 0) => {
     set({ mainFeedFoods: data, currentIndex: index });
     await AsyncStorage.setItem("main_feed_foods", JSON.stringify(data));
     await AsyncStorage.setItem("main_feed_current_index", index.toString());
   },
 
-  appendMainFeedFoodData: async (data) => {
+  appendMainFeedFoods: async (data) => {
     const currentFoods = get().mainFeedFoods;
 
     const uniqueNewFoods = data.filter(
       (newFood) =>
-        !currentFoods.some((existingFood) => existingFood.id === newFood.id)
+        !currentFoods.some((existingFood) => existingFood.id === newFood.id),
     );
     if (uniqueNewFoods.length === 0) return;
 

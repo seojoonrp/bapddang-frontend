@@ -30,215 +30,60 @@ import Colors from "../constants/colors";
 import DebugButton from "../components/DebugButton";
 import useModeStore from "../stores/modeStore";
 import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
-
-const HEADER_HEIGHT = 48;
-const BOTTOM_SHEET_HANDLE_HEIGHT = 90;
-const HERO_MARGIN = 18;
-const PAGINATION_HEIGHT = 32;
+import { useMainAnimations } from "../hooks/useMainAnimations";
+import MainHeader from "../components/MainScreen/MainHeader";
+import { MAIN_LAYOUT } from "../constants/layout";
+import { useMainLayout } from "../hooks/useMainLayout";
 
 const MainScreen = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const route = useRoute();
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  const { modeColor } = useModeStore();
+  const { screenWidth, insets, headerHeight, scrollThreshold, heroHeight } =
+    useMainLayout();
 
-  const headerHeight = insets.top + HEADER_HEIGHT;
-  const SCROLL_THRESHOLD =
-    screenHeight - headerHeight - BOTTOM_SHEET_HANDLE_HEIGHT;
-
-  const scrollY = useSharedValue(0);
-  const startY = useSharedValue(0);
-
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      startY.value = scrollY.value;
-    })
-    .onUpdate((e) => {
-      const newValue = startY.value - e.translationY;
-      scrollY.value = Math.max(0, Math.min(newValue, SCROLL_THRESHOLD));
-    })
-    .onEnd((e) => {
-      const velocity = -e.velocityY;
-      let toValue = 0;
-      if (
-        velocity > 500 ||
-        (scrollY.value > SCROLL_THRESHOLD / 2 && velocity > -500)
-      ) {
-        toValue = SCROLL_THRESHOLD;
-      }
-      scrollY.value = withSpring(toValue, {
-        damping: 20, // 튕기는 정도 -> 크게 상관없는듯
-        stiffness: 90, // 부드러운 정도 (낮을수록 부드러움)
-        mass: 1,
-        overshootClamping: true,
-      });
-    });
-
-  const [mainFeedFoods, setMainFeedFoods] = useState([]);
-
-  useEffect(() => {
-    const initMainFeedFoods = async () => {
-      setIsLoading(true);
-
-      try {
-        const data = await fetchMainFeedFoods({ speed: "fast", count: 2 });
-        if (data) setMainFeedFoods(data);
-      } catch (e) {
-        console.log("Error fetching main feed foods:", e);
-      }
-      setIsLoading(false);
-    };
-    initMainFeedFoods();
-  }, []);
-
-  const [isExtraLoading, setIsExtraLoading] = useState(false);
-  const handleLoadMore = async () => {
-    if (isExtraLoading) return;
-    setIsExtraLoading(true);
-    try {
-      const data = await fetchMainFeedFoods({ speed: "fast", count: 2 });
-      if (data) setMainFeedFoods((prev) => [...prev, ...data]);
-    } finally {
-      setIsExtraLoading(false);
-    }
-  };
-
-  const animatedLogoStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [Colors.point_red, Colors.yellow],
-    ),
-  }));
-  const animatedIconOverlayStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [0, 1],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const animatedHeaderLineStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD * 0.25],
-      [1, 0],
-      Extrapolation.CLAMP,
-    ),
-  }));
-  const animatedHeroStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, SCROLL_THRESHOLD],
-          [0, -(headerHeight + HERO_MARGIN)],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-  const animatedBottomSheetStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, SCROLL_THRESHOLD],
-          [SCROLL_THRESHOLD, 0],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-  const animatedCircleStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [Colors.point_red, Colors.yellow],
-    ),
-  }));
+  const { animatedStyles, panGesture, scrollY } = useMainAnimations(
+    scrollThreshold,
+    headerHeight,
+  );
 
   return (
     <GestureDetector gesture={panGesture}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.headerContainer}>
-          <Animated.Text
-            style={[styles.logoText, animatedLogoStyle, { color: modeColor }]}
-          >
-            밥땡
-          </Animated.Text>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity onPress={() => {}}>
-              <View>
-                <BellIcon color={Colors.yellow} width={24} height={24} />
-                <Animated.View
-                  style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
-                >
-                  <BellIcon
-                    color={Colors.background_yellow}
-                    width={24}
-                    height={24}
-                  />
-                </Animated.View>
-              </View>
-              <Animated.View
-                style={[styles.notificationCircle, animatedCircleStyle]}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}}>
-              <View>
-                <SettingsIcon color={Colors.yellow} width={24} height={24} />
-                <Animated.View
-                  style={[StyleSheet.absoluteFill, animatedIconOverlayStyle]}
-                >
-                  <SettingsIcon
-                    color={Colors.background_yellow}
-                    width={24}
-                    height={24}
-                  />
-                </Animated.View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Animated.View style={[styles.headerLine, animatedHeaderLineStyle]} />
+        <MainHeader
+          animatedStyles={animatedStyles}
+          onBellPress={() => console.log("Bell pressed")}
+          onSettingsPress={() => console.log("Settings pressed")}
+        />
 
         <Animated.View
           style={[
             styles.heroContainer,
-            { top: headerHeight + HERO_MARGIN },
-            animatedHeroStyle,
+            {
+              top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP,
+              height: heroHeight,
+            },
+            animatedStyles.hero,
           ]}
         >
-          <Hero scrollY={scrollY} scrollThreshold={SCROLL_THRESHOLD} />
+          <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
         </Animated.View>
 
         <View style={styles.middleContentContainer}>
           <View style={styles.textRow}>
-            <View style={styles.categoryPill}>
-              <Text style={styles.categoryPillText}>점심식사</Text>
+            <View style={styles.timePill}>
+              <Text style={styles.timePillText}>점심식사</Text>
             </View>
             <Text style={styles.questionText}>를 고민 중인가요?</Text>
           </View>
-          <FoodCardNews
-            foodsData={mainFeedFoods}
-            screenWidth={screenWidth}
-            size={300}
-            isLoading={isLoading}
-            paginationHeight={PAGINATION_HEIGHT}
-            onEndSwipe={handleLoadMore}
-            isExtraLoading={isExtraLoading}
-          />
+          <FoodCardNews screenWidth={screenWidth} size={screenWidth * 0.8} />
         </View>
 
         <Animated.View
           style={[
             styles.bottomSheetWrapper,
-            { height: SCROLL_THRESHOLD + BOTTOM_SHEET_HANDLE_HEIGHT },
-            animatedBottomSheetStyle,
+            { height: scrollThreshold + MAIN_LAYOUT.BOTTOM_SHEET_HANDLE },
+            animatedStyles.bottomSheet,
           ]}
         >
           <View style={styles.bottomSheetHandle}>
@@ -265,37 +110,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background_yellow,
   },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    zIndex: 20,
-    height: HEADER_HEIGHT,
-  },
-  logoText: {
-    marginTop: -3,
-    fontFamily: "KCCGanpan",
-    fontSize: 32,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    gap: 15,
-  },
-  notificationCircle: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  headerLine: {
-    width: "100%",
-    height: 0.7,
-    backgroundColor: Colors.light_text_gray,
-    zIndex: 15,
-  },
   heroContainer: {
     position: "absolute",
     width: "100%",
@@ -304,40 +118,38 @@ const styles = StyleSheet.create({
   },
   middleContentContainer: {
     position: "absolute",
-    bottom: BOTTOM_SHEET_HANDLE_HEIGHT,
+    bottom: MAIN_LAYOUT.BOTTOM_SHEET_HANDLE,
     width: "100%",
     justifyContent: "flex-end",
+    paddingBottom: 4,
   },
   textRow: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
-    flexWrap: "wrap",
-    marginBottom: 4,
+    gap: 4,
+    marginBottom: 14,
   },
-  subTextRow: {
-    paddingHorizontal: 24,
-    alignItems: "flex-end",
-    marginBottom: 15,
-  },
-  categoryPill: {
-    backgroundColor: "white",
-    borderWidth: 1.2,
-    borderColor: Colors.point_red,
-    borderRadius: 20,
-    paddingVertical: 4,
+  timePill: {
+    backgroundColor: Colors.background_white,
+    borderWidth: 1.5,
+    borderColor: Colors.nurim,
+    borderRadius: 99,
+    paddingVertical: 3,
     paddingHorizontal: 12,
-    marginRight: 8,
   },
-  categoryPillText: {
+  timePillText: {
     color: Colors.point_red,
-    fontWeight: "bold",
-    fontSize: 14,
+    fontFamily: "NanumSquareRoundEB",
+    letterSpacing: -0.3,
+    fontSize: 18,
   },
   questionText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    color: Colors.burn,
+    fontSize: 16,
+    fontFamily: "NanumSquareRoundEB",
+    letterSpacing: -0.3,
   },
   bottomSheetWrapper: {
     position: "absolute",
@@ -357,7 +169,7 @@ const styles = StyleSheet.create({
     zIndex: 30,
   },
   bottomSheetHandle: {
-    height: BOTTOM_SHEET_HANDLE_HEIGHT,
+    height: MAIN_LAYOUT.BOTTOM_SHEET_HANDLE,
     width: "100%",
     alignItems: "center",
     justifyContent: "flex-start",
