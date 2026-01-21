@@ -1,7 +1,14 @@
 // src/components/MainScreen/FoodCardNews.js
 
-import React, { memo, useState } from "react";
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -11,7 +18,7 @@ import Animated, {
   Extrapolation,
   runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
 } from "react-native-reanimated";
-import FoodInfoBox from "./FoodInfoModal";
+import FoodInfoModal from "./FoodInfoModal";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
@@ -19,14 +26,69 @@ import { useMainFeedFood } from "../../hooks/useMainFeedFood";
 
 const OVER_SCROLL_THRESHOLD = 80;
 
+const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: interpolate(
+          scrollX.value,
+          [(index - 1) * size, index * size, (index + 1) * size],
+          [0.88, 1.0, 0.88],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+  }));
+
+  return (
+    <TouchableOpacity onPress={() => onPress(item)} activeOpacity={0.7}>
+      <Animated.View
+        style={[
+          styles.cardContainer,
+          { width: size, height: size },
+          animatedStyle,
+        ]}
+      >
+        <Image source={{ uri: item.food.imageURL }} style={styles.cardImage} />
+        <Text style={styles.foodText}>{item.food.name}</Text>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+});
+
 const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
   const { foods, isLoading, isExtraLoading, loadMore } = useMainFeedFood();
 
   const sidePadding = (screenWidth - size) / 2;
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
   const scrollX = useSharedValue(0);
+  const maxScrollX = size * (foods.length - 1);
+
+  const flatListRef = useRef(null);
+  const prevLengthRef = useRef(foods.length);
+
+  const handleCardPress = useCallback((item) => {
+    setSelectedItem(item);
+    setShowInfo(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isExtraLoading && foods.length > prevLengthRef.current) {
+      const newIndex = prevLengthRef.current;
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToIndex({
+          index: newIndex,
+          animated: true,
+        });
+      });
+      prevLengthRef.current = foods.length;
+    } else if (!isExtraLoading) {
+      prevLengthRef.current = foods.length;
+    }
+  }, [isExtraLoading, foods.length]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -42,8 +104,6 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       }
     },
   });
-
-  const maxScrollX = size * (foods.length - 1);
 
   const animatedFooterStyle = useAnimatedStyle(() => {
     const translateX = interpolate(
@@ -63,7 +123,6 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       transform: [{ translateX }, { translateY: size * 0.1 }],
     };
   });
-
   const animatedFooterTextStyle = useAnimatedStyle(() => ({
     color: interpolateColor(
       scrollX.value,
@@ -71,36 +130,6 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       [Colors.light_gray, Colors.point_red],
     ),
   }));
-
-  const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [
-        {
-          scale: interpolate(
-            scrollX.value,
-            [(index - 1) * size, index * size, (index + 1) * size],
-            [0.88, 1.0, 0.88],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-    }));
-
-    return (
-      <Pressable onPress={onPress}>
-        <Animated.View
-          style={[
-            styles.cardContainer,
-            { width: size, height: size },
-            animatedStyle,
-          ]}
-        >
-          <Image source={{ uri: item.imageURL }} style={styles.cardImage} />
-          <Text style={styles.foodText}>{item.name}</Text>
-        </Animated.View>
-      </Pressable>
-    );
-  });
 
   if (isLoading) return null;
 
@@ -115,6 +144,7 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       </Animated.View>
 
       <Animated.FlatList
+        ref={flatListRef}
         data={foods}
         keyExtractor={(item) => item.food.id.toString()}
         horizontal
@@ -126,16 +156,18 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
         onScroll={scrollHandler}
         renderItem={({ item, index }) => (
           <CardItem
-            item={item.food}
+            item={item}
             index={index}
             scrollX={scrollX}
             size={size}
-            onPress={() => {
-              setSelectedItem(item);
-              setShowInfo(true);
-            }}
+            onPress={handleCardPress}
           />
         )}
+        getItemLayout={(data, index) => ({
+          length: size,
+          offset: size * index,
+          index,
+        })}
       />
 
       <View style={styles.paginationContainer}>
@@ -143,10 +175,7 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       </View>
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
-        <FoodInfoBox
-          item={selectedItem?.food}
-          onClose={() => setShowInfo(false)}
-        />
+        <FoodInfoModal item={selectedItem} onClose={() => setShowInfo(false)} />
       </ReanimatedModal>
     </View>
   );

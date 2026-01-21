@@ -20,7 +20,7 @@ export const useMainFeedFood = () => {
 
       if (!hasPersistedData || mainFeedFoods.length === 0) {
         // if (true) {
-        const data = await fetchMainFeedFoods({ speed: "fast", count: 5 });
+        const data = await fetchMainFeedFoods({ speed: "fast", count: 3 });
         if (data) await setMainFeedFoods(data);
       }
     } catch (e) {
@@ -34,7 +34,7 @@ export const useMainFeedFood = () => {
     if (isExtraLoading) return;
     setIsExtraLoading(true);
     try {
-      const data = await fetchMainFeedFoods({ speed: "fast", count: 5 });
+      const data = await fetchMainFeedFoods({ speed: "fast", count: 3 });
       if (data) await appendMainFeedFoods(data);
     } catch (e) {
       console.error("Failed to load more foods:", e);

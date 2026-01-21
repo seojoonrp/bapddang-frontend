@@ -14,8 +14,10 @@ import Animated, {
   ZoomOutEasyDown,
 } from "react-native-reanimated";
 
-const FoodInfoBox = ({ item, onClose }) => {
+const FoodInfoModal = ({ item, onClose }) => {
   if (!item) return null;
+
+  const food = item?.food;
 
   const { user } = useAuthStore();
 
@@ -25,7 +27,7 @@ const FoodInfoBox = ({ item, onClose }) => {
       return;
     }
 
-    handleLike(item.id);
+    handleLike(food.id);
   };
 
   const [selectedPlace, setSelectedPlace] = useState(null);
@@ -52,13 +54,13 @@ const FoodInfoBox = ({ item, onClose }) => {
 
         <View style={styles.contentContainer}>
           <View style={styles.imageContainer}>
-            <Image style={styles.foodImage} source={{ uri: item.imageURL }} />
+            <Image style={styles.foodImage} source={{ uri: food.imageURL }} />
           </View>
 
-          <Text style={styles.foodName}>{item.name}</Text>
+          <Text style={styles.foodName}>{food.name}</Text>
 
           <View style={styles.categoryRow}>
-            {item.categories.map((category) => (
+            {food.categories.map((category) => (
               <View key={category} style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>{category}</Text>
               </View>
@@ -67,7 +69,7 @@ const FoodInfoBox = ({ item, onClose }) => {
 
           <View style={styles.mapContainer}>
             <KakaoMap
-              keyword={item.name}
+              keyword={food.name}
               lat={37.3903}
               lon={127.1263}
               onSelectPlace={setSelectedPlace}
@@ -113,7 +115,7 @@ const FoodInfoBox = ({ item, onClose }) => {
   );
 };
 
-export default FoodInfoBox;
+export default FoodInfoModal;
 
 const styles = StyleSheet.create({
   container: {
@@ -132,8 +134,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     width: "100%",
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 16,
     gap: 12,
