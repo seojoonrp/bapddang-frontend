@@ -1,44 +1,88 @@
 // src/components/MainScreen/MainBottomSheet.js
 
+import { useState, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import Animated from "react-native-reanimated";
 import Colors from "../../constants/colors";
+import { MAIN_LAYOUT } from "../../constants/layout";
 import CategorySelector from "./CategorySelector";
-import { useState } from "react";
 
-const MainBottomSheet = () => {
+const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const handleCategorySelect = (selectedCategories) => {
-    setSelectedCategories(selectedCategories);
-    console.log("Selected Categories:", selectedCategories);
+
+  const handleCategorySelect = (categories) => {
+    setSelectedCategories(categories);
     // TODO : API 요청
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.categorySelectorContainer}>
-        <CategorySelector onSelect={handleCategorySelect} />
-        <Text style={styles.selectQuestionText}>중에서 골라볼까요?</Text>
+    <Animated.View
+      style={[
+        styles.wrapper,
+        { height: scrollThreshold + MAIN_LAYOUT.BOTTOM_SHEET_HANDLE },
+        animatedStyle,
+      ]}
+    >
+      <View style={styles.handleArea}>
+        <View style={styles.handleBar} />
+        <Text style={styles.handleText}>
+          카테고리별 추천 메뉴를 보려면 올려주세요!
+        </Text>
       </View>
-    </View>
+
+      <View style={styles.content}>
+        <View style={styles.categoryRow}>
+          <CategorySelector onSelect={handleCategorySelect} />
+          <Text style={styles.questionText}>중에서 골라볼까요?</Text>
+        </View>
+      </View>
+    </Animated.View>
   );
 };
 
-export default MainBottomSheet;
+export default memo(MainBottomSheet);
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
+    position: "absolute",
+    bottom: 0,
     width: "100%",
-    justifyContent: "flex-start",
-    alignItems: "center",
+    backgroundColor: Colors.background_white,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 10,
+    zIndex: 30,
   },
-  categorySelectorContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "flex-start",
+  handleArea: {
+    height: MAIN_LAYOUT.BOTTOM_SHEET_HANDLE,
     alignItems: "center",
+    paddingTop: 8,
+    gap: 16,
+  },
+  handleBar: {
+    width: 36,
+    height: 5,
+    backgroundColor: Colors.slightly_burn,
+    borderRadius: 99,
+  },
+  handleText: {
+    color: Colors.slightly_burn,
+    fontSize: 16,
+    fontFamily: "NanumSquareRoundEB",
+  },
+  content: {
+    flex: 1,
     paddingHorizontal: 20,
   },
-  selectQuestionText: {
+  categoryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  questionText: {
     marginLeft: 6,
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
