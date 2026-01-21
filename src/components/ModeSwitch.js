@@ -8,13 +8,16 @@ import Animated, {
   interpolateColor,
 } from "react-native-reanimated";
 import Colors from "../constants/colors";
+import useModeStore from "../stores/modeStore";
 
-const ModeSwitch = ({ value, onValueChange }) => {
-  const progress = useSharedValue(value ? 1 : 0);
+const ModeSwitch = () => {
+  const { mode, toggleMode } = useModeStore();
+
+  const progress = useSharedValue(mode ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(value ? 1 : 0, { duration: 200 });
-  }, [value]);
+    progress.value = withTiming(mode ? 1 : 0, { duration: 200 });
+  }, [mode]);
 
   const animatedTrackStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -26,12 +29,12 @@ const ModeSwitch = ({ value, onValueChange }) => {
   });
 
   const animatedThumbStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(progress.value, [0, 1], [1, 19]);
+    const translateX = interpolate(progress.mode, [0, 1], [1, 19]);
     return { transform: [{ translateX }] };
   });
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onValueChange}>
+    <TouchableOpacity activeOpacity={0.9} onPress={toggleMode}>
       <Animated.View style={[styles.switchTrack, animatedTrackStyle]}>
         <Animated.View style={[styles.switchThumb, animatedThumbStyle]} />
       </Animated.View>

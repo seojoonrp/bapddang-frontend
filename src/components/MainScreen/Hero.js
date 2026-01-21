@@ -9,79 +9,27 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, {
-  useAnimatedStyle,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated from "react-native-reanimated";
 import Colors from "../../constants/colors";
 import useModeStore from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
 import Favorite from "../svg/Favorite";
 import Edit from "../svg/Edit";
-
-const HORIZONTAL_PADDING = 12;
+import { useHeroAnimations } from "../../hooks/useHeroAnimations";
+import { memo } from "react";
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-  const { mode, toggleMode, modeColor } = useModeStore();
-  const { width: screenWidth } = useWindowDimensions();
 
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    const width = interpolate(
-      scrollY.value,
-      [0, scrollThreshold],
-      [screenWidth - HORIZONTAL_PADDING * 2, screenWidth],
-      Extrapolation.CLAMP,
-    );
-    const paddingHorizontal = interpolate(
-      scrollY.value,
-      [0, scrollThreshold],
-      [14, 14 + HORIZONTAL_PADDING],
-      Extrapolation.CLAMP,
-    );
-    const paddingTop = interpolate(
-      scrollY.value,
-      [0, scrollThreshold],
-      [14, insets.top + 9],
-      Extrapolation.CLAMP,
-    );
-    const borderRadius = interpolate(
-      scrollY.value,
-      [scrollThreshold * 0.7, scrollThreshold],
-      [24, 0],
-      Extrapolation.CLAMP,
-    );
-    return {
-      width,
-      paddingHorizontal,
-      paddingTop,
-      borderRadius,
-      backgroundColor: modeColor,
-    };
-  });
+  const { mode, modeColor } = useModeStore();
 
-  const animatedTextStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          scrollY.value,
-          [0, scrollThreshold * 0.8],
-          [1, 0],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
-  const animatedIconButtonStyle = useAnimatedStyle(() => ({
-    backgroundColor: modeColor,
-  }));
+  const { containerStyle, textStyle } = useHeroAnimations(
+    scrollY,
+    scrollThreshold,
+  );
 
   return (
-    <Animated.View style={[styles.container, animatedContainerStyle]}>
+    <Animated.View style={[styles.container, containerStyle]}>
       <LinearGradient
         colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.2)"]}
         start={{ x: 0.5, y: 0 }}
@@ -90,13 +38,10 @@ const Hero = ({ scrollY, scrollThreshold }) => {
       />
 
       <View style={styles.switchContainer}>
-        <Animated.Text style={[styles.modeText, animatedTextStyle]}>
+        <Animated.Text style={[styles.modeText, textStyle]}>
           {mode === "fast" ? "고속" : "저속"}노화
         </Animated.Text>
-        <ModeSwitch
-          value={mode === "fast"}
-          onValueChange={() => toggleMode()}
-        />
+        <ModeSwitch />
       </View>
 
       <View style={styles.bottomContainer} pointerEvents="box-none">
@@ -115,16 +60,17 @@ const Hero = ({ scrollY, scrollThreshold }) => {
   );
 };
 
-export default Hero;
+export default memo(Hero);
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
-    height: "100%",
+    position: "absolute",
+    width: "100%",
     flexDirection: "column",
     justifyContent: "flex-start",
     alignItems: "flex-start",
     overflow: "hidden",
+    zIndex: 10,
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,

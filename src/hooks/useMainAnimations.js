@@ -10,9 +10,8 @@ import {
 } from "react-native-reanimated";
 import { Gesture } from "react-native-gesture-handler";
 import Colors from "../constants/colors";
-import { MAIN_LAYOUT } from "../constants/layout";
 
-export const useMainAnimations = (scrollThreshold, headerHeight) => {
+export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);
   const startY = useSharedValue(0);
 
@@ -67,19 +66,6 @@ export const useMainAnimations = (scrollThreshold, headerHeight) => {
     ),
   }));
 
-  const animatedHeroStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, scrollThreshold],
-          [0, -(headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP)],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
   const animatedBottomSheetStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -108,7 +94,6 @@ export const useMainAnimations = (scrollThreshold, headerHeight) => {
       logo: animatedLogoStyle,
       iconOverlay: animatedIconOverlayStyle,
       headerLine: animatedHeaderLineStyle,
-      hero: animatedHeroStyle,
       bottomSheet: animatedBottomSheetStyle,
       circle: animatedCircleStyle,
     },

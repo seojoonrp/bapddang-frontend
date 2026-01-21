@@ -1,34 +1,14 @@
 // src/screens/MainScreen.js
 
-import { useEffect, useState, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet, View, Text } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  interpolate,
-  interpolateColor,
-  withSpring,
-  Extrapolation,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import useFoodStore from "../stores/foodStore";
-import { fetchMainFeedFoods } from "../services/food";
 import { handleLogout } from "../services/auth";
 import Hero from "../components/MainScreen/Hero";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
-import BellIcon from "../assets/icons/bell.svg";
-import SettingsIcon from "../assets/icons/settings.svg";
 import Colors from "../constants/colors";
 import DebugButton from "../components/DebugButton";
-import useModeStore from "../stores/modeStore";
 import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 import { useMainAnimations } from "../hooks/useMainAnimations";
 import MainHeader from "../components/MainScreen/MainHeader";
@@ -39,13 +19,10 @@ const MainScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  const { screenWidth, insets, headerHeight, scrollThreshold, heroHeight } =
-    useMainLayout();
+  const { screenWidth, insets, scrollThreshold } = useMainLayout();
 
-  const { animatedStyles, panGesture, scrollY } = useMainAnimations(
-    scrollThreshold,
-    headerHeight,
-  );
+  const { animatedStyles, panGesture, scrollY } =
+    useMainAnimations(scrollThreshold);
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -56,18 +33,7 @@ const MainScreen = () => {
           onSettingsPress={() => console.log("Settings pressed")}
         />
 
-        <Animated.View
-          style={[
-            styles.heroContainer,
-            {
-              top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP,
-              height: heroHeight,
-            },
-            animatedStyles.hero,
-          ]}
-        >
-          <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
-        </Animated.View>
+        <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
 
         <View style={styles.middleContentContainer}>
           <View style={styles.textRow}>
@@ -109,12 +75,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background_yellow,
-  },
-  heroContainer: {
-    position: "absolute",
-    width: "100%",
-    alignItems: "center",
-    zIndex: 10,
   },
   middleContentContainer: {
     position: "absolute",
