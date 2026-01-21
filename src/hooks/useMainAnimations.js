@@ -11,10 +11,13 @@ import {
 import { Gesture } from "react-native-gesture-handler";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
+import useModeStore from "../stores/modeStore";
 
 export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);
   const startY = useSharedValue(0);
+
+  const { modeColor } = useModeStore();
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -45,7 +48,7 @@ export const useMainAnimations = (scrollThreshold) => {
     color: interpolateColor(
       scrollY.value,
       [0, scrollThreshold],
-      [Colors.point_red, Colors.yellow],
+      [modeColor, Colors.yellow],
     ),
   }));
 
@@ -72,7 +75,7 @@ export const useMainAnimations = (scrollThreshold) => {
     bottom: MAIN_LAYOUT.BOTTOM_SHEET_HANDLE,
     width: "100%",
     justifyContent: "flex-end",
-    paddingBottom: 4,
+    paddingBottom: 12,
     transform: [
       {
         translateY: interpolate(

@@ -43,13 +43,13 @@ export const useHeroAnimations = (scrollY, scrollThreshold) => {
       paddingHorizontal: interpolate(
         scrollY.value,
         [0, scrollThreshold],
-        [14, 14 + HORIZONTAL_PADDING],
+        [14, 10 + HORIZONTAL_PADDING],
         Extrapolation.CLAMP,
       ),
       paddingTop: interpolate(
         scrollY.value,
         [0, scrollThreshold],
-        [14, insets.top + 9],
+        [14, insets.top + 10],
         Extrapolation.CLAMP,
       ),
       borderRadius: interpolate(
@@ -81,5 +81,34 @@ export const useHeroAnimations = (scrollY, scrollThreshold) => {
     ),
   }));
 
-  return { containerStyle, textStyle };
+  const editAndLikeStyle = useAnimatedStyle(() => ({
+    position: "absolute",
+    right: HORIZONTAL_PADDING + 14,
+    top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP + heroHeight - 40 - 12,
+    zIndex: 9999,
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, scrollThreshold],
+          [0, -heroHeight + 40 + 8],
+          Extrapolation.CLAMP,
+        ),
+      },
+      {
+        translateX: interpolate(
+          scrollY.value,
+          [0, scrollThreshold],
+          [0, HORIZONTAL_PADDING],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+  }));
+
+  return {
+    containerStyle,
+    textStyle,
+    editAndLikeStyle,
+  };
 };

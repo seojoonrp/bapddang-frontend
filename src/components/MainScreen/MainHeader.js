@@ -15,9 +15,7 @@ const MainHeader = ({ animatedStyles, onBellPress, onSettingsPress }) => {
   return (
     <>
       <View style={styles.headerContainer}>
-        <Animated.Text
-          style={[styles.logoText, animatedStyles.logo, { color: modeColor }]}
-        >
+        <Animated.Text style={[styles.logoText, animatedStyles.logo]}>
           밥땡
         </Animated.Text>
 
@@ -73,6 +71,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     zIndex: 20,
     height: MAIN_LAYOUT.HEADER,
+    pointerEvents: "box-none",
   },
   logoText: {
     marginTop: -3,
@@ -94,12 +93,10 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    borderWidth: 1,
-    borderColor: Colors.background_yellow,
   },
   headerLine: {
     width: "100%",
-    height: 0.7,
+    height: 1,
     backgroundColor: Colors.light_text_gray,
     zIndex: 15,
   },

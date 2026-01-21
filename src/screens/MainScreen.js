@@ -14,6 +14,7 @@ import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 import DebugButton from "../components/DebugButton";
 import Colors from "../constants/colors";
+import EditAndLike from "../components/MainScreen/EditAndLike";
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -34,6 +35,13 @@ const MainScreen = () => {
 
         <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
 
+        <EditAndLike
+          onEdit={() => navigation.navigate("DietLog")}
+          onLike={() => console.log("Like pressed")}
+          scrollY={scrollY}
+          scrollThreshold={scrollThreshold}
+        />
+
         <Animated.View style={animatedStyles.middleContent}>
           <TimeQuestion />
           <FoodCardNews screenWidth={screenWidth} size={screenWidth * 0.8} />
@@ -44,7 +52,7 @@ const MainScreen = () => {
           scrollThreshold={scrollThreshold}
         />
 
-        <DebugButton index={0} label="Logout" onPress={handleLogout} />
+        {/* <DebugButton index={0} label="Logout" onPress={handleLogout} /> */}
       </View>
     </GestureDetector>
   );

@@ -83,7 +83,6 @@ const Dot = memo(({ index, scrollX, cardSize }) => {
 const styles = StyleSheet.create({
   viewPort: {
     width: DOT_WIDTH * 5,
-    height: MAIN_LAYOUT.PAGINATION,
     overflow: "hidden",
     height: DOT_WIDTH,
     justifyContent: "center",
