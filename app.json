@@ -20,7 +20,9 @@
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": ["kakaoe12b185c584f7612e5f0d6398ebd1030"]
+            "CFBundleURLSchemes": [
+              "kakaoe12b185c584f7612e5f0d6398ebd1030"
+            ]
           }
         ],
         "ITSAppUsesNonExemptEncryption": false
@@ -51,7 +53,8 @@
           "kakaoAppKey": "e12b185c584f7612e5f0d6398ebd1030",
           "kotlinVersion": "1.9.0"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {
