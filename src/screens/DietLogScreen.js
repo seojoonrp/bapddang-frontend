@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState, useCallback } from "react";
+import { useEffect, useRef, useMemo, useState, useCallback} from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import Animated, {
   withSpring,
   Extrapolation,
 } from "react-native-reanimated";
+import { useMainAnimations } from "../hooks/useMainAnimations";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -42,65 +43,21 @@ const DietLogScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-
   const SHEET_MAX_HEIGHT =
     screenHeight - insets.top - HEADER_HEIGHT - SHEET_OPEN_MARGIN;
-  const SCROLL_THRESHOLD = SHEET_MAX_HEIGHT - SHEET_HANDLE_HEIGHT;
-  const scrollY = useSharedValue(0);
-  const startY = useSharedValue(0);
+  const scrollThreshold = SHEET_MAX_HEIGHT - SHEET_HANDLE_HEIGHT;
+  const { animatedStyles, panGesture, scrollY } = useMainAnimations(scrollThreshold);
 
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      startY.value = scrollY.value;
-    })
-    .onUpdate((e) => {
-      const newValue = startY.value - e.translationY;
-      scrollY.value = Math.max(0, Math.min(newValue, SCROLL_THRESHOLD));
-    })
-    .onEnd((e) => {
-      const velocity = -e.velocityY;
-      let toValue = 0;
-      if (
-        velocity > 500 ||
-        (scrollY.value > SCROLL_THRESHOLD / 2 && velocity > -500)
-      ) {
-        toValue = SCROLL_THRESHOLD;
-      }
-      scrollY.value = withSpring(toValue, {
-        velocity: velocity,
-        damping: 20,
-        stiffness: 80,
-        mass: 1.1,
-        overshootClamping: true,
-      });
-    });
+  const animatedFloatingButtons = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      scrollY.value,
+      [0, scrollThreshold],
+      [0, 180], 
+      Extrapolation.CLAMP
+    );
 
-  const animatedBottomSheetStyle = useAnimatedStyle(() => {
-    const shadowAlpha = interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD * 0.9, SCROLL_THRESHOLD],
-      [0.2, 0.2, 0],
-      Extrapolation.CLAMP,
-    );
-    const elevationValue = interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD * 0.9, SCROLL_THRESHOLD],
-      [10, 10, 0],
-      Extrapolation.CLAMP,
-    );
     return {
-      transform: [
-        {
-          translateY: interpolate(
-            scrollY.value,
-            [0, SCROLL_THRESHOLD],
-            [SCROLL_THRESHOLD, 0],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-      shadowOpacity: shadowAlpha,
-      elevation: elevationValue,
+      transform: [{ translateY }],
     };
   });
 
@@ -108,6 +65,7 @@ const DietLogScreen = () => {
   const user = useAuthStore((state) => state.user);
 
   const [displayMonth, setDisplayMonth] = useState(null);
+  const [displayWeekofMonth, setDisplayWeekofMonth] = useState(null);
   const [weekDates, setWeekDates] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState([]);
   const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
@@ -137,13 +95,6 @@ const DietLogScreen = () => {
         if (!uid) return;
 
         try {
-          await syncUserWeekAndDay();
-        } catch (e) {
-          console.log("syncUserWeek failed:", e);
-        }
-
-        // user의 day/week 읽어서 selectedWeek 세팅
-        try {
           const userDay = user?.day ?? 1;
           console.log("User day on focus:", userDay);
           const calculatedWeek = Math.ceil(userDay / 7);
@@ -171,6 +122,8 @@ const DietLogScreen = () => {
     startDate.setDate(startDate.getDate() + weekStartOffset);
 
     setDisplayMonth(startDate.getMonth() + 1);
+    const today = new Date();
+    setDisplayWeekofMonth(getWeekOfMonth(today));
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(startDate);
@@ -256,65 +209,79 @@ const DietLogScreen = () => {
     setSelectedReviewId(reviewId);
     setActiveModal("review");
   };
+  const getWeekOfMonth = (date) => {
+    const y = date.getFullYear();
+    const m = date.getMonth();
+
+    const firstOfMonth = new Date(y, m, 1);
+    const firstDowMon0 = (firstOfMonth.getDay() + 6) % 7;
+
+    return Math.floor((firstDowMon0 + (date.getDate() - 1)) / 7) + 1;
+  };
+
+  const weekOrdinalKorean = (n) => {
+    const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
+    return names[n - 1] ?? `${n}째`;
+  };
   const fillRatio = Math.min(1, (selectedDay) / 7);
   return (
-    <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
-      {/* 헤더 */}
-      <View style={styles.headerContainer}>
-        <View style={{ width: "100%", height: insets.top }} />
+    <GestureDetector gesture={panGesture}>
+      <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
+        {/* 헤더 */}
+        <View style={styles.headerContainer}>
+          <View style={{ width: "100%", height: insets.top }} />
 
-        <View style={styles.headerContent}>
-          <Text style={styles.logoText}>밥땡</Text>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity onPress={() => { }}>
-              <BellIcon color={Colors.yellow} width={24} height={24} />
-              <View style={styles.notificationCircle} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => { }}>
-              <SettingsIcon color={Colors.yellow} width={24} height={24} />
-            </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.logoText}>밥땡</Text>
+            <View style={styles.headerIcons}>
+              <TouchableOpacity onPress={() => { }}>
+                <BellIcon color={Colors.yellow} width={24} height={24} />
+                <View style={styles.notificationCircle} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { }}>
+                <SettingsIcon color={Colors.yellow} width={24} height={24} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      <MarshmallowStick
-        currentMaxWeek={currentMaxWeek}
-        selectedWeek={selectedWeek}
-        onClick={handleMarshmallowClick}
-      />
-      <TouchableOpacity
-        onPress={() => setActiveModal("foodSelect")}
-        style={styles.LikedButton}
-      >
-        <Liked />
-      </TouchableOpacity>
-      {/* 추가버튼 */}
-      <TouchableOpacity
-        onPress={() => setActiveModal("foodSelect")}
-        style={styles.reviewButton}
-      >
-        <Review />
-      </TouchableOpacity>
+        <MarshmallowStick
+          currentMaxWeek={currentMaxWeek}
+          selectedWeek={selectedWeek}
+          onClick={handleMarshmallowClick}
+        />
+        <Animated.View style={[styles.floatingButtonsContainer, animatedFloatingButtons]}>
+          <TouchableOpacity
+            onPress={() => setActiveModal("foodSelect")}
+            style={styles.LikeButton}
+          >
+            <Liked />
+          </TouchableOpacity>
 
-      {/* 바텀시트 */}
-      <GestureDetector gesture={panGesture}>
+          <TouchableOpacity
+            onPress={() => setActiveModal("foodSelect")}
+            style={styles.reviewButton}
+          >
+            <Review />
+          </TouchableOpacity>
+        </Animated.View>
+
         <Animated.View
           style={[
             styles.bottomSheetWrapper,
-            { height: SHEET_MAX_HEIGHT },
-            animatedBottomSheetStyle,
+            animatedStyles.bottomSheet, // 공통 스타일 적용
           ]}
         >
           <View style={styles.innerSheetContainer}>
             <View style={styles.handleBar} />
             <Text style={styles.sheetTitleText}>주간 식단기록</Text>
-            <Text style={styles.monthText}>{displayMonth}월</Text>
+            <Text style={styles.monthText}>{displayMonth}월 {`${weekOrdinalKorean(displayWeekofMonth)}주`}</Text>
             <View style={styles.dayContainer}>
               <LinearGradient
-                colors={["#FF5A1F", "#E92F05", "#B51200"]} 
+                colors={["#FF5A1F", "#E92F05", "#B51200"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.dayFill, { width: `${fillRatio * 100}%`  }]}
+                style={[styles.dayFill, { width: `${fillRatio * 100}%` }]}
               />
               {[1, 2, 3, 4, 5, 6, 7].map((num, index) => {
                 const isFilled = num <= selectedDay;
@@ -338,24 +305,23 @@ const DietLogScreen = () => {
               })}
             </View>
 
-            <FlatList
-              data={dailyReviews}
-              style={{ width: "100%" }}
-              renderItem={({ item }) => (
-                <ReviewCard review={item} onEdit={handleEditReview} />
-              )}
-              ListEmptyComponent={() => (
-                <View style={{ alignItems: "center", marginTop: 50 }}>
-                  <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
-                    기록된 식단이 없습니다.
-                  </Text>
-                </View>
-              )}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
-        </Animated.View>
-      </GestureDetector>
+        <FlatList
+          data={dailyReviews}
+          style={{ width: "100%" }}
+          renderItem={({ item }) => (
+            <ReviewCard review={item} onEdit={handleEditReview} />
+          )}
+          ListEmptyComponent={() => (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+              <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
+                기록된 식단이 없습니다.
+              </Text>
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </Animated.View>
 
       <Modal
         isVisible={activeModal === "foodSelect"}
@@ -399,7 +365,8 @@ const DietLogScreen = () => {
           navigation.goBack();
         }}
       />
-    </LinearGradient>
+    </LinearGradient >
+    </GestureDetector >
   );
 };
 
@@ -448,17 +415,18 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 4,
   },
-  LikedButton: {
+  floatingButtonsContainer: {
     position: "absolute",
     right: 20,
-    bottom: 290,
+    bottom: SHEET_HANDLE_HEIGHT,
+    zIndex: 100,  
+    alignItems: "center",
+  },
+  LikeButton: {
     justifyContent: "center",
     alignItems: "center",
   },
   reviewButton: {
-    position: "absolute",
-    right: 20,
-    bottom: 235,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -471,12 +439,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
+    height: 700,
     zIndex: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
-    elevation: 10,
+    elevation: 1,
   },
   innerSheetContainer: {
     flex: 1,
@@ -517,7 +486,7 @@ const styles = StyleSheet.create({
   },
   monthText: {
     position: "absolute",
-    width : 73,
+    width: 73,
     left: 30,
     top: 80,
     bottom: 14,

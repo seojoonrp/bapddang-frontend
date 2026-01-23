@@ -228,17 +228,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
                 ]}
                 onPress={() => startCheck("fast")}
               >
-                <Text style={styles.confirmText}>고속노화로 저장</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.confirmButton,
-                  { backgroundColor: Colors.point_green },
-                ]}
-                onPress={() => startCheck("slow")}
-              >
-                <Text style={styles.confirmText}>저속노화로 저장</Text>
+                <Text style={styles.confirmText}>다음</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -321,14 +311,14 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     paddingVertical: 16,
-    paddingHorizontal: 30,
+    paddingHorizontal: 32,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 0.4,
     borderColor: Colors.light_gray,
     backgroundColor: Colors.point_red,
-    marginTop: 15,
+    marginTop: 10,
   },
   dualConfirmRow: {
     width: "100%",
