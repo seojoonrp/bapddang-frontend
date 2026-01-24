@@ -12,7 +12,7 @@ import {
   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
 } from "@env";
 import { syncUserWeekAndDay } from "./user";
-import useAuthStore from "../stores/authStore";
+import { useAuthStore } from "../stores/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const checkUsernameAvailability = async (username) => {

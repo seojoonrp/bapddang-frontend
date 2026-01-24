@@ -44,7 +44,11 @@ const MainScreen = () => {
 
         <Animated.View style={animatedStyles.middleContent}>
           <TimeQuestion />
-          <FoodCardNews screenWidth={screenWidth} size={screenWidth * 0.8} />
+          <FoodCardNews
+            type="main"
+            screenWidth={screenWidth}
+            size={screenWidth * 0.8}
+          />
         </Animated.View>
 
         <MainBottomSheet

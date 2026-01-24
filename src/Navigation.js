@@ -8,7 +8,7 @@ import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 import WelcomeScreen from "./screens/login/WelcomeScreen";
 import { handleLoginSession } from "./services/auth";
-import useAuthStore from "./stores/authStore";
+import { useAuthStore } from "./stores/authStore";
 import { useEffect, useState } from "react";
 
 const Stack = createStackNavigator();

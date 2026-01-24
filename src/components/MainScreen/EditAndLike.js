@@ -3,7 +3,7 @@
 import { TouchableOpacity, StyleSheet, View } from "react-native";
 import EditIcon from "../../assets/icons/edit.svg";
 import Colors from "../../constants/colors";
-import useModeStore from "../../stores/modeStore";
+import { useModeStore } from "../../stores/modeStore";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import Animated from "react-native-reanimated";
 import HeartIcon from "../svg/HeartIcon";

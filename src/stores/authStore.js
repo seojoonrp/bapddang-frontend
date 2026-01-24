@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
   isLoggedIn: false,
@@ -30,5 +30,3 @@ const useAuthStore = create((set, get) => ({
     set({ user: userData });
   },
 }));
-
-export default useAuthStore;

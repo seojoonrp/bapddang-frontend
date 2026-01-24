@@ -2,14 +2,14 @@
 
 import { create } from "zustand";
 
-const useFoodStore = create((set, get) => ({
+export const useFoodStore = create((set, get) => ({
   foodsByID: {},
 
   mainFoodIDs: [],
   categoryFoodIDs: [],
   likedFoodIDs: [],
 
-  setFoods: (category, data) => {
+  setFoods: (type, data) => {
     const { foodsByID } = get();
     const newFoodsByID = { ...foodsByID };
     const newIDs = data.map((item) => {
@@ -19,7 +19,25 @@ const useFoodStore = create((set, get) => ({
 
     set({
       foodsByID: newFoodsByID,
-      [`${category}FoodIDs`]: newIDs,
+      [`${type}FoodIDs`]: newIDs,
+    });
+  },
+
+  appendFoods: (type, data) => {
+    const { foodsByID } = get();
+    const currentIDs = get()[`${type}FoodIDs`] || [];
+
+    const newFoodsByID = { ...foodsByID };
+    const newIDs = data
+      .filter((item) => !currentIDs.includes(item.food.id))
+      .map((item) => {
+        newFoodsByID[item.food.id] = item;
+        return item.food.id;
+      });
+
+    set({
+      foodsByID: newFoodsByID,
+      [`${type}FoodIDs`]: [...currentIDs, ...newIDs],
     });
   },
 
@@ -45,5 +63,3 @@ const useFoodStore = create((set, get) => ({
     });
   },
 }));
-
-export default useFoodStore;

@@ -2,7 +2,7 @@
 
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { handleLike, handleUnlike } from "../../services/like";
-import useAuthStore from "../../stores/authStore";
+import { useAuthStore } from "../../stores/authStore";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
 import HeartIcon from "../../components/svg/HeartIcon";
@@ -14,7 +14,7 @@ import Animated, {
   ZoomOut,
   ZoomOutEasyDown,
 } from "react-native-reanimated";
-import useFoodStore from "../../stores/foodStore";
+import { useFoodStore } from "../../stores/foodStore";
 
 const FoodInfoModal = ({ foodID, onClose }) => {
   if (!foodID) return null;
@@ -32,13 +32,10 @@ const FoodInfoModal = ({ foodID, onClose }) => {
     toggleLike(food.id);
 
     try {
-      if (!isLiked) {
-        await handleLike(food.id);
-      } else {
-        await handleUnlike(food.id);
-      }
+      if (!isLiked) await handleLike(food.id);
+      else await handleUnlike(food.id);
     } catch (error) {
-      console.error("Error updating like status:", error);
+      console.log("Error updating like status:", error);
       toggleLike(food.id);
     }
   };

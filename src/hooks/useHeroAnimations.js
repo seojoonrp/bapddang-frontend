@@ -5,7 +5,7 @@ import {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import useModeStore from "../stores/modeStore";
+import { useModeStore } from "../stores/modeStore";
 import { useMainLayout } from "./useMainLayout";
 import { MAIN_LAYOUT } from "../constants/layout";
 

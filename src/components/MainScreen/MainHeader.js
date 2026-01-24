@@ -7,7 +7,7 @@ import BellIcon from "../../assets/icons/bell.svg";
 import SettingsIcon from "../../assets/icons/settings.svg";
 import Colors from "../../constants/colors";
 import { MAIN_LAYOUT } from "../../constants/layout";
-import useModeStore from "../../stores/modeStore";
+import { useModeStore } from "../../stores/modeStore";
 
 const MainHeader = ({ animatedStyles, onBellPress, onSettingsPress }) => {
   const { modeColor } = useModeStore();

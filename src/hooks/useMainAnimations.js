@@ -11,7 +11,7 @@ import {
 import { Gesture } from "react-native-gesture-handler";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
-import useModeStore from "../stores/modeStore";
+import { useModeStore } from "../stores/modeStore";
 
 export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);

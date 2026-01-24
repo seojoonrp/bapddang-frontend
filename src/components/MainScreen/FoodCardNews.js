@@ -15,11 +15,15 @@ import FoodInfoModal from "./FoodInfoModal";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
-import { useMainFeedFood } from "../../hooks/useMainFeedFood";
+import { useFoodStore } from "../../stores/foodStore";
+import { useFoodFeed } from "../../hooks/useFoodFeed";
 
 const OVER_SCROLL_THRESHOLD = 80;
 
-const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
+const CardItem = memo(({ foodID, index, scrollX, size, onPress }) => {
+  const item = useFoodStore((state) => state.foodsByID[foodID]);
+  if (!item) return null;
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
@@ -34,7 +38,7 @@ const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
   }));
 
   return (
-    <TouchableOpacity onPress={() => onPress(item)} activeOpacity={0.7}>
+    <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
       <Animated.View
         style={[
           styles.cardContainer,
@@ -49,27 +53,28 @@ const CardItem = memo(({ item, index, scrollX, size, onPress }) => {
   );
 });
 
-const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
-  const { foods, isLoading, isExtraLoading, loadMore } = useMainFeedFood();
+const FoodCardNews = ({ type, screenWidth, size, categories }) => {
+  const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
+    categories,
+  });
 
   const sidePadding = (screenWidth - size) / 2;
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
   const scrollX = useSharedValue(0);
-  const maxScrollX = size * (foods.length - 1);
-
+  const maxScrollX = size * (foodIDs.length - 1);
   const flatListRef = useRef(null);
-  const prevLengthRef = useRef(foods.length);
+  const prevLengthRef = useRef(foodIDs.length);
 
-  const handleCardPress = useCallback((item) => {
-    setSelectedItem(item);
+  const handleCardPress = useCallback((foodID) => {
+    setSelectedFoodID(foodID);
     setShowInfo(true);
   }, []);
 
   useEffect(() => {
-    if (!isExtraLoading && foods.length > prevLengthRef.current) {
+    if (!isExtraLoading && foodIDs.length > prevLengthRef.current) {
       const newIndex = prevLengthRef.current;
       requestAnimationFrame(() => {
         flatListRef.current?.scrollToIndex({
@@ -77,11 +82,11 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
           animated: true,
         });
       });
-      prevLengthRef.current = foods.length;
+      prevLengthRef.current = foodIDs.length;
     } else if (!isExtraLoading) {
-      prevLengthRef.current = foods.length;
+      prevLengthRef.current = foodIDs.length;
     }
-  }, [isExtraLoading, foods.length]);
+  }, [isExtraLoading, foodIDs.length]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -138,8 +143,8 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
 
       <Animated.FlatList
         ref={flatListRef}
-        data={foods}
-        keyExtractor={(item) => item.food.id.toString()}
+        data={foodIDs}
+        keyExtractor={(id) => id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={size}
@@ -147,9 +152,9 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
         contentContainerStyle={{ paddingHorizontal: sidePadding }}
         scrollEventThrottle={16}
         onScroll={scrollHandler}
-        renderItem={({ item, index }) => (
+        renderItem={({ item: id, index }) => (
           <CardItem
-            item={item}
+            foodID={id}
             index={index}
             scrollX={scrollX}
             size={size}
@@ -164,11 +169,14 @@ const FoodCardNews = ({ screenWidth, size = screenWidth * 0.8 }) => {
       />
 
       <View style={styles.paginationContainer}>
-        <Pagination total={foods.length} scrollX={scrollX} cardSize={size} />
+        <Pagination total={foodIDs.length} scrollX={scrollX} cardSize={size} />
       </View>
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
-        <FoodInfoModal item={selectedItem} onClose={() => setShowInfo(false)} />
+        <FoodInfoModal
+          foodID={selectedFoodID}
+          onClose={() => setShowInfo(false)}
+        />
       </ReanimatedModal>
     </View>
   );

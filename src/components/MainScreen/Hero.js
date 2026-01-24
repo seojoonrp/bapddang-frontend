@@ -4,7 +4,7 @@ import { View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated from "react-native-reanimated";
 import Colors from "../../constants/colors";
-import useModeStore from "../../stores/modeStore";
+import { useModeStore } from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import { memo } from "react";

@@ -8,7 +8,7 @@ import Animated, {
   interpolateColor,
 } from "react-native-reanimated";
 import Colors from "../constants/colors";
-import useModeStore from "../stores/modeStore";
+import { useModeStore } from "../stores/modeStore";
 import { LinearGradient } from "expo-linear-gradient";
 
 const ModeSwitch = () => {

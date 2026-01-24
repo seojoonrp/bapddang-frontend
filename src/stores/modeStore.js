@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Colors from "../constants/colors";
 
-const useModeStore = create((set, get) => ({
+export const useModeStore = create((set, get) => ({
   mode: "fast",
   modeColor: Colors.point_red,
 
@@ -33,5 +33,3 @@ const useModeStore = create((set, get) => ({
     await AsyncStorage.setItem("modeColor", newModeColor);
   },
 }));
-
-export default useModeStore;
