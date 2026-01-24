@@ -16,16 +16,14 @@ import Animated, {
 } from "react-native-reanimated";
 import useFoodStore from "../../stores/foodStore";
 
-const FoodInfoModal = ({ item, onClose }) => {
+const FoodInfoModal = ({ foodID, onClose }) => {
+  if (!foodID) return null;
+
+  const item = useFoodStore((state) => state.foodsByID[foodID]);
+  const toggleLike = useFoodStore((state) => state.toggleLike);
   if (!item) return null;
+  const { food, isLiked } = item;
 
-  const storeFoodItem = useFoodStore((state) =>
-    state.mainFeedFoods.find((f) => f.food.id === item.food.id),
-  );
-  const currentItem = storeFoodItem || item;
-  const { food, isLiked } = currentItem;
-
-  const { toggleLike } = useFoodStore();
   const { user } = useAuthStore();
 
   const onLikePress = async () => {
@@ -37,7 +35,7 @@ const FoodInfoModal = ({ item, onClose }) => {
       if (!isLiked) {
         await handleLike(food.id);
       } else {
-        handleUnlike(food.id);
+        await handleUnlike(food.id);
       }
     } catch (error) {
       console.error("Error updating like status:", error);

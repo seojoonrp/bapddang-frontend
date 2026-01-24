@@ -1,3 +1,5 @@
+// src/hooks/useMainFeedFood.js
+
 import { useState, useEffect, useCallback } from "react";
 import useFoodStore from "../stores/foodStore";
 import { fetchMainFeedFoods } from "../services/food";
