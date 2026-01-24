@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 
-import useAuthStore from "../../stores/authStore";
+import { useAuthStore } from "../../stores/authStore";
 
 import { getBestMatches } from "../../utils/nameCheck.js";
 import { standardFoodNames } from "../../constants/data/standardFoodNames.js";
@@ -27,7 +27,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   // 입력 단계 상태
   const [likedFoodNames, setLikedFoodNames] = useState([]);
   const [inputList, setInputList] = useState(
-    Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""]
+    Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""],
   );
   const [curInputIndex, setCurInputIndex] = useState(0);
 
@@ -94,7 +94,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
         autoResolvedNames.push(topMatch.name);
       } else {
         const validSuggestions = result.top.filter(
-          (opt) => opt.score >= SCORE_THRESHOLD
+          (opt) => opt.score >= SCORE_THRESHOLD,
         );
 
         queue.push({

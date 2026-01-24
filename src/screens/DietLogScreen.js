@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState, useCallback} from "react";
+import { useEffect, useRef, useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
-import useAuthStore from "../stores/authStore";
+import { useAuthStore } from "../stores/authStore";
 import { fetchReviewsByDay } from "../services/review";
 import { syncUserWeekAndDay } from "../services/user";
 import Colors from "../constants/colors";
@@ -46,14 +46,15 @@ const DietLogScreen = () => {
   const SHEET_MAX_HEIGHT =
     screenHeight - insets.top - HEADER_HEIGHT - SHEET_OPEN_MARGIN;
   const scrollThreshold = SHEET_MAX_HEIGHT - SHEET_HANDLE_HEIGHT;
-  const { animatedStyles, panGesture, scrollY } = useMainAnimations(scrollThreshold);
+  const { animatedStyles, panGesture, scrollY } =
+    useMainAnimations(scrollThreshold);
 
   const animatedFloatingButtons = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
       [0, scrollThreshold],
-      [0, 180], 
-      Extrapolation.CLAMP
+      [0, 180],
+      Extrapolation.CLAMP,
     );
 
     return {
@@ -223,7 +224,7 @@ const DietLogScreen = () => {
     const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
     return names[n - 1] ?? `${n}째`;
   };
-  const fillRatio = Math.min(1, (selectedDay) / 7);
+  const fillRatio = Math.min(1, selectedDay / 7);
   return (
     <GestureDetector gesture={panGesture}>
       <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
@@ -234,11 +235,11 @@ const DietLogScreen = () => {
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
               </TouchableOpacity>
             </View>
@@ -250,7 +251,9 @@ const DietLogScreen = () => {
           selectedWeek={selectedWeek}
           onClick={handleMarshmallowClick}
         />
-        <Animated.View style={[styles.floatingButtonsContainer, animatedFloatingButtons]}>
+        <Animated.View
+          style={[styles.floatingButtonsContainer, animatedFloatingButtons]}
+        >
           <TouchableOpacity
             onPress={() => setActiveModal("foodSelect")}
             style={styles.LikeButton}
@@ -275,7 +278,9 @@ const DietLogScreen = () => {
           <View style={styles.innerSheetContainer}>
             <View style={styles.handleBar} />
             <Text style={styles.sheetTitleText}>주간 식단기록</Text>
-            <Text style={styles.monthText}>{displayMonth}월 {`${weekOrdinalKorean(displayWeekofMonth)}주`}</Text>
+            <Text style={styles.monthText}>
+              {displayMonth}월 {`${weekOrdinalKorean(displayWeekofMonth)}주`}
+            </Text>
             <View style={styles.dayContainer}>
               <LinearGradient
                 colors={["#FF5A1F", "#E92F05", "#B51200"]}
@@ -295,7 +300,7 @@ const DietLogScreen = () => {
                     <Text
                       style={[
                         styles.dayText,
-                        [styles.dayText, isFilled && styles.dayTextFilled]
+                        [styles.dayText, isFilled && styles.dayTextFilled],
                       ]}
                     >
                       {weekDates[index]}
@@ -305,68 +310,68 @@ const DietLogScreen = () => {
               })}
             </View>
 
-        <FlatList
-          data={dailyReviews}
-          style={{ width: "100%" }}
-          renderItem={({ item }) => (
-            <ReviewCard review={item} onEdit={handleEditReview} />
-          )}
-          ListEmptyComponent={() => (
-            <View style={{ alignItems: "center", marginTop: 50 }}>
-              <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
-                기록된 식단이 없습니다.
-              </Text>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </Animated.View>
+            <FlatList
+              data={dailyReviews}
+              style={{ width: "100%" }}
+              renderItem={({ item }) => (
+                <ReviewCard review={item} onEdit={handleEditReview} />
+              )}
+              ListEmptyComponent={() => (
+                <View style={{ alignItems: "center", marginTop: 50 }}>
+                  <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
+                    기록된 식단이 없습니다.
+                  </Text>
+                </View>
+              )}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </Animated.View>
 
-      <Modal
-        isVisible={activeModal === "foodSelect"}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        backdropOpacity={0}
-        onModalHide={handleHideFoodSelect}
-        style={{ margin: 0 }}
-      >
-        <Pressable style={styles.backdrop} onPress={handleCloseModal} />
-        <FoodSelectModal
-          onClose={handleCloseModal}
-          onSelect={(foods, mode) => {
-            handleSelectFood(foods, mode);
+        <Modal
+          isVisible={activeModal === "foodSelect"}
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          backdropOpacity={0}
+          onModalHide={handleHideFoodSelect}
+          style={{ margin: 0 }}
+        >
+          <Pressable style={styles.backdrop} onPress={handleCloseModal} />
+          <FoodSelectModal
+            onClose={handleCloseModal}
+            onSelect={(foods, mode) => {
+              handleSelectFood(foods, mode);
+            }}
+            initialFoods={selectedFoods}
+          />
+        </Modal>
+
+        <Modal
+          isVisible={activeModal === "review"}
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          backdropOpacity={0}
+          onModalHide={handleHideReview}
+          style={{ margin: 0 }}
+        >
+          <Pressable style={styles.backdrop} onPress={handleCloseModal} />
+          <CreateReviewModal
+            onClose={handleCloseModal}
+            onBack={handleBack}
+            foodNames={selectedFoods}
+            reviewMode={selectedMode}
+          />
+        </Modal>
+
+        <DebugButton
+          index={1}
+          label={"Go back"}
+          onPress={() => {
+            navigation.goBack();
           }}
-          initialFoods={selectedFoods}
         />
-      </Modal>
-
-      <Modal
-        isVisible={activeModal === "review"}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        backdropOpacity={0}
-        onModalHide={handleHideReview}
-        style={{ margin: 0 }}
-      >
-        <Pressable style={styles.backdrop} onPress={handleCloseModal} />
-        <CreateReviewModal
-          onClose={handleCloseModal}
-          onBack={handleBack}
-          foodNames={selectedFoods}
-          reviewMode={selectedMode}
-        />
-      </Modal>
-
-      <DebugButton
-        index={1}
-        label={"Go back"}
-        onPress={() => {
-          navigation.goBack();
-        }}
-      />
-    </LinearGradient >
-    </GestureDetector >
+      </LinearGradient>
+    </GestureDetector>
   );
 };
 
@@ -419,7 +424,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     bottom: SHEET_HANDLE_HEIGHT,
-    zIndex: 100,  
+    zIndex: 100,
     alignItems: "center",
   },
   LikeButton: {
