@@ -48,6 +48,8 @@ const MainScreen = () => {
             type="main"
             screenWidth={screenWidth}
             size={screenWidth * 0.8}
+            canLoadMore={true}
+            animationRatio={0.88}
           />
         </Animated.View>
 

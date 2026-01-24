@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useFoodStore } from "../stores/foodStore";
 import { useModeStore } from "../stores/modeStore";
-import { fetchMainFoods } from "../services/food";
+import { fetchMainFoods, fetchCategoryFoods } from "../services/food";
 
 export const useFoodFeed = (type, options = {}) => {
   const [isLoading, setIsLoading] = useState(true);

@@ -190,6 +190,7 @@ export default CategorySelector;
 
 const styles = StyleSheet.create({
   container: {
+    marginLeft: 20,
     zIndex: 1000,
   },
   overlay: {
@@ -243,7 +244,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     marginLeft: 6,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: "NanumSquareRoundEB",
     color: Colors.burn,
   },

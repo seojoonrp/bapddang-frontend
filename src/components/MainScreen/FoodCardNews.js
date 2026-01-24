@@ -20,7 +20,7 @@ import { useFoodFeed } from "../../hooks/useFoodFeed";
 
 const OVER_SCROLL_THRESHOLD = 80;
 
-const CardItem = memo(({ foodID, index, scrollX, size, onPress }) => {
+const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
   const item = useFoodStore((state) => state.foodsByID[foodID]);
   if (!item) return null;
 
@@ -30,7 +30,7 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress }) => {
         scale: interpolate(
           scrollX.value,
           [(index - 1) * size, index * size, (index + 1) * size],
-          [0.88, 1.0, 0.88],
+          [ratio, 1.0, ratio],
           Extrapolation.CLAMP,
         ),
       },
@@ -53,7 +53,14 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress }) => {
   );
 });
 
-const FoodCardNews = ({ type, screenWidth, size, categories }) => {
+const FoodCardNews = ({
+  type,
+  screenWidth,
+  size,
+  categories,
+  canLoadMore = true,
+  animationRatio,
+}) => {
   const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
     categories,
   });
@@ -67,6 +74,14 @@ const FoodCardNews = ({ type, screenWidth, size, categories }) => {
   const maxScrollX = size * (foodIDs.length - 1);
   const flatListRef = useRef(null);
   const prevLengthRef = useRef(foodIDs.length);
+
+  useEffect(() => {
+    scrollX.value = 0;
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+    }
+    prevLengthRef.current = foodIDs.length;
+  }, [type, categories]);
 
   const handleCardPress = useCallback((foodID) => {
     setSelectedFoodID(foodID);
@@ -97,7 +112,7 @@ const FoodCardNews = ({ type, screenWidth, size, categories }) => {
         event.contentOffset.x +
         event.layoutMeasurement.width -
         event.contentSize.width;
-      if (overScroll > OVER_SCROLL_THRESHOLD) {
+      if (overScroll > OVER_SCROLL_THRESHOLD && canLoadMore) {
         runOnJS(loadMore)();
       }
     },
@@ -133,13 +148,15 @@ const FoodCardNews = ({ type, screenWidth, size, categories }) => {
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[styles.footer, { height: size * 0.8 }, animatedFooterStyle]}
-      >
-        <Animated.Text style={[styles.footerText, animatedFooterTextStyle]}>
-          당겨서{"\n"}음식{"\n"}더 보기
-        </Animated.Text>
-      </Animated.View>
+      {canLoadMore && (
+        <Animated.View
+          style={[styles.footer, { height: size * 0.8 }, animatedFooterStyle]}
+        >
+          <Animated.Text style={[styles.footerText, animatedFooterTextStyle]}>
+            당겨서{"\n"}음식{"\n"}더 보기
+          </Animated.Text>
+        </Animated.View>
+      )}
 
       <Animated.FlatList
         ref={flatListRef}
@@ -159,6 +176,7 @@ const FoodCardNews = ({ type, screenWidth, size, categories }) => {
             scrollX={scrollX}
             size={size}
             onPress={handleCardPress}
+            ratio={animationRatio}
           />
         )}
         getItemLayout={(data, index) => ({
@@ -185,7 +203,7 @@ const FoodCardNews = ({ type, screenWidth, size, categories }) => {
 export default memo(FoodCardNews);
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: { justifyContent: "center", alignItems: "center" },
   cardContainer: {
     justifyContent: "center",
     alignItems: "center",

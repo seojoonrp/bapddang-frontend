@@ -6,11 +6,17 @@ import Animated from "react-native-reanimated";
 import Colors from "../../constants/colors";
 import { MAIN_LAYOUT } from "../../constants/layout";
 import CategorySelector from "./CategorySelector";
+import { useMainLayout } from "../../hooks/useMainLayout";
+import FoodCardNews from "./FoodCardNews";
 
 const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
+  const { screenWidth } = useMainLayout();
+
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const handleCategorySelect = (categories) => {
+    if (categories === selectedCategories) return;
+
     setSelectedCategories(categories);
     // TODO : API 요청
   };
@@ -32,6 +38,15 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
 
       <View style={styles.content}>
         <CategorySelector onSelect={handleCategorySelect} />
+
+        <FoodCardNews
+          type="category"
+          screenWidth={screenWidth}
+          size={screenWidth * 0.6}
+          categories={selectedCategories}
+          canLoadMore={false}
+          animationRatio={0.93}
+        />
       </View>
     </Animated.View>
   );
@@ -73,6 +88,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    justifyContent: "flex-start",
+    gap: 10,
   },
 });

@@ -15,8 +15,8 @@ export const fetchMainFoods = async ({ speed, count }) => {
 
 export const fetchCategoryFoods = async ({ categories, speed, count }) => {
   try {
-    const result = await api.post("/foods/", {
-      params: { categories, speed, count },
+    const result = await api.get("/foods/", {
+      params: { category: categories, speed, count },
     });
     return result;
   } catch (error) {
