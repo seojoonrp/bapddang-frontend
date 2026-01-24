@@ -31,10 +31,7 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.categoryRow}>
-          <CategorySelector onSelect={handleCategorySelect} />
-          <Text style={styles.questionText}>중에서 골라볼까요?</Text>
-        </View>
+        <CategorySelector onSelect={handleCategorySelect} />
       </View>
     </Animated.View>
   );
@@ -77,15 +74,5 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  categoryRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  questionText: {
-    marginLeft: 6,
-    fontSize: 16,
-    fontFamily: "NanumSquareRoundEB",
-    color: Colors.burn,
   },
 });

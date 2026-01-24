@@ -85,7 +85,7 @@ export const useHeroAnimations = (scrollY, scrollThreshold) => {
     position: "absolute",
     right: HORIZONTAL_PADDING + 14,
     top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP + heroHeight - 40 - 12,
-    zIndex: 9999,
+    zIndex: 400,
     transform: [
       {
         translateY: interpolate(

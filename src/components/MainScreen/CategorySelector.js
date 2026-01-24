@@ -12,7 +12,19 @@ import {
 } from "react-native";
 import Triangle from "../../assets/icons/dropdown.svg";
 import Colors from "../../constants/colors";
-import { categories } from "../../constants/data/categoryData";
+import {
+  categoryGroups,
+  allCategories,
+} from "../../constants/data/categoryData";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+  FadeInUp,
+  FadeOutUp,
+} from "react-native-reanimated";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CategorySelector = ({ onSelect }) => {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
@@ -31,9 +43,9 @@ const CategorySelector = ({ onSelect }) => {
 
   // 맨 처음에 랜덤으로 하나 선택
   useEffect(() => {
-    if (categories && categories.length > 0) {
-      const randomIndex = Math.floor(Math.random() * categories.length);
-      const randomCategory = categories[randomIndex];
+    if (allCategories && allCategories.length > 0) {
+      const randomIndex = Math.floor(Math.random() * allCategories.length);
+      const randomCategory = allCategories[randomIndex];
       setSelected([randomCategory]);
       onSelect([randomCategory]);
     }
@@ -57,81 +69,118 @@ const CategorySelector = ({ onSelect }) => {
     return selected.join(", ");
   }, [selected]);
 
+  const animatedOverlayStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(isOpen ? 1 : 0, { duration: 300 }),
+  }));
+  const animatedArrowStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: withTiming(isOpen ? "0deg" : "180deg", {
+          duration: 300,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        }),
+      },
+      {
+        translateY: withTiming(isOpen ? 0 : 1.5, {
+          duration: 300,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        }),
+      },
+    ],
+  }));
+  const animatedDropdownShadowStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(isOpen ? 0 : 1, { duration: 300 }),
+  }));
+
   return (
     <View style={styles.container}>
-      {isOpen && (
-        <Pressable
-          style={[
-            styles.overlay,
-            {
-              top: -SCREEN_HEIGHT,
-              left: -SCREEN_WIDTH,
-              width: SCREEN_WIDTH * 2,
-              height: SCREEN_HEIGHT * 2,
-            },
-          ]}
-          onPress={() => setIsOpen(false)}
-        />
-      )}
+      <AnimatedPressable
+        pointerEvents={isOpen ? "auto" : "none"}
+        style={[
+          styles.overlay,
+          {
+            top: -SCREEN_HEIGHT,
+            left: -SCREEN_WIDTH,
+            width: SCREEN_WIDTH * 2,
+            height: SCREEN_HEIGHT * 2,
+          },
+          animatedOverlayStyle,
+        ]}
+        onPress={() => setIsOpen(false)}
+      />
 
-      <TouchableOpacity
-        style={styles.dropdown}
-        activeOpacity={0.8}
-        onPress={() => setIsOpen(!isOpen)}
-      >
-        <Text style={styles.selectedTextStyle} numberOfLines={1}>
-          {displayText}
-        </Text>
-
-        <View style={styles.rightIconContainer}>
-          <View style={styles.verticalLine} />
-          <Triangle
-            width={12}
-            height={12}
-            style={{
-              transform: [
-                { rotate: isOpen ? "180deg" : "0deg" },
-                { translateY: isOpen ? 1.5 : 0 },
-              ],
-            }}
+      <View style={styles.dropdownRow}>
+        <View>
+          <Animated.View
+            style={[styles.dropdownShadow, animatedDropdownShadowStyle]}
           />
+          <TouchableOpacity
+            style={styles.dropdown}
+            activeOpacity={0.8}
+            onPress={() => setIsOpen(!isOpen)}
+          >
+            <Text style={styles.selectedTextStyle} numberOfLines={1}>
+              {displayText}
+            </Text>
+
+            <View style={styles.rightIconContainer}>
+              <View style={styles.verticalLine} />
+              <Animated.View style={animatedArrowStyle}>
+                <Triangle width={12} height={12} />
+              </Animated.View>
+            </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+        <Text style={styles.questionText}>중에서 골라볼까요?</Text>
+      </View>
 
       {isOpen && (
-        <View style={styles.listContainer}>
+        <Animated.View
+          entering={FadeInUp.duration(300).easing(Easing.out(Easing.quad))}
+          exiting={FadeOutUp.duration(300)}
+          style={styles.listContainer}
+        >
           <ScrollView
             style={styles.scrollView}
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 4 }}
           >
-            <View style={styles.optionsWrapper}>
-              {categories.map((category) => {
-                const isSelected = selected.includes(category);
-                return (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.optionItem,
-                      isSelected && styles.optionItemActive,
-                    ]}
-                    onPress={() => toggleCategory(category)}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        isSelected && styles.optionTextActive,
-                      ]}
-                    >
-                      {category}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            {categoryGroups.map((group, index) => (
+              <View key={group.id}>
+                <View style={styles.optionsWrapper}>
+                  {group.items.map((category) => {
+                    const isSelected = selected.includes(category);
+                    return (
+                      <TouchableOpacity
+                        key={category}
+                        style={[
+                          styles.optionItem,
+                          isSelected && styles.optionItemActive,
+                        ]}
+                        onPress={() => toggleCategory(category)}
+                        activeOpacity={0.7}
+                      >
+                        <Text
+                          style={[
+                            styles.optionText,
+                            isSelected && styles.optionTextActive,
+                          ]}
+                        >
+                          {category}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {index < categoryGroups.length - 1 && (
+                  <View style={styles.divider} />
+                )}
+              </View>
+            ))}
           </ScrollView>
-        </View>
+        </Animated.View>
       )}
     </View>
   );
@@ -145,7 +194,13 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(0,0,0,0.2)",
+    zIndex: 500,
+  },
+  dropdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 502,
   },
   dropdown: {
     height: 28,
@@ -158,6 +213,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "flex-start",
+  },
+  dropdownShadow: {
+    position: "absolute",
+    top: 2,
+    width: "100%",
+    height: "100%",
+    borderRadius: 99,
+    backgroundColor: "#FDEDC0",
+    zIndex: -1,
   },
   selectedTextStyle: {
     fontSize: 18,
@@ -177,19 +241,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.text_gray,
     marginRight: 5,
   },
+  questionText: {
+    marginLeft: 6,
+    fontSize: 16,
+    fontFamily: "NanumSquareRoundEB",
+    color: Colors.burn,
+  },
   listContainer: {
     position: "absolute",
     left: 0,
-    top: 34,
-    width: 240,
+    top: 36,
+    width: 270,
     backgroundColor: Colors.background_white,
     borderRadius: 20,
-    maxHeight: 200,
-    borderWidth: 1.5,
-    borderColor: Colors.nurim,
+    maxHeight: 240,
+    borderWidth: 3,
+    borderColor: Colors.background_yellow,
+    padding: 4,
     overflow: "hidden",
+    zIndex: 501,
+    boxShadow: "0 4px 6px 2px rgba(0, 0, 0, 0.15)",
   },
   scrollView: {
+    borderRadius: 16,
+    borderColor: Colors.light_text_gray,
+    borderWidth: 1,
     padding: 4,
   },
   optionsWrapper: {
@@ -197,27 +273,35 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     padding: 6,
     gap: 6,
-    marginBottom: 4,
   },
   optionItem: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 99,
-    backgroundColor: "#F5F5F5",
-    borderWidth: 1.5,
-    borderColor: "#EEE",
+    display: "flex",
+    borderWidth: 0.4,
+    borderColor: Colors.light_gray,
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
+    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   optionItemActive: {
     backgroundColor: Colors.nurim,
     borderColor: Colors.nurim,
+    boxShadow: "",
   },
   optionText: {
-    fontSize: 14,
-    fontFamily: "NanumSquareRoundB",
-    color: "#666",
+    fontSize: 16,
+    fontFamily: "NanumSquareEB",
+    color: Colors.slightly_burn,
   },
   optionTextActive: {
-    color: Colors.background_white,
-    fontFamily: "NanumSquareRoundEB",
+    color: Colors.background_yellow,
+  },
+  divider: {
+    height: 1.5,
+    backgroundColor: Colors.light_text_gray,
+    marginHorizontal: 24,
+    marginVertical: 4,
   },
 });
