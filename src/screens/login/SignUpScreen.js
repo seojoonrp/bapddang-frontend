@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
-import { checkUsernameAvailability } from "../../services/auth";
+import { checkUsernameAvailability, handleSignUp } from "../../services/auth";
 import ChevronIcon from "../../assets/icons/chevron.svg";
 import EyeOpenIcon from "../../assets/icons/eye-open.svg";
 import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
@@ -113,38 +113,13 @@ const SignUpScreen = () => {
   }, [pw, pwConfirm]);
 
   const handleAgree = async () => {
-    const success = await handleSignUp();
-    if (success) {
-      setShowTerms(false);
-      navigation.navigate("Welcome");
-    }
-  };
-
-  const handleSignUp = async () => {
     if (loading || !isComplete || !isAllAgreed) return;
     setLoading(true);
 
-    try {
-      const response = await api.post("/auth/signup", {
-        username: username,
-        password: pw,
-      });
-
-      if (response.status === 201) {
-        console.log("Signup successful:", response.data);
-        return true;
-      }
-    } catch (e) {
-      if (e.response) {
-        console.log("Server error:", e.response.data);
-      } else if (e.request) {
-        console.log("Network error:", e.request);
-      } else {
-        console.log("Error:", e.message);
-      }
-      return false;
-    } finally {
-      setLoading(false);
+    const success = await handleSignUp(username, pw);
+    if (success) {
+      setShowTerms(false);
+      navigation.navigate("Welcome");
     }
   };
 
@@ -156,7 +131,7 @@ const SignUpScreen = () => {
             style={styles.goBackButton}
             onPress={() => navigation.goBack()}
           >
-            <ChevronIcon width={24} height={24} />
+            <ChevronIcon width={24} height={24} color={Colors.light_red} />
           </TouchableOpacity>
           <Text style={styles.registerText}>회원가입</Text>
         </View>
@@ -231,7 +206,7 @@ const SignUpScreen = () => {
               value={pwConfirm}
               onChangeText={setPwConfirm}
               autoCapitalize="none"
-              secureTextEntry={!isPwVisible}
+              secureTextEntry={!isPwConfirmVisible}
               placeholderTextColor={Colors.placeholder_gray}
             />
             <TouchableOpacity

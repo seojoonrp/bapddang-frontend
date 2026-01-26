@@ -65,6 +65,15 @@ const processAuthResult = async (result, method) => {
   return false;
 };
 
+export const handleSignUp = async (username, password) => {
+  try {
+    await api.post("/auth/signup", { username, password });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const handleLocalLogin = async (username, password) => {
   try {
     const result = await api.post("/auth/login", { username, password });

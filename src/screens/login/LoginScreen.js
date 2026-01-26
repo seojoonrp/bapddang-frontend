@@ -58,9 +58,9 @@ const LoginScreen = ({ navigation }) => {
         <View style={[styles.headerContainer, { top: insets.top + 8 }]}>
           <TouchableOpacity
             style={styles.goBackButton}
-            onPress={() => navigation.replace("Landing")}
+            onPress={() => navigation.goBack()}
           >
-            <ChevronIcon width={24} height={24} />
+            <ChevronIcon width={24} height={24} color={Colors.light_red} />
           </TouchableOpacity>
           <Text style={styles.loginText}>로그인</Text>
         </View>
