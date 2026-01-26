@@ -60,6 +60,7 @@ const FoodCardNews = ({
   categories,
   canLoadMore = true,
   animationRatio,
+  pagination = true,
 }) => {
   const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
     categories,
@@ -193,9 +194,15 @@ const FoodCardNews = ({
         })}
       />
 
-      <View style={styles.paginationContainer}>
-        <Pagination total={foodIDs.length} scrollX={scrollX} cardSize={size} />
-      </View>
+      {pagination && (
+        <View style={styles.paginationContainer}>
+          <Pagination
+            total={foodIDs.length}
+            scrollX={scrollX}
+            cardSize={size}
+          />
+        </View>
+      )}
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
         <FoodInfoModal
