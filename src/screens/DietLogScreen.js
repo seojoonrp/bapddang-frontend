@@ -34,6 +34,7 @@ import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import Review from "../components/svg/Review.svg";
 import Liked from "../components/svg/Liked.svg";
+import Back from "../assets/icons/back.svg";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 220;
@@ -235,11 +236,11 @@ const DietLogScreen = () => {
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
               </TouchableOpacity>
             </View>
@@ -283,7 +284,7 @@ const DietLogScreen = () => {
             </Text>
             <View style={styles.dayContainer}>
               <LinearGradient
-                colors={["#FF5A1F", "#E92F05", "#B51200"]}
+                colors={["#FF5A2C", "#E90C05"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={[styles.dayFill, { width: `${fillRatio * 100}%` }]}
@@ -364,8 +365,8 @@ const DietLogScreen = () => {
         </Modal>
 
         <DebugButton
-          index={1}
-          label={"Go back"}
+          index={5}
+          icon={<Back width={52} height={52} />}
           onPress={() => {
             navigation.goBack();
           }}
@@ -491,7 +492,7 @@ const styles = StyleSheet.create({
   },
   monthText: {
     position: "absolute",
-    width: 73,
+    maxwidth: 150,
     left: 30,
     top: 80,
     bottom: 14,
@@ -507,8 +508,10 @@ const styles = StyleSheet.create({
     left: 2,
     top: 2,
     bottom: 2,
-    borderRadius: 11,
-    backgroundColor: Colors.point_red,
+    borderTopLeftRadius: 11,
+    borderBottomLeftRadius: 11,
+    borderTopRightRadius: 26,
+    borderBottomRightRadius: 26,
   },
   dayButton: {
     flex: 1,

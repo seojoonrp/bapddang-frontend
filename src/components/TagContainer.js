@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.light_gray,
     backgroundColor: "white",
     borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 6,
     boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   buttonSelected: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     boxShadow: "",
   },
   buttonText: {
-    fontFamily: "NanumSquareEB",
+    fontFamily: "NanumSquareOTF",
     fontSize: 16,
     color: Colors.slightly_burn,
     fontWeight: 700,

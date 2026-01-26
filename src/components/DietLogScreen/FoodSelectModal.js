@@ -139,100 +139,106 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   return (
     <View style={styles.container}>
       <IconBar onClose={onClose} />
+      <View style={styles.outerFrame}>
+        <View style={styles.contentBox}>
+          {isInCheckMode && currentTarget ? (
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+              <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
 
-      <View style={styles.contentBox}>
-        {isInCheckMode && currentTarget ? (
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
-
-            <Text style={styles.checkHint}>
-              {currentIndex + 1} / {suggestionQueue.length} 번째 음식 확인 중
-            </Text>
-
-            <View style={styles.checkBox}>
-              <Text style={styles.checkTitle}>입력한 음식</Text>
-              <Text style={styles.checkInputName}>
-                {currentTarget.originalName}
+              <Text style={styles.checkHint}>
+                {currentIndex + 1} / {suggestionQueue.length} 번째 음식 확인 중
               </Text>
-            </View>
 
-            <View style={{ width: "100%", marginTop: 20 }}>
-              <Text style={styles.subTitle}>추천 검색 결과</Text>
-              <View style={styles.suggestionContainer}>
-                {currentTarget.suggestions?.map((opt, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.suggestionChip}
-                    onPress={() => handleSelectName(opt.name)}
-                  >
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Text style={styles.suggestionText}>{opt.name}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.checkBox}>
+                <Text style={styles.checkTitle}>입력한 음식</Text>
+                <Text style={styles.checkInputName}>
+                  {currentTarget.originalName}
+                </Text>
               </View>
-            </View>
 
-            <TouchableOpacity
-              style={[
-                styles.confirmButton,
-                {
-                  backgroundColor: Colors.slightly_burn,
-                  marginTop: 30,
-                  width: "100%",
-                },
-              ]}
-              onPress={() => handleSelectName(currentTarget.originalName)}
-            >
-              <Text style={styles.confirmText}>원문 그대로 사용</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        ) : (
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
+              <View style={{ width: "100%", marginTop: 20 }}>
+                <Text style={styles.subTitle}>추천 검색 결과</Text>
+                <View style={styles.suggestionContainer}>
+                  {currentTarget.suggestions?.map((opt, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.suggestionChip}
+                      onPress={() => handleSelectName(opt.name)}
+                    >
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Text style={styles.suggestionText}>{opt.name}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
 
-            {inputList.map((input, index) => (
-              <TextInput
-                key={index}
-                style={styles.input}
-                placeholder="음식 이름을 입력해주세요"
-                value={input}
-                onChangeText={(text) => updateInput(index, text)}
-                onFocus={() => setCurInputIndex(index)}
-              />
-            ))}
-
-            <TouchableOpacity style={styles.addButton} onPress={addInput}>
-              <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.subTitle}>좋아요한 음식</Text>
-            <TagContainer
-              tags={likedFoodNames}
-              mode="assign"
-              onPress={(food) => updateInput(curInputIndex, food)}
-              containerStyle={{ marginBottom: 20 }}
-            />
-
-            <View style={styles.dualConfirmRow}>
               <TouchableOpacity
                 style={[
                   styles.confirmButton,
-                  { backgroundColor: Colors.point_red },
+                  {
+                    backgroundColor: Colors.slightly_burn,
+                    marginTop: 30,
+                    width: "100%",
+                  },
                 ]}
-                onPress={() => startCheck("fast")}
+                onPress={() => handleSelectName(currentTarget.originalName)}
               >
-                <Text style={styles.confirmText}>다음</Text>
+                <Text style={styles.confirmText}>원문 그대로 사용</Text>
               </TouchableOpacity>
-            </View>
-          </ScrollView>
-        )}
+            </ScrollView>
+          ) : (
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <Text style={styles.question}>어떤 음식을 먹었나요?</Text>
+
+              {inputList.map((input, index) => (
+                <TextInput
+                  key={index}
+                  style={styles.input}
+                  placeholder="음식 이름을 입력해주세요"
+                  value={input}
+                  onChangeText={(text) => updateInput(index, text)}
+                  onFocus={() => setCurInputIndex(index)}
+                />
+              ))}
+
+              <TouchableOpacity style={styles.addButton} onPress={addInput}>
+                <Text style={styles.addButtonText}>+</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.subTitle}>좋아요한 음식</Text>
+              <TagContainer
+                tags={likedFoodNames}
+                mode="assign"
+                onPress={(food) => updateInput(curInputIndex, food)}
+                containerStyle={{ marginBottom: 20 }}
+              />
+
+              <View style={styles.dualConfirmRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.confirmButton,
+                    {
+                      backgroundColor: Colors.point_red,
+                      alignSelf: "center",
+                      width: 100,
+                    },
+                  ]}
+                  onPress={() => startCheck("fast")}
+                >
+                  <Text style={styles.confirmText}>다음</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -247,9 +253,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
   },
+  outerFrame: {
+    width: "100%",
+    borderRadius: 13,       
+    borderWidth: 1,
+    borderColor: Colors.light_text_gray,       
+    padding: 8,                
+    backgroundColor: "white",
+  },
   contentBox: {
     display: "flex",
     flexDirection: "column",
+    justifyContent: "center",
     width: "100%",
     height: 580,
     paddingHorizontal: 20,
@@ -260,6 +275,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   scrollContainer: {
+    flexGrow: 1,
     display: "flex",
     flexDirection: "column",
     width: "100%",
@@ -269,7 +285,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   question: {
-    color: Colors.point_red,
+    color: Colors.burn,
     fontFamily: "NanumSquareRoundEB",
     fontSize: 18,
     fontWeight: 800,

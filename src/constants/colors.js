@@ -17,6 +17,7 @@ const Colors = {
   nurim: "#A94946",
   bg_white: "#FEFDFA",
   kakao_yellow: "#FEE500",
+  pressed_button: "#A94946",
 };
 
 export default Colors;

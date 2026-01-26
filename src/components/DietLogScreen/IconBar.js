@@ -1,13 +1,13 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Colors from "../../constants/colors";
 
 const IconBar = ({ onClose }) => {
   return (
     <View style={styles.iconBar}>
       <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-        <Ionicons name="chevron-back" size={18} color={Colors.icon_gray} />
+        <Ionicons name="arrow-back" size={18} color={Colors.icon_gray} />
         <Text style={styles.iconText}>CALENDAR</Text>
       </TouchableOpacity>
     </View>

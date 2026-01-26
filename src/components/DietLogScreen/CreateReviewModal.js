@@ -9,7 +9,7 @@ import {
   Image,
   Alert,
 } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 import { fetchFoodItemsByNames } from "../../services/food";
 import { createReview } from "../../services/review";
@@ -89,7 +89,6 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
   return (
     <View style={styles.overlay}>
       <IconBar onClose={onClose} />
-
       <View style={[styles.header, { backgroundColor: mainColor }]}>
         <Star />
         <Text
@@ -101,79 +100,81 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
       </View>
 
       <View style={styles.contentBox}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* 시간대 */}
-          <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
-          <TagContainer
-            tags={timeOption}
-            mode="select_single"
-            onPress={(time) => setSelectedTime(time)}
-            selectedTag={selectedTime}
-            containerStyle={{ marginBottom: 20 }}
-          />
+        <View style={styles.outerFrame}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* 시간대 */}
+            <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
+            <TagContainer
+              tags={timeOption}
+              mode="select_single"
+              onPress={(time) => setSelectedTime(time)}
+              selectedTag={selectedTime}
+              containerStyle={{ marginBottom: 24 }}
+            />
 
-          {/* 이미지 */}
-          <View>
-            <TouchableOpacity
-              onPress={() => pickImage({ setImageUrl: setImageURL })}
-              style={styles.imageBox}
-            >
-              {imageURL !== "" ? (
-                <Image
-                  source={{ uri: imageURL }}
-                  style={styles.imagePreview}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.placeholder}>
-                  <Ionicons name="camera-outline" size={20} color="#BFA6A1" />
-                  <Text style={styles.placeholderText}>
-                    사진을 추가해보세요!
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {/* 한줄평 */}
-          <Text style={styles.subtitle}>한줄평을 남겨보세요!</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="후기 남기기..."
-            value={comment}
-            onChangeText={setComment}
-          />
-
-          {/* 별점 */}
-          <View style={styles.ratingRow}>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+            {/* 이미지 */}
+            <View>
+              <TouchableOpacity
+                onPress={() => pickImage({ setImageUrl: setImageURL })}
+                style={styles.imageBox}
+              >
+                {imageURL !== "" ? (
+                  <Image
+                    source={{ uri: imageURL }}
+                    style={styles.imagePreview}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholder}>
+                    <Ionicons name="camera" size={20} color="#BFA6A1" />
+                    <Text style={styles.placeholderText}>
+                      사진을 추가해보세요!
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
-            ))}
-          </View>
+            </View>
 
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.bottomButton, { backgroundColor: "#D9D9D9" }]}
-              onPress={onBack}
-            >
-              <Text style={styles.bottomButtonText}>뒤로가기</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.bottomButton, { backgroundColor: mainColor }]}
-              onPress={handleSubmit}
-            >
-              <Text style={[styles.bottomButtonText]}>리뷰 등록하기</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+            
+
+            {/* 별점 */}
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                  <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              style={styles.input}
+              placeholder="한줄평을 남겨보세요..."
+              value={comment}
+              onChangeText={setComment}
+            />
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.bottomButton, { backgroundColor: Colors.text_gray }]}
+                onPress={onBack}
+              >
+                <Text style={styles.bottomButtonText}>이전</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.bottomButton, { backgroundColor: mainColor }]}
+                onPress={handleSubmit}
+              >
+                <Text style={[styles.bottomButtonText]}>등록</Text>
+              </TouchableOpacity>
+            </View>
+            </ScrollView>
+        </View> 
       </View>
-    </View>
+    </View >
   );
 };
 
@@ -184,37 +185,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
-  },
-  modalContainer: {
-    width: "100%",
-    paddingHorizontal: 14,
-    backgroundColor: "transparent",
-    marginBottom: 40,
-
-    borderColor: "#00FF00",
-    borderWidth: 3,
-  },
-  iconBar: {
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  iconLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconText: {
-    color: "#CCC",
-    marginLeft: 4,
-    fontWeight: "bold",
-    fontSize: 17,
-    fontFamily: "NanumSquareOTF",
-    fontWeight: "600",
+    paddingHorizontal: 11,
   },
   header: {
     width: "100%",
@@ -238,15 +209,24 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   contentBox: {
-    display: "flex",
+    width: "100%",
     flexDirection: "column",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderColor: Colors.light_gray,
+    borderColor: Colors.background_yellow,
+    borderWidth: 3,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    maxHeight: 600, // 나도 싫지만 이게 최선인듯 이거 맞나..?
+    backgroundColor: "white",
+    paddingHorizontal : 10,
+    paddingTop : 17,
+    paddingBottom : 10,
+    overflow: "hidden",
+  },
+  outerFrame: {
+    width: "100%",
+    borderColor: Colors.light_gray, 
     borderWidth: 1,
-    maxHeight: 520, // 나도 싫지만 이게 최선인듯
+    borderRadius: 13,
     backgroundColor: "white",
   },
   scrollContainer: {
@@ -254,12 +234,11 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 5,
-    paddingVertical: 20,
-    gap: 25,
+    paddingVertical: 10,
   },
   subtitle: {
     marginBottom: 15,
+    marginTop: 20,
     fontFamily: "NanumSquareEB",
     fontSize: 18,
     color: Colors.burn,
@@ -269,13 +248,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderStyle: "dashed",
     borderColor: Colors.light_gray,
-    borderRadius: 13,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    height: 250,
     width: 314,
-    gap: 25,
+    height: 250,
     overflow: "hidden",
   },
   placeholder: {
@@ -301,7 +279,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: 312,
     height: 51,
-    marginTop: 5,
+    marginTop : 22,
     fontFamily: "NanumSquareB",
     fontSize: 16,
     color: Colors.burn,
@@ -312,6 +290,7 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: "row",
     gap: 3,
+    marginTop: 16,
   },
   star: {
     fontSize: 33,
@@ -325,12 +304,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 10,
-    marginTop: 62,
+    marginTop: 21,
   },
   bottomButton: {
-    width: 151,
+    width: 95,
     height: 51,
-    borderRadius: 20,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
   },
