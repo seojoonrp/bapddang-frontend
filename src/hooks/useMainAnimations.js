@@ -12,10 +12,13 @@ import { Gesture } from "react-native-gesture-handler";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import { useModeStore } from "../stores/modeStore";
+import { useMainLayout } from "./useMainLayout";
 
 export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);
   const startY = useSharedValue(0);
+
+  const { headerHeight, heroHeight } = useMainLayout();
 
   const { modeColor } = useModeStore();
 
@@ -115,6 +118,30 @@ export const useMainAnimations = (scrollThreshold) => {
     ),
   }));
 
+  const animatedEditAndLikeStyle = useAnimatedStyle(() => ({
+    position: "absolute",
+    right: 24,
+    top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP + heroHeight - 40 - 8,
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, scrollThreshold],
+          [0, -(headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP)],
+          Extrapolation.CLAMP,
+        ),
+      },
+      {
+        translateX: interpolate(
+          scrollY.value,
+          [0, scrollThreshold],
+          [0, 12],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+  }));
+
   return {
     scrollY,
     panGesture,
@@ -125,6 +152,7 @@ export const useMainAnimations = (scrollThreshold) => {
       middleContent: animatedMiddleContentStyle,
       bottomSheet: animatedBottomSheetStyle,
       circle: animatedCircleStyle,
+      editAndLike: animatedEditAndLikeStyle,
     },
   };
 };

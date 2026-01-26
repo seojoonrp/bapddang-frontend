@@ -26,7 +26,7 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
       style={[
         styles.wrapper,
         { height: scrollThreshold + MAIN_LAYOUT.BOTTOM_SHEET_HANDLE },
-        animatedStyle,
+        animatedStyle.bottomSheet,
       ]}
     >
       <View style={styles.handleArea}>

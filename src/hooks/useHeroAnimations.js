@@ -81,33 +81,8 @@ export const useHeroAnimations = (scrollY, scrollThreshold) => {
     ),
   }));
 
-  const editAndLikeStyle = useAnimatedStyle(() => ({
-    position: "absolute",
-    right: HORIZONTAL_PADDING + 12,
-    top: headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP + heroHeight - 40 - 8,
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, scrollThreshold],
-          [0, -(headerHeight + MAIN_LAYOUT.HEADER_HERO_GAP)],
-          Extrapolation.CLAMP,
-        ),
-      },
-      {
-        translateX: interpolate(
-          scrollY.value,
-          [0, scrollThreshold],
-          [0, HORIZONTAL_PADDING],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
   return {
     containerStyle,
     textStyle,
-    editAndLikeStyle,
   };
 };

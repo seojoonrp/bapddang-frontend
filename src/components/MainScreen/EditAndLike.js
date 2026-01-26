@@ -16,16 +16,8 @@ import Animated, {
 
 const BUBBLE_HEIGHT = 32.5;
 
-const EditAndLike = ({
-  onEdit,
-  onLike,
-  scrollY,
-  scrollThreshold,
-  showTextBubble,
-}) => {
+const EditAndLike = ({ onEdit, onLike, animatedStyle, showTextBubble }) => {
   const { modeColor } = useModeStore();
-
-  const { editAndLikeStyle } = useHeroAnimations(scrollY, scrollThreshold);
 
   const bubbleAnimatedStyle = useAnimatedStyle(() => {
     const scale = withSpring(showTextBubble.value, {
@@ -42,7 +34,7 @@ const EditAndLike = ({
   });
 
   return (
-    <Animated.View style={[styles.container, editAndLikeStyle]}>
+    <Animated.View style={[styles.container, animatedStyle.editAndLike]}>
       <TouchableOpacity
         onPress={onEdit}
         style={[styles.button, { backgroundColor: modeColor }]}

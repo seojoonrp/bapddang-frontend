@@ -38,10 +38,9 @@ const MainScreen = () => {
         <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
 
         <EditAndLike
-          onEdit={() => console.log("Edit pressed")}
+          onEdit={() => navigation.navigate("DietLog")}
           onLike={() => console.log("Like pressed")}
-          scrollY={scrollY}
-          scrollThreshold={scrollThreshold}
+          animatedStyle={animatedStyles}
           showTextBubble={showTextBubble}
         />
 
@@ -57,7 +56,7 @@ const MainScreen = () => {
         </Animated.View>
 
         <MainBottomSheet
-          animatedStyle={animatedStyles.bottomSheet}
+          animatedStyle={animatedStyles}
           scrollThreshold={scrollThreshold}
         />
       </View>
