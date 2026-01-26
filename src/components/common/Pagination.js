@@ -46,15 +46,13 @@ const Dot = memo(({ index, scrollX, cardSize }) => {
     const scale = interpolate(
       scrollX.value,
       [
-        centerPos - cardSize * 3,
         centerPos - cardSize * 2,
         centerPos - cardSize,
         centerPos,
         centerPos + cardSize,
         centerPos + cardSize * 2,
-        centerPos + cardSize * 3,
       ],
-      [0.3, 0.6, 0.9, 1, 0.9, 0.6, 0.3],
+      [0.75, 0.85, 1, 0.85, 0.75],
       Extrapolation.CLAMP,
     );
 
@@ -67,7 +65,7 @@ const Dot = memo(({ index, scrollX, cardSize }) => {
         centerPos + cardSize,
         centerPos + cardSize * 2,
       ],
-      [0.15, 0.25, 1, 0.25, 0.15],
+      [0.2, 0.25, 1, 0.25, 0.2],
       Extrapolation.CLAMP,
     );
 

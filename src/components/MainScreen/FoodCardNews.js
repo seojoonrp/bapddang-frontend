@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   paginationContainer: {
     justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: 8,
+    paddingTop: 10,
   },
   footer: {
     position: "absolute",

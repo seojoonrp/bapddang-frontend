@@ -1,16 +1,48 @@
 // src/components/MainScreen/EditAndLike.js
 
-import { TouchableOpacity, StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View, Text } from "react-native";
 import EditIcon from "../../assets/icons/edit.svg";
 import Colors from "../../constants/colors";
 import { useModeStore } from "../../stores/modeStore";
 import HeartIcon from "../svg/HeartIcon";
+import TextBubble from "../../assets/images/textbubble-main.svg";
+import { useHeroAnimations } from "../../hooks/useHeroAnimations";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  ZoomInUp,
+  ZoomOutUp,
+} from "react-native-reanimated";
 
-const EditAndLike = ({ onEdit, onLike }) => {
+const BUBBLE_HEIGHT = 32.5;
+
+const EditAndLike = ({
+  onEdit,
+  onLike,
+  scrollY,
+  scrollThreshold,
+  showTextBubble,
+}) => {
   const { modeColor } = useModeStore();
 
+  const { editAndLikeStyle } = useHeroAnimations(scrollY, scrollThreshold);
+
+  const bubbleAnimatedStyle = useAnimatedStyle(() => {
+    const scale = withSpring(showTextBubble.value, {
+      damping: 6,
+      stiffness: 75,
+      mass: 0.6,
+    });
+    const translateY = -(BUBBLE_HEIGHT / 2) * (1 - showTextBubble.value);
+    return {
+      opacity: showTextBubble.value,
+      transform: [{ scale }, { translateY }],
+      pointerEvents: showTextBubble.value === 0 ? "none" : "auto",
+    };
+  });
+
   return (
-    <View style={[styles.container]}>
+    <Animated.View style={[styles.container, editAndLikeStyle]}>
       <TouchableOpacity
         onPress={onEdit}
         style={[styles.button, { backgroundColor: modeColor }]}
@@ -26,7 +58,16 @@ const EditAndLike = ({ onEdit, onLike }) => {
       >
         <HeartIcon size={24} fillColor={Colors.background_white} />
       </TouchableOpacity>
-    </View>
+
+      {showTextBubble && (
+        <Animated.View
+          style={[styles.textBubbleContainer, bubbleAnimatedStyle]}
+        >
+          <TextBubble />
+          <Text style={styles.textBubbleText}>식단기록 하러가기</Text>
+        </Animated.View>
+      )}
+    </Animated.View>
   );
 };
 
@@ -34,11 +75,9 @@ export default EditAndLike;
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    bottom: 10,
-    right: 12,
     flexDirection: "row",
     gap: 6,
+    zIndex: 10,
   },
   button: {
     width: 40,
@@ -48,5 +87,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.background_white,
     borderWidth: 1,
     borderRadius: 20,
+  },
+  textBubbleContainer: {
+    position: "absolute",
+    bottom: -36,
+    right: 13,
+  },
+  textBubbleText: {
+    position: "absolute",
+    bottom: 6.4,
+    left: 10.8,
+    color: Colors.nurim,
+    fontSize: 12,
+    fontFamily: "NanumSquareRoundB",
   },
 });

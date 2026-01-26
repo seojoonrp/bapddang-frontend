@@ -75,7 +75,7 @@ export const useMainAnimations = (scrollThreshold) => {
     bottom: MAIN_LAYOUT.BOTTOM_SHEET_HANDLE,
     width: "100%",
     justifyContent: "flex-end",
-    paddingBottom: 12,
+    paddingBottom: 14,
     transform: [
       {
         translateY: interpolate(

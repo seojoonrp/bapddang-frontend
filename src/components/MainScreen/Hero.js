@@ -33,11 +33,6 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         </Animated.Text>
         <ModeSwitch />
       </View>
-
-      <EditAndLike
-        onEdit={() => navigation.navigate("DietLog")}
-        onLike={() => console.log("Like pressed")}
-      />
     </Animated.View>
   );
 };

@@ -2,7 +2,7 @@
 
 import { StyleSheet, View, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Animated from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 import { useMainLayout } from "../hooks/useMainLayout";
 import { useMainAnimations } from "../hooks/useMainAnimations";
@@ -12,6 +12,9 @@ import TimeQuestion from "../components/MainScreen/TimeQuestion";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 import Colors from "../constants/colors";
+import { MAIN_LAYOUT } from "../constants/layout";
+import EditAndLike from "../components/MainScreen/EditAndLike";
+import DebugButton from "../components/DebugButton";
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -20,6 +23,8 @@ const MainScreen = () => {
 
   const { animatedStyles, panGesture, scrollY } =
     useMainAnimations(scrollThreshold);
+
+  const showTextBubble = useSharedValue(0);
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -32,14 +37,22 @@ const MainScreen = () => {
 
         <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
 
+        <EditAndLike
+          onEdit={() => console.log("Edit pressed")}
+          onLike={() => console.log("Like pressed")}
+          scrollY={scrollY}
+          scrollThreshold={scrollThreshold}
+          showTextBubble={showTextBubble}
+        />
+
         <Animated.View style={animatedStyles.middleContent}>
-          <TimeQuestion />
+          <TimeQuestion showTextBubble={showTextBubble} />
           <FoodCardNews
             type="main"
             screenWidth={screenWidth}
-            size={screenWidth * 0.8}
+            size={screenWidth * MAIN_LAYOUT.CARDNEWS_RATIO}
             canLoadMore={true}
-            animationRatio={0.88}
+            animationRatio={0.91}
           />
         </Animated.View>
 
