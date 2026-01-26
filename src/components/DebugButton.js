@@ -1,8 +1,8 @@
-// src/components/DebugButton.tsx
+// src/components/DebugButton.js
 
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function DebugButton({ icon, onPress, index = 0 }) {
+const DebugButton = ({ label, onPress, index = 0 }) => {
   const topPosition = 80 + index * 50;
 
   return (
@@ -11,24 +11,22 @@ export default function DebugButton({ icon, onPress, index = 0 }) {
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={ styles.iconWrap }>{icon}</View>
+      <Text style={styles.buttonText}>{label}</Text>
     </TouchableOpacity>
   );
-}
+};
+
+export default DebugButton;
 
 const styles = StyleSheet.create({
   button: {
     position: "absolute",
     left: 20,
-    width: 52,
-    height: 52,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 8,
     zIndex: 9999,
-  },
-  iconWrap: {
-    justifyContent: "center",
-    alignItems: "center",
   },
   buttonText: {
     color: "white",
