@@ -8,6 +8,7 @@ import { useModeStore } from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import { memo } from "react";
+import EditAndLike from "./EditAndLike";
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const { mode, modeColor } = useModeStore();
@@ -32,6 +33,11 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         </Animated.Text>
         <ModeSwitch />
       </View>
+
+      <EditAndLike
+        onEdit={() => navigation.navigate("DietLog")}
+        onLike={() => console.log("Like pressed")}
+      />
     </Animated.View>
   );
 };

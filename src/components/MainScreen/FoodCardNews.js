@@ -18,7 +18,7 @@ import ReanimatedModal from "../common/ReanimatedModal";
 import { useFoodStore } from "../../stores/foodStore";
 import { useFoodFeed } from "../../hooks/useFoodFeed";
 
-const OVER_SCROLL_THRESHOLD = 80;
+const OVER_SCROLL_THRESHOLD = 90;
 
 const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
   const item = useFoodStore((state) => state.foodsByID[foodID]);
@@ -130,19 +130,26 @@ const FoodCardNews = ({
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
       [Colors.light_gray, Colors.point_red],
     );
+    const backgroundColor = interpolateColor(
+      scrollX.value,
+      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+      [Colors.background_yellow, Colors.point_red],
+    );
+    const borderRadius = interpolate(
+      scrollX.value,
+      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+      [16, 32],
+      Extrapolation.CLAMP,
+    );
 
     return {
       borderColor,
+      backgroundColor,
+      borderTopLeftRadius: borderRadius,
+      borderBottomLeftRadius: borderRadius,
       transform: [{ translateX }, { translateY: size * 0.1 }],
     };
   });
-  const animatedFooterTextStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(
-      scrollX.value,
-      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-      [Colors.light_gray, Colors.point_red],
-    ),
-  }));
 
   if (isLoading) return null;
 
@@ -152,7 +159,7 @@ const FoodCardNews = ({
         <Animated.View
           style={[styles.footer, { height: size * 0.8 }, animatedFooterStyle]}
         >
-          <Animated.Text style={[styles.footerText, animatedFooterTextStyle]}>
+          <Animated.Text style={styles.footerText}>
             당겨서{"\n"}음식{"\n"}더 보기
           </Animated.Text>
         </Animated.View>
@@ -244,9 +251,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     textAlign: "left",
+    color: Colors.background_yellow,
     fontSize: 14,
-    fontFamily: "NanumSquareRoundR",
+    fontFamily: "NanumSquareRoundB",
     lineHeight: 20,
+    marginLeft: -2,
   },
   backdrop: {
     position: "absolute",

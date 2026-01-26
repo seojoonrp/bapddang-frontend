@@ -4,17 +4,13 @@ import { TouchableOpacity, StyleSheet, View } from "react-native";
 import EditIcon from "../../assets/icons/edit.svg";
 import Colors from "../../constants/colors";
 import { useModeStore } from "../../stores/modeStore";
-import { useHeroAnimations } from "../../hooks/useHeroAnimations";
-import Animated from "react-native-reanimated";
 import HeartIcon from "../svg/HeartIcon";
 
-const EditAndLike = ({ onEdit, onLike, scrollY, scrollThreshold }) => {
+const EditAndLike = ({ onEdit, onLike }) => {
   const { modeColor } = useModeStore();
 
-  const { editAndLikeStyle } = useHeroAnimations(scrollY, scrollThreshold);
-
   return (
-    <Animated.View style={[styles.container, editAndLikeStyle]}>
+    <View style={[styles.container]}>
       <TouchableOpacity
         onPress={onEdit}
         style={[styles.button, { backgroundColor: modeColor }]}
@@ -30,7 +26,7 @@ const EditAndLike = ({ onEdit, onLike, scrollY, scrollThreshold }) => {
       >
         <HeartIcon size={24} fillColor={Colors.background_white} />
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 };
 
@@ -38,6 +34,9 @@ export default EditAndLike;
 
 const styles = StyleSheet.create({
   container: {
+    position: "absolute",
+    bottom: 10,
+    right: 12,
     flexDirection: "row",
     gap: 6,
   },

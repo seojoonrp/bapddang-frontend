@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
     gap: 4,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   timePill: {
     backgroundColor: Colors.background_white,
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     paddingVertical: 3,
     paddingHorizontal: 12,
+    boxShadow: "0 2px 0 0 #FDEDC0",
   },
   timePillText: {
     color: Colors.point_red,
