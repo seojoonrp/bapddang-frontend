@@ -1,15 +1,90 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
 
 import Marshmallow from "../svg/Marshmallow";
-import marshmallowData from "../../constants/data/MarshmallowData.json";
 import Colors from "../../constants/colors";
-
-const ITEM_HEIGHT = 180;
+import { fetchMarshmallows } from "../../services/marshmallow";
+import Marsh_1_1 from "../../assets/images/marshmallows/marsh_1-1.svg";
+import Marsh_1_2 from "../../assets/images/marshmallows/marsh_1-2.svg";
+import Marsh_2_1 from "../../assets/images/marshmallows/marsh_2-1.svg";
+import Marsh_2_2 from "../../assets/images/marshmallows/marsh_2-2.svg";
+import Marsh_3_1 from "../../assets/images/marshmallows/marsh_3-1.svg";
+import Marsh_3_2 from "../../assets/images/marshmallows/marsh_3-2.svg";
+import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
+import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
+const ITEM_HEIGHT = 150;
 const MARSHMALLOW_SIZE = 160;
 
 const MarshmallowStick = ({ onClick }) => {
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [marshmallows, setMarshmallows] = useState([]);
+  const variantCacheRef = useRef(new Map());
+
+  const pickVariantOnce = (key) => {
+    if (!variantCacheRef.current.has(key)) {
+      variantCacheRef.current.set(key, Math.random() < 0.5 ? 0 : 1);
+    }
+    return variantCacheRef.current.get(key); // 0 or 1
+  };
+
+  const getMarshmallowSvgByStatus = (item) => {
+    const { status, id } = item;
+    const key = `${id}:s${status}`; // 주차(id)별 + status별로 독립 랜덤
+
+    switch (status) {
+      case 0: {
+        const v = pickVariantOnce(key);
+        return v === 0 ? Marsh_4_1 : Marsh_4_2; // 잠김 전용 svg 있으면 여기만 바꾸면 됨
+      }
+      case 1: {
+        const v = pickVariantOnce(key);
+        return v === 0 ? Marsh_1_1 : Marsh_1_2;
+      }
+      case 2: {
+        const v = pickVariantOnce(key);
+        return v === 0 ? Marsh_2_1 : Marsh_2_2;
+      }
+      case 3: {
+        const v = pickVariantOnce(key);
+        return v === 0 ? Marsh_3_1 : Marsh_3_2;
+      }
+      case -1: { // 리뷰 완료
+        const v = pickVariantOnce(key);
+        //console.log("pickVariantOnce for -1 status:", v);
+        return v === 0 ? Marsh_4_1 : Marsh_4_2;
+      }
+      case -2: { // 잠김
+        const v = pickVariantOnce(key);
+        return v === 0 ? Marsh_4_1 : Marsh_4_2; // 잠김 전용 svg 있으면 여기만 바꾸면 됨
+      }
+      default:
+        return Marshmallow;
+    }
+  };
+  const DEBUG_STICK = true;
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        const data = await fetchMarshmallows();
+        if (mounted) setMarshmallows(data);
+        console.log("render marshmallows length:", marshmallows.length);
+      }
+      catch (e) {
+        console.log("Error fetching marshmallows:", e);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const stickHeight = useMemo(
+    () => ITEM_HEIGHT * marshmallows.length + 100,
+    [marshmallows.length]
+  );
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -17,17 +92,12 @@ const MarshmallowStick = ({ onClick }) => {
         style={[
           styles.stick,
           {
+            height: stickHeight,
             transform: [
               {
                 translateY: scrollY.interpolate({
-                  inputRange: [
-                    0,
-                    ITEM_HEIGHT * marshmallowData.marshmallows.length,
-                  ],
-                  outputRange: [
-                    0,
-                    -ITEM_HEIGHT * (marshmallowData.marshmallows.length - 1),
-                  ],
+                  inputRange: [0, ITEM_HEIGHT * marshmallows.length],
+                  outputRange: [0, -ITEM_HEIGHT * Math.max(marshmallows.length - 1, 0)],
                   extrapolate: "extend",
                 }),
               },
@@ -37,30 +107,29 @@ const MarshmallowStick = ({ onClick }) => {
       />
       <Animated.FlatList
         style={styles.listContainer}
-        data={marshmallowData.marshmallows}
+        data={marshmallows}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              if (onClick) {
-                onClick(index);
-              }
-            }}
-            style={{
-              height: ITEM_HEIGHT, // FlatList의 snapToInterval과 일치시킴
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Marshmallow
-              roastStep={item.roastStep}
-              rotation={item.rotation}
-              size={MARSHMALLOW_SIZE}
-              verticalGap={(ITEM_HEIGHT - MARSHMALLOW_SIZE) / 2}
-            />
-          </TouchableOpacity>
-        )}
+        renderItem={({ item, index }) => {
+          const SvgComp = getMarshmallowSvgByStatus(item);
+          return (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                console.log(item.status);
+                onClick?.(index);
+              }}
+              style={{
+                height: ITEM_HEIGHT,
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: marshmallows.length - index,
+                elevation: marshmallows.length - index,
+              }}
+            >
+              <SvgComp width={MARSHMALLOW_SIZE} height={MARSHMALLOW_SIZE} />
+            </TouchableOpacity>
+          );
+        }}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
         decelerationRate="fast"
@@ -71,8 +140,6 @@ const MarshmallowStick = ({ onClick }) => {
           { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
-        // bounces={false}
-        // overScrollMode="never"
       />
     </View>
   );
@@ -92,8 +159,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 155,
     width: 10,
-    height: ITEM_HEIGHT * marshmallowData.marshmallows.length + 100,
-
     backgroundColor: Colors.burn,
   },
 });

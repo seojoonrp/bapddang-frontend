@@ -136,9 +136,11 @@ const DietLogScreen = () => {
     const weekStartOffset = (selectedWeek - 1) * 7;
     startDate.setDate(startDate.getDate() + weekStartOffset);
 
-    setDisplayMonth(startDate.getMonth() + 1);
-    const today = new Date();
-    setDisplayWeekofMonth(getWeekOfMonth(today));
+    const selectedDate = new Date(startDate);
+    selectedDate.setDate(startDate.getDate() + (selectedDay - 1));
+
+    setDisplayMonth(selectedDate.getMonth() + 1);
+    setDisplayWeekofMonth(getWeekOfMonth(selectedDate));
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(startDate);
@@ -146,7 +148,7 @@ const DietLogScreen = () => {
       dates.push(date.getDate());
     }
     setWeekDates(dates);
-  }, [selectedWeek, user?.createdAt]);
+  }, [selectedWeek, selectedDay, user?.createdAt]);
 
   const fetchDailyData = useCallback(async () => {
     const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
