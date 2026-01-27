@@ -1,16 +1,23 @@
 // src/components/MainScreen/RecentReviewCard.js
 
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import StarIcon from "../../assets/icons/star.svg";
 import Colors from "../../constants/colors";
 
-const RecentReviewCard = ({ data }) => {
+const RecentReviewCard = ({ data, setSelectedFoodID, setShowInfo }) => {
   const calculatePastTimeText = (timestamp) => {
     return "2분 전"; // TODO
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => {
+        setSelectedFoodID(data.food.id);
+        setShowInfo(true);
+      }}
+      activeOpacity={0.7}
+    >
       <View style={styles.leftStuffContainer}>
         <View style={styles.imageContainer}>
           <Image source={{ uri: data.food.imageURL }} style={styles.image} />
@@ -38,7 +45,7 @@ const RecentReviewCard = ({ data }) => {
           />
         ))}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

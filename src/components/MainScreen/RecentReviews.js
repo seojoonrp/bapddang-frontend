@@ -6,6 +6,9 @@ import CheckIcon from "../../assets/icons/check.svg";
 import RecentReviewCard from "./RecentReviewCard";
 import { useEffect, useState } from "react";
 import { fetchRecentReviews } from "../../services/review";
+import ReanimatedModal from "../common/ReanimatedModal";
+import FoodInfoModal from "./FoodInfoModal";
+import { useFoodStore } from "../../stores/foodStore";
 
 const RecentReviews = () => {
   const [reviewData, setReviewData] = useState([]);
@@ -21,6 +24,18 @@ const RecentReviews = () => {
 
     fetchRecent();
   }, []);
+
+  useEffect(() => {
+    const updateFoodStore = async () => {
+      const foods = reviewData.map((review) => review.food);
+      useFoodStore.getState().setFoodsByID(foods);
+    };
+
+    updateFoodStore();
+  }, [reviewData]);
+
+  const [selectedFoodID, setSelectedFoodID] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -38,9 +53,21 @@ const RecentReviews = () => {
 
       <View style={styles.cardContainer}>
         {reviewData.map((review, index) => (
-          <RecentReviewCard key={index} data={review} />
+          <RecentReviewCard
+            key={index}
+            data={review}
+            setSelectedFoodID={setSelectedFoodID}
+            setShowInfo={setShowInfo}
+          />
         ))}
       </View>
+
+      <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
+        <FoodInfoModal
+          foodID={selectedFoodID}
+          onClose={() => setShowInfo(false)}
+        />
+      </ReanimatedModal>
     </View>
   );
 };

@@ -9,6 +9,21 @@ export const useFoodStore = create((set, get) => ({
   categoryFoodIDs: [],
   likedFoodIDs: [],
 
+  setFoodsByID: (foods) => {
+    const { foodsByID } = get();
+    const newFoodsByID = { ...foodsByID };
+
+    foods.forEach((f) => {
+      const newItem = {
+        food: f,
+        isLiked: get().likedFoodIDs.includes(f.id),
+      };
+      newFoodsByID[f.id] = newItem;
+    });
+
+    set({ foodsByID: newFoodsByID });
+  },
+
   setFoods: (type, data) => {
     const { foodsByID } = get();
     const newFoodsByID = { ...foodsByID };
