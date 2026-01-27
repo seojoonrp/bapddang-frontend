@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     textShadowColor: "black",
-    textShadowOffset: { width: 0, height: 0 },
+    textShadowOffset: { width: 0, height: 5 },
     textShadowRadius: 50,
     shadowOpacity: 1,
   },

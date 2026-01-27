@@ -1,6 +1,6 @@
 // src/components/MainScreen/LikedFoods.js
 
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useModeStore } from "../../stores/modeStore";
@@ -9,11 +9,16 @@ import { fetchLikedFoods } from "../../services/like";
 import Colors from "../../constants/colors";
 import HeartIcon from "../../components/svg/HeartIcon";
 import AllIcon from "../../assets/images/liked-all.svg";
+import ReanimatedModal from "../common/ReanimatedModal";
+import FoodInfoModal from "./FoodInfoModal";
 
 const LikedFoods = () => {
   const navigation = useNavigation();
 
   const { mode, modeColor } = useModeStore();
+
+  const [selectedFoodID, setSelectedFoodID] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
   const foodsByID = useFoodStore((state) => state.foodsByID);
@@ -75,6 +80,10 @@ const LikedFoods = () => {
               key={item.food.id}
               style={styles.food}
               activeOpacity={0.7}
+              onPress={() => {
+                setSelectedFoodID(item.food.id);
+                setShowInfo(true);
+              }}
             >
               <Image
                 source={{ uri: item.food.imageURL }}
@@ -95,11 +104,18 @@ const LikedFoods = () => {
           <AllIcon width={55} height={56} />
         </TouchableOpacity>
       </View>
+
+      <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
+        <FoodInfoModal
+          foodID={selectedFoodID}
+          onClose={() => setShowInfo(false)}
+        />
+      </ReanimatedModal>
     </View>
   );
 };
 
-export default LikedFoods;
+export default memo(LikedFoods);
 
 const styles = StyleSheet.create({
   container: {
