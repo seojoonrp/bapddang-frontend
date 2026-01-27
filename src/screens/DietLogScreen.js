@@ -12,6 +12,9 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolation,
+  useSharedValue,
+  withTiming,
+  Easing,
 } from "react-native-reanimated";
 import { useMainAnimations } from "../hooks/useMainAnimations";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -60,6 +63,16 @@ const DietLogScreen = () => {
     return {
       transform: [{ translateY }],
     };
+  });
+  const animatedReviewCardList = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      scrollY.value,
+      [0, scrollThreshold],
+      [0, -40],
+      Extrapolation.CLAMP,
+    );
+
+    return { transform: [{ translateY }] };
   });
 
   // 추가버튼 관련
@@ -236,7 +249,22 @@ const DietLogScreen = () => {
     const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
     return names[n - 1] ?? `${n}째`;
   };
-  const fillRatio = Math.min(1, selectedDay / 7);
+
+  const ratio = (day) => {
+    return Math.min(day / 7 + (7 - day) / 280, 1);
+  };
+  const fillWidth = useSharedValue(ratio(selectedDay) * 100);
+  useEffect(() => {
+    const fillRatio = ratio(selectedDay);
+    fillWidth.value = withTiming(fillRatio * 100, {
+      duration: 400,
+      easing: Easing.inOut(Easing.quad),
+    });
+  }, [selectedDay]);
+  const animatedFillWidth = useAnimatedStyle(() => {
+    return { width: `${fillWidth.value}%` };
+  });
+
   return (
     <GestureDetector gesture={panGesture}>
       <LinearGradient
@@ -301,55 +329,82 @@ const DietLogScreen = () => {
             <Text style={styles.monthText}>
               {displayMonth}월 {`${weekOrdinalKorean(displayWeekofMonth)}주`}
             </Text>
-            <View style={styles.dayContainer}>
-              <LinearGradient
-                colors={["#FF5A2C", "#E90C05"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.dayFill, { width: `${fillRatio * 100}%` }]}
-              />
-              {[1, 2, 3, 4, 5, 6, 7].map((num, index) => {
-                const isFilled = num <= selectedDay;
-                return (
-                  <TouchableOpacity
-                    key={num}
-                    onPress={() => setSelectedDay(num)}
-                    activeOpacity={1}
-                    style={styles.dayButton}
-                  >
-                    <Text
-                      style={[
-                        styles.dayText,
-                        [styles.dayText, isFilled && styles.dayTextFilled],
-                      ]}
+            <View style={[styles.dayContainer, { zIndex: 999 }]}>
+              <View
+                style={[styles.dayTextContainer, { width: screenWidth - 28 }]}
+              >
+                {[1, 2, 3, 4, 5, 6, 7].map((num, index) => {
+                  return (
+                    <TouchableOpacity
+                      key={num}
+                      onPress={() => setSelectedDay(num)}
+                      activeOpacity={1}
+                      style={styles.dayButton}
                     >
-                      {weekDates[index]}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                      <Text style={styles.dayText}>{weekDates[index]}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Animated.View style={[styles.dayFill, animatedFillWidth]}>
+                <View style={styles.gradientContainer}>
+                  <LinearGradient
+                    colors={["#FF5A2C", "#E90C05"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.redGradient}
+                  />
+                </View>
+                <View
+                  style={[styles.dayTextContainer, { width: screenWidth - 28 }]}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7].map((num, index) => {
+                    return (
+                      <TouchableOpacity
+                        key={num}
+                        onPress={() => setSelectedDay(num)}
+                        activeOpacity={1}
+                        style={styles.dayButton}
+                      >
+                        <Text
+                          style={[
+                            styles.dayText,
+                            { color: Colors.background_white },
+                          ]}
+                        >
+                          {weekDates[index]}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </Animated.View>
             </View>
 
-            <FlatList
-              data={dailyReviews}
-              style={{ width: "100%" }}
-              contentContainerStyle={{ paddingBottom: 50 }}
-              renderItem={({ item }) => (
-                <ReviewCard
-                  review={item}
-                  onEdit={handleEditReview}
-                  onDelete={handleDeleteReview}
-                />
-              )}
-              ListEmptyComponent={() => (
-                <View style={{ alignItems: "center", marginTop: 50 }}>
-                  <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
-                    기록된 식단이 없습니다.
-                  </Text>
-                </View>
-              )}
-              showsVerticalScrollIndicator={false}
-            />
+            <Animated.View
+              style={[animatedReviewCardList, { flex: 1, width: "100%" }]}
+            >
+              <FlatList
+                data={dailyReviews}
+                style={{ width: "100%", marginTop: 30 }}
+                contentContainerStyle={{ paddingBottom: 50 }}
+                renderItem={({ item }) => (
+                  <ReviewCard
+                    review={item}
+                    onEdit={handleEditReview}
+                    onDelete={handleDeleteReview}
+                  />
+                )}
+                ListEmptyComponent={() => (
+                  <View style={{ alignItems: "center", marginTop: 50 }}>
+                    <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
+                      기록된 식단이 없습니다.
+                    </Text>
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+              />
+            </Animated.View>
           </View>
         </Animated.View>
 
@@ -387,6 +442,7 @@ const DietLogScreen = () => {
             reviewMode={selectedMode}
           />
         </Modal>
+
         <Modal
           isVisible={activeUpdateModal === true}
           animationIn="fadeIn"
@@ -476,7 +532,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.background_yellow,
     borderWidth: 1.5,
     borderRadius: 28,
-    boxShadow: "0 4px 0 2px rgba(204, 204, 204, 0.25)",
+    boxShadow: "0 2px 0 1px rgba(204, 204, 204, 0.25)",
   },
   sheetContainer: {
     flex: 1,
@@ -517,21 +573,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: Colors.burn,
   },
-  dayContainer: {
-    marginTop: 43,
-    marginBottom: 10,
-    width: "100%",
-    height: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderColor: Colors.text_gray,
-    borderWidth: 1.5,
-    borderRadius: 18,
-    position: "relative",
-    overflow: "hidden",
-    boxShadow: "0 2px 0 0 #FDEDC0",
-  },
   monthText: {
     position: "absolute",
     left: 24,
@@ -541,19 +582,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text_gray,
   },
+  dayContainer: {
+    marginTop: 43,
+    marginBottom: 10,
+    width: "100%",
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    borderColor: Colors.text_gray,
+    borderWidth: 1.5,
+    borderRadius: 18,
+    position: "relative",
+    overflow: "hidden",
+    boxShadow: "0 2px 0 0 #FDEDC0",
+  },
+  dayTextContainer: {
+    width: "100%",
+    height: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
   dayTextFilled: {
     color: Colors.background_white,
   },
   dayFill: {
     position: "absolute",
-    left: 1.5,
-    top: 1.5,
-    bottom: 1.5,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-    borderTopRightRadius: 99,
-    borderBottomRightRadius: 99,
+    left: 0,
+    top: 0,
+    height: "100%",
+    borderRadius: 16,
     boxShadow: "0 2px 0 2px rgba(0, 0, 0, 0.08) inset",
+    overflow: "hidden",
+  },
+  gradientContainer: {
+    position: "absolute",
+    flex: 1,
+    left: 1.5,
+    right: 2,
+    top: 1.5,
+    bottom: 2,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  redGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   dayButton: {
     flex: 1,
@@ -561,18 +639,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 0,
-    borderRadius: 21,
   },
   dayText: {
     color: Colors.burn,
     fontSize: 28,
     fontFamily: "NanumSquareB",
-    marginTop: 2,
+    letterSpacing: -0.5,
   },
   backdrop: {
     position: "absolute",
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
 });

@@ -243,13 +243,16 @@ export default FoodSelectModal;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: "100%",
+    height: "70%",
+    maxHeight: 600,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 15,
+    paddingHorizontal: 12,
   },
   outerFrame: {
     width: "100%",
+    height: "100%",
     borderRadius: 20,
     borderColor: Colors.background_yellow,
     borderWidth: 3,
@@ -257,11 +260,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background_white,
   },
   contentBox: {
-    display: "flex",
-    flexDirection: "column",
     justifyContent: "center",
     width: "100%",
-    height: 580,
+    height: "100%",
     paddingHorizontal: 20,
     borderColor: Colors.light_text_gray,
     borderRadius: 13,
@@ -269,12 +270,9 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    display: "flex",
-    flexDirection: "column",
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 5,
   },
   question: {
     color: Colors.burn,

@@ -1,11 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 
 import Colors from "../../constants/colors";
 import ReviewStar from "../svg/ReviewStar";
@@ -31,12 +25,19 @@ const ReviewCard = ({ review, onEdit, onDelete }) => {
         onPress={() => setMenuOpen((prev) => !prev)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Ionicons name="ellipsis-horizontal" size={20} color={Colors.icon_gray} />
+        <Ionicons
+          name="ellipsis-horizontal"
+          size={20}
+          color={Colors.icon_gray}
+        />
       </TouchableOpacity>
 
       {menuOpen && (
         <View style={styles.menuBox}>
-          <TouchableOpacity style={[styles.menuItem, styles.menuItemDivider]} onPress={handleEdit}>
+          <TouchableOpacity
+            style={[styles.menuItem, styles.menuItemDivider]}
+            onPress={handleEdit}
+          >
             <Text style={styles.menuText}>기록 수정</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
@@ -78,13 +79,13 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     marginTop: 20,
-    borderRadius: 13,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#D9D9D9",
     padding: 18,
     gap: 12,
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background_white,
     alignItems: "center",
     alignSelf: "stretch",
   },
@@ -95,18 +96,18 @@ const styles = StyleSheet.create({
   },
   menuBox: {
     position: "absolute",
-    top: 36,    
+    top: 36,
     right: 12,
     zIndex: 999,
     width: 95,
     height: 72,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background_white,
     borderRadius: 16,
     shadowColor: "#CCCCCC",
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 0,
-    elevation :2,
+    elevation: 2,
     paddingVertical: 6,
   },
   menuItem: {

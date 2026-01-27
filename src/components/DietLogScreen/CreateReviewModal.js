@@ -87,20 +87,20 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
   };
 
   return (
-    <View style={styles.overlay}>
+    <View style={styles.container}>
       <IconBar onClose={onClose} />
       <View style={[styles.header, { backgroundColor: mainColor }]}>
         <Star />
         <Text
-          style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 30 }]}
+          style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 24 }]}
         >
           {name}
         </Text>
         <Star />
       </View>
 
-      <View style={styles.contentBox}>
-        <View style={styles.outerFrame}>
+      <View style={styles.outerFrame}>
+        <View style={styles.contentBox}>
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
@@ -117,7 +117,7 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
             />
 
             {/* 이미지 */}
-            <View>
+            <View style={{ width: "100%" }}>
               <TouchableOpacity
                 onPress={() => pickImage({ setImageUrl: setImageURL })}
                 style={styles.imageBox}
@@ -139,8 +139,6 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
               </TouchableOpacity>
             </View>
 
-            
-
             {/* 별점 */}
             <View style={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((i) => (
@@ -159,7 +157,10 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
 
             <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={[styles.bottomButton, { backgroundColor: Colors.text_gray }]}
+                style={[
+                  styles.bottomButton,
+                  { backgroundColor: Colors.text_gray },
+                ]}
                 onPress={onBack}
               >
                 <Text style={styles.bottomButtonText}>이전</Text>
@@ -171,21 +172,23 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
                 <Text style={[styles.bottomButtonText]}>등록</Text>
               </TouchableOpacity>
             </View>
-            </ScrollView>
-        </View> 
+          </ScrollView>
+        </View>
       </View>
-    </View >
+    </View>
   );
 };
 
 export default CreateReviewModal;
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
+  container: {
+    width: "100%",
+    height: "70%",
+    maxHeight: 600,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
   },
   header: {
     width: "100%",
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    paddingVertical: 20,
+    height: 64,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -204,37 +207,37 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   foodName: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  contentBox: {
-    width: "100%",
-    flexDirection: "column",
-    borderColor: Colors.background_yellow,
-    borderWidth: 3,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    maxHeight: 600, // 나도 싫지만 이게 최선인듯 이거 맞나..?
-    backgroundColor: "white",
-    paddingHorizontal : 10,
-    paddingTop : 17,
-    paddingBottom : 10,
-    overflow: "hidden",
+    color: Colors.background_white,
+    fontSize: 18,
+    fontFamily: "NanumSquareEB",
   },
   outerFrame: {
+    flex: 1,
     width: "100%",
-    borderColor: Colors.light_gray, 
-    borderWidth: 1,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    borderColor: Colors.background_yellow,
+    borderTopColor: Colors.background_white,
+    borderWidth: 3,
+    padding: 10,
+    backgroundColor: Colors.background_white,
+  },
+  contentBox: {
+    justifyContent: "flex-start",
+    width: "100%",
+    flex: 1,
+    paddingHorizontal: 20,
+    borderColor: Colors.light_text_gray,
     borderRadius: 13,
-    backgroundColor: "white",
+    borderWidth: 1,
   },
   scrollContainer: {
-    display: "flex",
-    flexDirection: "column",
     width: "100%",
+    flexGrow: 1,
+    justifyContent: "flex-start",
+    paddingVertical: 8,
+    paddingBottom: 28,
     alignItems: "center",
-    paddingVertical: 10,
   },
   subtitle: {
     marginBottom: 15,
@@ -244,26 +247,25 @@ const styles = StyleSheet.create({
     color: Colors.burn,
   },
   imageBox: {
-    display: "flex",
+    width: "100%",
+    height: 250,
     borderWidth: 1.5,
     borderStyle: "dashed",
     borderColor: Colors.light_gray,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
-    width: 314,
-    height: 250,
+    backgroundColor: Colors.background_white,
     overflow: "hidden",
   },
   placeholder: {
     justifyContent: "center",
     alignItems: "center",
+    gap: 4,
   },
   placeholderText: {
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareRoundB",
     fontSize: 10,
-    fontWeight: 400,
     color: Colors.slightly_burn,
   },
   imagePreview: {
@@ -274,13 +276,13 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#D9D9D9",
-    borderRadius: 13,
+    borderColor: Colors.text_gray,
+    borderRadius: 16,
     textAlign: "center",
-    width: 312,
-    height: 51,
-    marginTop : 22,
-    fontFamily: "NanumSquareB",
+    width: "100%",
+    height: 48,
+    marginTop: 20,
+    fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     color: Colors.burn,
   },
