@@ -11,7 +11,7 @@ import Colors from "../../constants/colors";
 import ReviewStar from "../svg/ReviewStar";
 import { Ionicons } from "@expo/vector-icons";
 
-const ReviewCard = ({ review, onEdit }) => {
+const ReviewCard = ({ review, onEdit, onDelete }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   if (!review) return null;
 
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   menuBox: {
     position: "absolute",
-    top: 36,        // 점3개 버튼 아래로
+    top: 36,    
     right: 12,
     zIndex: 999,
     width: 95,

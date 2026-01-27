@@ -29,7 +29,8 @@ import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
-import DebugButton from "../components/DebugButton";
+import UpdateReviewModal from "../components/DietLogScreen/UpdateReviewModal";
+import BackButton from "../components/DietLogScreen/BackButton";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import Review from "../components/svg/Review.svg";
@@ -86,7 +87,8 @@ const DietLogScreen = () => {
   // 리뷰 가져오기
   const [dailyReviews, setDailyReviews] = useState([]);
   const [selectedReviewId, setSelectedReviewId] = useState(null);
-
+  const [activeUpdateModal, setActiveUpdateModal] = useState("none");
+  const [editingReview, setEditingReview] = useState(null);
   // 이 부분 좀 정리 필요
   useFocusEffect(
     useCallback(() => {
@@ -135,24 +137,25 @@ const DietLogScreen = () => {
     setWeekDates(dates);
   }, [selectedWeek, user?.createdAt]);
 
+  const fetchDailyData = useCallback(async () => {
+    const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
+    console.log(
+      `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`,
+    );
+
+    try {
+      const reviews = await fetchReviewsByDay(targetAbsoluteDay);
+      setDailyReviews(reviews || []);
+    } catch (e) {
+      console.log("Failed to fetch reviews for day:", e);
+      setDailyReviews([]);
+    }
+  }, [selectedWeek, selectedDay],
+  );
+
   useEffect(() => {
-    const fetchDailyData = async () => {
-      const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
-      console.log(
-        `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`,
-      );
-
-      try {
-        const reviews = await fetchReviewsByDay(targetAbsoluteDay);
-        setDailyReviews(reviews || []);
-      } catch (e) {
-        console.log("Failed to fetch reviews for day:", e);
-        setDailyReviews([]);
-      }
-    };
-
     fetchDailyData();
-  }, [selectedWeek, selectedDay]);
+  }, [fetchDailyData]);
 
   const handleMarshmallowClick = (offset) => {
     const targetWeek = currentMaxWeek - offset;
@@ -205,11 +208,22 @@ const DietLogScreen = () => {
   };
 
   const handleEditReview = (reviewId) => {
+    const target = dailyReviews.find((r) => r.id === reviewId);
+    if (!target) {
+      console.log("Review not found for ID:", reviewId);
+      return;
+    }
     console.log("Editing review with ID:", reviewId);
+    setEditingReview(target);
+    setActiveUpdateModal(true);
+  };
+  const handleUpdateSuccess = () => {
+    fetchDailyData();
+    setActiveUpdateModal(false);
+  };
+  const handleDeleteReview = async (reviewId) => {
+    console.log("Deleting review with ID:", reviewId);
     return; // temp
-
-    setSelectedReviewId(reviewId);
-    setActiveModal("review");
   };
   const getWeekOfMonth = (date) => {
     const y = date.getFullYear();
@@ -314,8 +328,9 @@ const DietLogScreen = () => {
             <FlatList
               data={dailyReviews}
               style={{ width: "100%" }}
+              contentContainerStyle={{ paddingBottom: 50 }}
               renderItem={({ item }) => (
-                <ReviewCard review={item} onEdit={handleEditReview} />
+                <ReviewCard review={item} onEdit={handleEditReview} onDelete={handleDeleteReview} />
               )}
               ListEmptyComponent={() => (
                 <View style={{ alignItems: "center", marginTop: 50 }}>
@@ -363,13 +378,29 @@ const DietLogScreen = () => {
             reviewMode={selectedMode}
           />
         </Modal>
+        <Modal
+          isVisible={activeUpdateModal === true}
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          backdropOpacity={0}
+          onModalHide={() => setEditingReview(null)}
+          style={{ margin: 0 }}
+        >
+          <Pressable
+            style={styles.backdrop}
+            onPress={() => setActiveUpdateModal(false)}
+          />
+          <UpdateReviewModal
+            onClose={() => setActiveUpdateModal(false)}
+            existingReview={editingReview}
+            onUpdateSuccess={handleUpdateSuccess}
+          />
+        </Modal>
 
-        <DebugButton
+        <BackButton
           index={5}
           icon={<Back width={52} height={52} />}
-          onPress={() => {
-            navigation.goBack();
-          }}
+          onPress={() => navigation.goBack()}
         />
       </LinearGradient>
     </GestureDetector>
@@ -483,12 +514,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderColor: "#D9D9D9",
-    borderWidth: 1,
-    borderRadius: 13,
-
+    borderColor: Colors.text_gray,
+    borderWidth: 1.5,
+    borderRadius: 16,
     position: "relative",
     overflow: "hidden",
+
+    //나중에 shadow 넣기
   },
   monthText: {
     position: "absolute",
@@ -499,6 +531,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareB",
     fontSize: 16,
     color: "#D2C0C0",
+
   },
   dayTextFilled: {
     color: "white",
@@ -512,6 +545,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 11,
     borderTopRightRadius: 26,
     borderBottomRightRadius: 26,
+
   },
   dayButton: {
     flex: 1,
@@ -532,5 +566,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+
   },
 });

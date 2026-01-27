@@ -1,8 +1,7 @@
-// src/components/DebugButton.tsx
 
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function DebugButton({ icon, onPress, index = 0 }) {
+export default function BackButton({ icon, onPress, index = 0 }) {
   const topPosition = 80 + index * 50;
 
   return (
