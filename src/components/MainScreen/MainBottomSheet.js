@@ -8,6 +8,7 @@ import { MAIN_LAYOUT } from "../../constants/layout";
 import CategorySelector from "./CategorySelector";
 import { useMainLayout } from "../../hooks/useMainLayout";
 import FoodCardNews from "./FoodCardNews";
+import LikedFoods from "./LikedFoods";
 
 const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
   const { screenWidth } = useMainLayout();
@@ -46,7 +47,10 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
           categories={selectedCategories}
           canLoadMore={false}
           animationRatio={0.93}
+          pagination={false}
         />
+
+        <LikedFoods />
       </View>
     </Animated.View>
   );

@@ -15,6 +15,7 @@ import Animated, {
   ZoomOutEasyDown,
 } from "react-native-reanimated";
 import { useFoodStore } from "../../stores/foodStore";
+import * as Location from "expo-location";
 
 const FoodInfoModal = ({ foodID, onClose }) => {
   if (!foodID) return null;
@@ -25,6 +26,24 @@ const FoodInfoModal = ({ foodID, onClose }) => {
   const { food, isLiked } = item;
 
   const { user } = useAuthStore();
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        setLocation({ latitude: 37.4502, longitude: 126.9526 }); // 301동ㅋㅋ
+        return;
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+    })();
+  }, []);
 
   const onLikePress = async () => {
     if (!user) return;
@@ -96,12 +115,20 @@ const FoodInfoModal = ({ foodID, onClose }) => {
           </View>
 
           <View style={styles.mapContainer}>
-            <KakaoMap
-              keyword={food.name}
-              lat={37.3903}
-              lon={127.1263}
-              onSelectPlace={setSelectedPlace}
-            />
+            {location ? (
+              <KakaoMap
+                keyword={food.name}
+                lat={location.latitude}
+                lon={location.longitude}
+                onSelectPlace={setSelectedPlace}
+              />
+            ) : (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>
+                  지도를 불러오는 중입니다...
+                </Text>
+              </View>
+            )}
 
             {selectedPlace && (
               <Animated.View
@@ -267,5 +294,16 @@ const styles = StyleSheet.create({
     top: 16,
     right: 16,
     zIndex: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.background_light_gray,
+  },
+  loadingText: {
+    fontFamily: "NanumSquareB",
+    fontSize: 14,
+    color: Colors.text_gray,
   },
 });

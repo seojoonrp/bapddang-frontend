@@ -42,7 +42,7 @@ export const useFoodStore = create((set, get) => ({
   },
 
   toggleLike: (foodID) => {
-    const { foodsByID } = get();
+    const { foodsByID, likedFoodIDs } = get();
     const target = foodsByID[foodID];
     if (!target) return;
 
@@ -58,8 +58,36 @@ export const useFoodStore = create((set, get) => ({
       },
     };
 
+    let newLikedIDs = [...likedFoodIDs];
+    if (newIsLiked) {
+      if (!newLikedIDs.includes(foodID)) {
+        newLikedIDs.push(foodID);
+      }
+    } else {
+      newLikedIDs = newLikedIDs.filter((id) => id !== foodID);
+    }
+
     set({
       foodsByID: { ...foodsByID, [foodID]: updatedFood },
+      likedFoodIDs: newLikedIDs,
+    });
+  },
+
+  setLikedFoods: (foods) => {
+    const { foodsByID } = get();
+    const newFoodsByID = { ...foodsByID };
+
+    const likedIDs = foods.map((food) => {
+      newFoodsByID[food.id] = {
+        food: food,
+        isLiked: true,
+      };
+      return food.id;
+    });
+
+    set({
+      foodsByID: newFoodsByID,
+      likedFoodIDs: likedIDs,
     });
   },
 }));

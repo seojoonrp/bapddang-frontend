@@ -39,7 +39,7 @@ const MainScreen = () => {
 
         <EditAndLike
           onEdit={() => navigation.navigate("DietLog")}
-          onLike={() => console.log("Like pressed")}
+          onLike={() => navigation.navigate("Liked")}
           animatedStyle={animatedStyles}
           showTextBubble={showTextBubble}
         />

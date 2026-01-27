@@ -60,6 +60,7 @@ const FoodCardNews = ({
   categories,
   canLoadMore = true,
   animationRatio,
+  pagination = true,
 }) => {
   const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
     categories,
@@ -193,9 +194,15 @@ const FoodCardNews = ({
         })}
       />
 
-      <View style={styles.paginationContainer}>
-        <Pagination total={foodIDs.length} scrollX={scrollX} cardSize={size} />
-      </View>
+      {pagination && (
+        <View style={styles.paginationContainer}>
+          <Pagination
+            total={foodIDs.length}
+            scrollX={scrollX}
+            cardSize={size}
+          />
+        </View>
+      )}
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
         <FoodInfoModal
@@ -227,7 +234,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     textShadowColor: "black",
-    textShadowOffset: { width: 0, height: 0 },
+    textShadowOffset: { width: 0, height: 5 },
     textShadowRadius: 50,
     shadowOpacity: 1,
   },

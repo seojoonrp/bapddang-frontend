@@ -22,12 +22,12 @@ export const useFoodFeed = (type, options = {}) => {
       try {
         let data;
         if (type === "main") {
-          data = await fetchMainFoods({ speed: mode, count: 3 });
+          data = await fetchMainFoods({ speed: mode, count: 7 });
         } else if (type === "category") {
           data = await fetchCategoryFoods({
             categories: options.categories || [],
             speed: mode,
-            count: 7,
+            count: 10,
           });
         }
 

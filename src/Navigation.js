@@ -11,6 +11,7 @@ import SettingScreen from "./screens/SettingScreen";
 import { handleLoginSession } from "./services/auth";
 import { useAuthStore } from "./stores/authStore";
 import { useEffect, useState } from "react";
+import LikedScreen from "./screens/LikedScreen";
 
 const Stack = createStackNavigator();
 
@@ -40,6 +41,7 @@ const Navigation = () => {
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="DietLog" component={DietLogScreen} />
             <Stack.Screen name="Setting" component={SettingScreen} />
+            <Stack.Screen name="Liked" component={LikedScreen} />
           </>
         ) : (
           <>

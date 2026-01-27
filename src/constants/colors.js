@@ -12,6 +12,7 @@ const Colors = {
   burn_red: "#BE0A20",
   light_text_gray: "#F3EFEF",
   yellow: "#FFC77D",
+  border_yellow: "#FDEDC0",
   icon_gray: "#CCC",
   light_red: "#FF7873",
   nurim: "#A94946",
