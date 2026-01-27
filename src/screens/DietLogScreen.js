@@ -278,7 +278,7 @@ const DietLogScreen = () => {
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
@@ -433,6 +433,7 @@ const DietLogScreen = () => {
           backdropOpacity={0}
           onModalHide={handleHideReview}
           style={{ margin: 0 }}
+          avoidKeyboard={true}
         >
           <Pressable style={styles.backdrop} onPress={handleCloseModal} />
           <CreateReviewModal
@@ -440,6 +441,12 @@ const DietLogScreen = () => {
             onBack={handleBack}
             foodNames={selectedFoods}
             reviewMode={selectedMode}
+            onCreateSuccess={(createdReview) => {
+              if (createdReview) {
+                setDailyReviews((prev) => [createdReview, ...prev]); // 즉시 반영
+              }
+              fetchDailyData(); // 서버값으로 재동기화
+            }}
           />
         </Modal>
 

@@ -8,6 +8,10 @@ import {
   ScrollView,
   Image,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,7 +26,7 @@ import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 
-const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
+const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuccess }) => {
   const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
@@ -39,6 +43,7 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
   // foodItems 받아오기
   useEffect(() => {
     if (!foodNames || foodNames.length === 0) {
+      
       console.log("No food names provided");
       return;
     }
@@ -64,11 +69,12 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
   const handleSubmit = async () => {
     try {
       if (!selectedTime || rating <= 0) {
+        Alert.alert("시간과 별점을 필수로 선택해주세요.");
         console.log("Please select both time and rating");
         return;
       }
 
-      await createReview({
+      const created = await createReview({
         name: name,
         foods: foodItems,
         speed: reviewMode,
@@ -77,7 +83,8 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
         comment: comment,
         rating: Number(rating),
       });
-
+      await new Promise((r) => setTimeout(r, 300));
+      await onCreateSuccess?.(created);
       Alert.alert("리뷰 등록 완료", "리뷰가 성공적으로 등록되었습니다.");
       onClose();
     } catch (error) {
@@ -85,97 +92,115 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack }) => {
       Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
     }
   };
+  const COMMENT_MAX = 50;
+
+  const handleChangeComment = (t) => {
+    setComment(t.slice(0, COMMENT_MAX));
+  };
 
   return (
-    <View style={styles.container}>
-      <IconBar onClose={onClose} />
-      <View style={[styles.header, { backgroundColor: mainColor }]}>
-        <Star />
-        <Text
-          style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 24 }]}
-        >
-          {name}
-        </Text>
-        <Star />
-      </View>
-
-      <View style={styles.outerFrame}>
-        <View style={styles.contentBox}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+      <View style={styles.container}>
+        <IconBar onClose={onClose} />
+        <View style={[styles.header, { backgroundColor: mainColor }]}>
+          <Star />
+          <Text
+            style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 24 }]}
           >
-            {/* 시간대 */}
-            <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
-            <TagContainer
-              tags={timeOption}
-              mode="select_single"
-              onPress={(time) => setSelectedTime(time)}
-              selectedTag={selectedTime}
-              containerStyle={{ marginBottom: 24 }}
-            />
+            {name}
+          </Text>
+          <Star />
+        </View>
 
-            {/* 이미지 */}
-            <View style={{ width: "100%" }}>
-              <TouchableOpacity
-                onPress={() => pickImage({ setImageUrl: setImageURL })}
-                style={styles.imageBox}
-              >
-                {imageURL !== "" ? (
-                  <Image
-                    source={{ uri: imageURL }}
-                    style={styles.imagePreview}
-                    resizeMode="cover"
+        <View style={styles.outerFrame}>
+          <View style={styles.contentBox}>
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="always"
+              keyboardDismissMode="on-drag"
+            >
+              {/* 시간대 */}
+              <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
+              <TagContainer
+                tags={timeOption}
+                mode="select_single"
+                onPress={(time) => setSelectedTime(time)}
+                selectedTag={selectedTime}
+                containerStyle={{ marginBottom: 24 }}
+              />
+
+              {/* 이미지 */}
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <TouchableOpacity
+                  onPress={() => pickImage({ setImageUrl: setImageURL })}
+                  style={[styles.imageBox,
+                  imageURL !== "" ? styles.imageBoxWithImage : null
+                  ]}
+                >
+                  {imageURL !== "" ? (
+                    <Image
+                      source={{ uri: imageURL }}
+                      style={styles.imagePreview}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.placeholder}>
+                      <Ionicons name="camera" size={20} color="#BFA6A1" />
+                      <Text style={styles.placeholderText}>
+                        사진을 추가해보세요!
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* 별점 */}
+              <View style={styles.ratingRow}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                    <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={{ width: "100%", marginTop: 20 }}>
+                <View style={styles.inputWrap}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="한줄평을 남겨보세요..."
+                    value={comment}
+                    onChangeText={handleChangeComment}
+                    maxLength={50}
+                    returnKeyType="done"
+                    onSubmitEditing={Keyboard.dismiss}
                   />
-                ) : (
-                  <View style={styles.placeholder}>
-                    <Ionicons name="camera" size={20} color="#BFA6A1" />
-                    <Text style={styles.placeholderText}>
-                      사진을 추가해보세요!
+                  <View style={styles.charBadge}>
+                    <Text style={styles.charBadgeText}>
+                      {comment.length}/{COMMENT_MAX}
                     </Text>
                   </View>
-                )}
-              </TouchableOpacity>
-            </View>
-
-            {/* 별점 */}
-            <View style={styles.ratingRow}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                  <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+                </View>
+              </View>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.bottomButton,
+                    { backgroundColor: Colors.text_gray },
+                  ]}
+                  onPress={onBack}
+                >
+                  <Text style={styles.bottomButtonText}>이전</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <TextInput
-              style={styles.input}
-              placeholder="한줄평을 남겨보세요..."
-              value={comment}
-              onChangeText={setComment}
-            />
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[
-                  styles.bottomButton,
-                  { backgroundColor: Colors.text_gray },
-                ]}
-                onPress={onBack}
-              >
-                <Text style={styles.bottomButtonText}>이전</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.bottomButton, { backgroundColor: mainColor }]}
-                onPress={handleSubmit}
-              >
-                <Text style={[styles.bottomButtonText]}>등록</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+                <TouchableOpacity
+                  style={[styles.bottomButton, { backgroundColor: mainColor }]}
+                  onPress={handleSubmit}
+                >
+                  <Text style={[styles.bottomButtonText]}>등록</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
         </View>
-      </View>
-    </View>
+      </View >
   );
 };
 
@@ -184,8 +209,7 @@ export default CreateReviewModal;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: "70%",
-    maxHeight: 600,
+    height: 630,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 12,
@@ -247,12 +271,22 @@ const styles = StyleSheet.create({
     color: Colors.burn,
   },
   imageBox: {
-    width: "100%",
-    height: 250,
+    width: 222,
+    height: 176,
     borderWidth: 1.5,
     borderStyle: "dashed",
     borderColor: Colors.light_gray,
     borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.background_white,
+    overflow: "hidden",
+  },
+  imageBoxWithImage: {
+    width: "100%",
+    height: 250,
+    borderRadius: 16,
+    borderWidth: 0,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.background_white,
@@ -274,6 +308,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     resizeMode: "cover",
   },
+  inputWrap: {
+    width: "100%",
+    position: "relative",
+  },
   input: {
     borderWidth: 1,
     borderColor: Colors.text_gray,
@@ -281,10 +319,28 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "100%",
     height: 48,
-    marginTop: 20,
+    paddingRight: 64,
+    paddingLeft: 64,
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     color: Colors.burn,
+  },
+  charBadge: {
+    position: "absolute",
+    right: 10,
+    top: 6,
+    bottom: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    borderRadius: 13,
+    backgroundColor: Colors.light_text_gray,
+  },
+
+  charBadgeText: {
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 14,
+    color: Colors.text_gray,
   },
   inputPlaceholder: {
     color: Colors.light_gray,
