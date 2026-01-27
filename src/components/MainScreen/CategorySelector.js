@@ -177,7 +177,7 @@ export default CategorySelector;
 
 const styles = StyleSheet.create({
   container: {
-    marginLeft: 20,
+    marginLeft: 22,
     zIndex: 1000,
   },
   overlay: {

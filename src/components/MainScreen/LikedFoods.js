@@ -120,15 +120,15 @@ export default memo(LikedFoods);
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    paddingHorizontal: 18,
-    gap: 6,
+    paddingHorizontal: 16,
+    gap: 4,
     marginTop: 6,
   },
   labelRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginLeft: 8,
+    marginLeft: 6,
   },
   heartBorder: {
     width: 28,

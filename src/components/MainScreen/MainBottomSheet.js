@@ -9,6 +9,7 @@ import CategorySelector from "./CategorySelector";
 import { useMainLayout } from "../../hooks/useMainLayout";
 import FoodCardNews from "./FoodCardNews";
 import LikedFoods from "./LikedFoods";
+import RecentReviews from "./RecentReviews";
 
 const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
   const { screenWidth } = useMainLayout();
@@ -32,26 +33,41 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
     >
       <View style={styles.handleArea}>
         <View style={styles.handleBar} />
-        <Text style={styles.handleText}>
+        <Animated.Text
+          style={[styles.handleText, animatedStyle.originalHandleText]}
+        >
           카테고리별 추천 메뉴를 보려면 올려주세요!
-        </Text>
+        </Animated.Text>
+        <Animated.Text
+          style={[
+            styles.handleText,
+            animatedStyle.newHandleText,
+            { marginTop: -32 },
+          ]}
+        >
+          카테고리별 추천 메뉴 보기!
+        </Animated.Text>
       </View>
 
-      <View style={styles.content}>
-        <CategorySelector onSelect={handleCategorySelect} />
+      <Animated.View style={[styles.content, animatedStyle.bottomSheetContent]}>
+        <View style={styles.categoryContainer}>
+          <CategorySelector onSelect={handleCategorySelect} />
 
-        <FoodCardNews
-          type="category"
-          screenWidth={screenWidth}
-          size={screenWidth * 0.6}
-          categories={selectedCategories}
-          canLoadMore={false}
-          animationRatio={0.93}
-          pagination={false}
-        />
+          <FoodCardNews
+            type="category"
+            screenWidth={screenWidth}
+            size={screenWidth * 0.6}
+            categories={selectedCategories}
+            canLoadMore={false}
+            animationRatio={0.93}
+            pagination={false}
+          />
+        </View>
 
         <LikedFoods />
-      </View>
+
+        <RecentReviews />
+      </Animated.View>
     </Animated.View>
   );
 };
@@ -92,7 +108,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: "flex-start",
-    gap: 10,
+    justifyContent: "space-between",
+    paddingBottom: 24,
+  },
+  categoryContainer: {
+    width: "100%",
+    gap: 12,
   },
 });

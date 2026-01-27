@@ -13,6 +13,7 @@ import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import { useModeStore } from "../stores/modeStore";
 import { useMainLayout } from "./useMainLayout";
+import { use } from "react";
 
 export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);
@@ -142,6 +143,36 @@ export const useMainAnimations = (scrollThreshold) => {
     ],
   }));
 
+  const animatedOriginalHandleText = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, scrollThreshold * 0.7],
+      [1, 0],
+      Extrapolation.CLAMP,
+    ),
+  }));
+  const animatedNewHandleText = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [scrollThreshold * 0.3, scrollThreshold],
+      [0, 1],
+      Extrapolation.CLAMP,
+    ),
+  }));
+
+  const animatedBottomSheetContent = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, scrollThreshold],
+          [0, -20],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+  }));
+
   return {
     scrollY,
     panGesture,
@@ -153,6 +184,9 @@ export const useMainAnimations = (scrollThreshold) => {
       bottomSheet: animatedBottomSheetStyle,
       circle: animatedCircleStyle,
       editAndLike: animatedEditAndLikeStyle,
+      originalHandleText: animatedOriginalHandleText,
+      newHandleText: animatedNewHandleText,
+      bottomSheetContent: animatedBottomSheetContent,
     },
   };
 };
