@@ -74,10 +74,16 @@ export const useFoodStore = create((set, get) => ({
   },
 
   setLikedFoods: (foods) => {
+    if (foods.length === 0) return;
+
     const { foodsByID } = get();
     const newFoodsByID = { ...foodsByID };
 
-    const likedIDs = foods.map((food) => {
+    const uniqueInputFoods = Array.from(
+      new Map(foods.map((f) => [f.id, f])).values(),
+    );
+
+    const likedIDs = uniqueInputFoods.map((food) => {
       newFoodsByID[food.id] = {
         food: food,
         isLiked: true,

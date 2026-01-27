@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,21 +9,18 @@ import {
   useWindowDimensions,
 } from "react-native";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
   interpolate,
-  withSpring,
   Extrapolation,
 } from "react-native-reanimated";
 import { useMainAnimations } from "../hooks/useMainAnimations";
-import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import { GestureDetector } from "react-native-gesture-handler";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "../stores/authStore";
 import { fetchReviewsByDay } from "../services/review";
-import { syncUserWeekAndDay } from "../services/user";
 import Colors from "../constants/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -33,9 +30,10 @@ import UpdateReviewModal from "../components/DietLogScreen/UpdateReviewModal";
 import BackButton from "../components/DietLogScreen/BackButton";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
-import Review from "../components/svg/Review.svg";
-import Liked from "../components/svg/Liked.svg";
 import Back from "../assets/icons/back.svg";
+import HeartIcon from "../components/svg/HeartIcon";
+import PlusIcon from "../assets/icons/plus.svg";
+import { BlurView } from "expo-blur";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 220;
@@ -150,8 +148,7 @@ const DietLogScreen = () => {
       console.log("Failed to fetch reviews for day:", e);
       setDailyReviews([]);
     }
-  }, [selectedWeek, selectedDay],
-  );
+  }, [selectedWeek, selectedDay]);
 
   useEffect(() => {
     fetchDailyData();
@@ -242,45 +239,53 @@ const DietLogScreen = () => {
   const fillRatio = Math.min(1, selectedDay / 7);
   return (
     <GestureDetector gesture={panGesture}>
-      <LinearGradient colors={["#FFFFFF", "#CCCCCC"]} style={styles.container}>
+      <LinearGradient
+        colors={["#F5F4F2", "rgb(208, 208, 208)"]}
+        style={styles.container}
+      >
         {/* 헤더 */}
-        <View style={styles.headerContainer}>
+        <BlurView style={styles.headerContainer} intensity={50} tint="light">
           <View style={{ width: "100%", height: insets.top }} />
 
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => navigation.navigate("Setting")}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </BlurView>
 
         <MarshmallowStick
           currentMaxWeek={currentMaxWeek}
           selectedWeek={selectedWeek}
           onClick={handleMarshmallowClick}
         />
+
         <Animated.View
           style={[styles.floatingButtonsContainer, animatedFloatingButtons]}
         >
           <TouchableOpacity
-            onPress={() => setActiveModal("foodSelect")}
-            style={styles.LikeButton}
+            onPress={() => navigation.navigate("Liked")}
+            style={styles.redButton}
           >
-            <Liked />
+            <HeartIcon
+              size={26}
+              fillColor={Colors.background_white}
+              strokeWidth={0}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setActiveModal("foodSelect")}
-            style={styles.reviewButton}
+            style={styles.redButton}
           >
-            <Review />
+            <PlusIcon width={24} height={24} />
           </TouchableOpacity>
         </Animated.View>
 
@@ -330,7 +335,11 @@ const DietLogScreen = () => {
               style={{ width: "100%" }}
               contentContainerStyle={{ paddingBottom: 50 }}
               renderItem={({ item }) => (
-                <ReviewCard review={item} onEdit={handleEditReview} onDelete={handleDeleteReview} />
+                <ReviewCard
+                  review={item}
+                  onEdit={handleEditReview}
+                  onDelete={handleDeleteReview}
+                />
               )}
               ListEmptyComponent={() => (
                 <View style={{ alignItems: "center", marginTop: 50 }}>
@@ -398,7 +407,7 @@ const DietLogScreen = () => {
         </Modal>
 
         <BackButton
-          index={5}
+          index={5.5}
           icon={<Back width={52} height={52} />}
           onPress={() => navigation.goBack()}
         />
@@ -423,8 +432,6 @@ const styles = StyleSheet.create({
     zIndex: 99,
     borderBottomColor: Colors.text_gray,
     borderBottomWidth: 0.3,
-
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // TODO : expo-blur (EAS 빌드 다시할때)
   },
   headerContent: {
     flexDirection: "row",
@@ -454,18 +461,22 @@ const styles = StyleSheet.create({
   },
   floatingButtonsContainer: {
     position: "absolute",
-    right: 20,
-    bottom: SHEET_HANDLE_HEIGHT,
+    right: 16,
+    bottom: SHEET_HANDLE_HEIGHT + 8,
     zIndex: 100,
     alignItems: "center",
+    gap: 5,
   },
-  LikeButton: {
+  redButton: {
     justifyContent: "center",
     alignItems: "center",
-  },
-  reviewButton: {
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: Colors.point_red,
+    width: 44,
+    height: 44,
+    borderColor: Colors.background_yellow,
+    borderWidth: 1.5,
+    borderRadius: 28,
+    boxShadow: "0 4px 0 2px rgba(204, 204, 204, 0.25)",
   },
   sheetContainer: {
     flex: 1,
@@ -516,36 +527,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderColor: Colors.text_gray,
     borderWidth: 1.5,
-    borderRadius: 16,
+    borderRadius: 18,
     position: "relative",
     overflow: "hidden",
-
-    //나중에 shadow 넣기
+    boxShadow: "0 2px 0 0 #FDEDC0",
   },
   monthText: {
     position: "absolute",
-    maxwidth: 150,
-    left: 30,
+    left: 24,
     top: 80,
-    bottom: 14,
-    fontFamily: "NanumSquareB",
+    bottom: 12,
+    fontFamily: "NanumSquareRoundEB",
     fontSize: 16,
-    color: "#D2C0C0",
-
+    color: Colors.text_gray,
   },
   dayTextFilled: {
-    color: "white",
+    color: Colors.background_white,
   },
   dayFill: {
     position: "absolute",
-    left: 2,
-    top: 2,
-    bottom: 2,
-    borderTopLeftRadius: 11,
-    borderBottomLeftRadius: 11,
-    borderTopRightRadius: 26,
-    borderBottomRightRadius: 26,
-
+    left: 1.5,
+    top: 1.5,
+    bottom: 1.5,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderTopRightRadius: 99,
+    borderBottomRightRadius: 99,
+    boxShadow: "0 2px 0 2px rgba(0, 0, 0, 0.08) inset",
   },
   dayButton: {
     flex: 1,
@@ -566,6 +574,5 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-
   },
 });

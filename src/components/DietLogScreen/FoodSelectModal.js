@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/components/DietLogScreen/FoodSelectModal.js
+
+import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,25 +9,16 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-
-import { useAuthStore } from "../../stores/authStore";
-
+import { useFoodStore } from "../../stores/foodStore.js";
 import { getBestMatches } from "../../utils/nameCheck.js";
 import { standardFoodNames } from "../../constants/data/standardFoodNames.js";
-
-import { fetchLikedFoods } from "../../services/like.js";
-
 import Colors from "../../constants/colors";
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
 
-const SCORE_THRESHOLD = 0.7;
+const SCORE_THRESHOLD = 0.85;
 
 const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
-  const user = useAuthStore((state) => state.user);
-
-  // 입력 단계 상태
-  const [likedFoodNames, setLikedFoodNames] = useState([]);
   const [inputList, setInputList] = useState(
     Array.isArray(initialFoods) && initialFoods.length ? initialFoods : [""],
   );
@@ -39,24 +32,24 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [currentMode, setCurrentMode] = useState("fast");
 
   // 좋아요한 음식 불러오기
-  useEffect(() => {
-    if (!user) return;
+  const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
+  const foodsByID = useFoodStore((state) => state.foodsByID);
 
-    fetchLikedFoods()
-      .then((data) => {
-        if (data.liked_foods) {
-          const names = data.liked_foods.map((food) => food.name);
-          console.log("Fetched liked foods:", names);
-          setLikedFoodNames(names);
-        } else {
-          console.log("No liked foods found.");
-          setLikedFoodNames([]);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching liked foods:", error);
-      });
-  }, [user]);
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const likedFoodNames = useMemo(() => {
+    const fullList = likedFoodIDs.map((id) => foodsByID[id]).filter(Boolean);
+    const shuffledList = shuffleArray(fullList);
+    const names = shuffledList.slice(0, 5).map((item) => item.food.name);
+    return [...new Set(names)];
+  }, [likedFoodIDs, foodsByID]);
 
   // 입력 로직
   const updateInput = (index, value) => {
@@ -90,17 +83,20 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
       const topMatch = result.best;
 
       if (topMatch && topMatch.score === 1) {
-        // 완전 일치
-        autoResolvedNames.push(topMatch.name);
+        autoResolvedNames.push(topMatch.name); // 완전 일치
       } else {
         const validSuggestions = result.top.filter(
           (opt) => opt.score >= SCORE_THRESHOLD,
         );
 
-        queue.push({
-          originalName: name,
-          suggestions: validSuggestions,
-        });
+        if (validSuggestions.length > 0) {
+          queue.push({
+            originalName: name,
+            suggestions: validSuggestions,
+          });
+        } else {
+          autoResolvedNames.push(name); // 비슷한 게 없는 경우
+        }
       }
     });
 
@@ -143,10 +139,8 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
         <View style={styles.contentBox}>
           {isInCheckMode && currentTarget ? (
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-              <Text style={styles.question}>혹시 이 음식을 말씀하신 건가요?</Text>
-
-              <Text style={styles.checkHint}>
-                {currentIndex + 1} / {suggestionQueue.length} 번째 음식 확인 중
+              <Text style={styles.question}>
+                혹시 이 음식을 말씀하신 건가요?
               </Text>
 
               <View style={styles.checkBox}>
@@ -156,7 +150,15 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
                 </Text>
               </View>
 
-              <View style={{ width: "100%", marginTop: 20 }}>
+              <View
+                style={{
+                  width: "100%",
+                  marginTop: 20,
+                  marginBottom: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <Text style={styles.subTitle}>추천 검색 결과</Text>
                 <View style={styles.suggestionContainer}>
                   {currentTarget.suggestions?.map((opt, idx) => (
@@ -176,14 +178,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
               </View>
 
               <TouchableOpacity
-                style={[
-                  styles.confirmButton,
-                  {
-                    backgroundColor: Colors.slightly_burn,
-                    marginTop: 30,
-                    width: "100%",
-                  },
-                ]}
+                style={styles.confirmButton}
                 onPress={() => handleSelectName(currentTarget.originalName)}
               >
                 <Text style={styles.confirmText}>원문 그대로 사용</Text>
@@ -255,11 +250,11 @@ const styles = StyleSheet.create({
   },
   outerFrame: {
     width: "100%",
-    borderRadius: 13,       
-    borderWidth: 1,
-    borderColor: Colors.light_text_gray,       
-    padding: 8,                
-    backgroundColor: "white",
+    borderRadius: 20,
+    borderColor: Colors.background_yellow,
+    borderWidth: 3,
+    padding: 10,
+    backgroundColor: Colors.background_white,
   },
   contentBox: {
     display: "flex",
@@ -268,11 +263,9 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 580,
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderColor: Colors.light_gray,
-    borderRadius: 20,
+    borderColor: Colors.light_text_gray,
+    borderRadius: 13,
     borderWidth: 1,
-    backgroundColor: "white",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -282,7 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 5,
-    paddingVertical: 20,
   },
   question: {
     color: Colors.burn,
@@ -302,12 +294,13 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareR",
     fontSize: 16,
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 20,
+    boxShadow: "0 1px 0 2px rgba(204, 204, 204, 0.30) inset",
   },
   addButton: {
     width: 72,
     height: 38,
-    backgroundColor: Colors.light_text_gray,
+    backgroundColor: "#eceaea",
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
@@ -317,12 +310,12 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontFamily: "NanumSquareB",
-    fontSize: 20,
+    fontSize: 22,
   },
   subTitle: {
     color: Colors.slightly_burn,
-    fontFamily: "NanumSquareB",
-    fontSize: 15,
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 14,
     marginBottom: 10,
   },
   confirmButton: {
@@ -342,19 +335,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   confirmText: {
+    color: Colors.background_white,
     fontFamily: "NanumSquareEB",
     fontSize: 18,
-    fontWeight: "800",
-    color: "#FFF",
   },
-  // ----- inline check UI -----
   checkBox: {
     width: "100%",
     paddingVertical: 20,
-    paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: Colors.light_gray,
-    borderRadius: 16,
+    borderColor: Colors.light_text_gray,
+    borderRadius: 99,
     alignItems: "center",
     marginBottom: 10,
   },
@@ -365,35 +355,31 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   checkInputName: {
-    fontFamily: "NanumSquareEB",
+    fontFamily: "NanumSquareRoundEB",
     fontSize: 24,
     color: Colors.point_red,
     textAlign: "center",
-  },
-  checkHint: {
-    marginBottom: 15,
-    fontSize: 14,
-    color: "black",
-    fontFamily: "NanumSquareB",
   },
   suggestionContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   suggestionChip: {
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderWidth: 1,
+    display: "flex",
+    borderWidth: 0.4,
     borderColor: Colors.light_gray,
     backgroundColor: "white",
-    marginBottom: 6,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 6,
+    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   suggestionText: {
     fontFamily: "NanumSquareB",
     fontSize: 16,
-    color: Colors.burn,
+    color: Colors.slightly_burn,
   },
 });

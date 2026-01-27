@@ -112,10 +112,9 @@ const styles = StyleSheet.create({
     boxShadow: "",
   },
   buttonText: {
-    fontFamily: "NanumSquareOTF",
+    fontFamily: "NanumSquareB",
     fontSize: 16,
     color: Colors.slightly_burn,
-    fontWeight: 700,
   },
   buttonTextSelected: {
     color: Colors.background_yellow,

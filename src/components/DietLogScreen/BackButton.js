@@ -1,4 +1,3 @@
-
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function BackButton({ icon, onPress, index = 0 }) {
@@ -10,7 +9,18 @@ export default function BackButton({ icon, onPress, index = 0 }) {
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={ styles.iconWrap }>{icon}</View>
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          backgroundColor: "rgba(0,0,0,0.05)",
+          borderRadius: 99,
+        }}
+      />
+      <View style={styles.iconWrap}>{icon}</View>
     </TouchableOpacity>
   );
 }

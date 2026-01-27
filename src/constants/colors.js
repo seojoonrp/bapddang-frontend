@@ -4,7 +4,7 @@ const Colors = {
   point_red: "#E92F05",
   point_green: "#5fb143",
   light_gray: "#D9D9D9",
-  text_gray: "#DEC0C0",
+  text_gray: "#D2C0C0",
   placeholder_gray: "#D2C0C0",
   background_yellow: "#FFFAED",
   background_white: "#FEFDFA",

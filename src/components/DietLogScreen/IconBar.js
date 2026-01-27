@@ -1,13 +1,12 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
-
-import Ionicons from "@expo/vector-icons/Ionicons";
+import ChevronIcon from "../../assets/icons/chevron.svg";
 import Colors from "../../constants/colors";
 
 const IconBar = ({ onClose }) => {
   return (
     <View style={styles.iconBar}>
       <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
-        <Ionicons name="arrow-back" size={18} color={Colors.icon_gray} />
+        <ChevronIcon width={24} height={24} color={Colors.icon_gray} />
         <Text style={styles.iconText}>CALENDAR</Text>
       </TouchableOpacity>
     </View>
@@ -29,12 +28,11 @@ const styles = StyleSheet.create({
   iconLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
   },
   iconText: {
     color: Colors.icon_gray,
-    fontWeight: "bold",
-    fontSize: 18,
-    fontFamily: "NanumSquareEB",
+    fontSize: 17,
+    fontFamily: "NanumSquareB",
+    marginTop: 1.5,
   },
 });

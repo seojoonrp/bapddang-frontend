@@ -12,10 +12,7 @@ import {
 } from "react-native";
 import Triangle from "../../assets/icons/dropdown.svg";
 import Colors from "../../constants/colors";
-import {
-  categoryGroups,
-  allCategories,
-} from "../../constants/data/categoryData";
+import { categoryGroups } from "../../constants/data/categoryData";
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -40,16 +37,6 @@ const CategorySelector = ({ onSelect }) => {
     }
     wasOpen.current = isOpen;
   }, [isOpen, onSelect, selected]);
-
-  // 맨 처음에 랜덤으로 하나 선택
-  useEffect(() => {
-    if (allCategories && allCategories.length > 0) {
-      const randomIndex = Math.floor(Math.random() * allCategories.length);
-      const randomCategory = allCategories[randomIndex];
-      setSelected([randomCategory]);
-      onSelect([randomCategory]);
-    }
-  }, []);
 
   const toggleCategory = (item) => {
     if (selected.includes(item)) {
