@@ -10,6 +10,20 @@ const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
 const TimeQuestion = ({ showTextBubble }) => {
+  const hour = new Date().getHours();
+
+  const getMealInfo = () => {
+    if (hour >= 5 && hour < 10)
+      return { label: "아침식사", suffix: "를", question: "아침을" };
+    if (hour >= 10 && hour < 16)
+      return { label: "점심식사", suffix: "를", question: "점심을" };
+    if (hour >= 16 && hour < 22)
+      return { label: "저녁식사", suffix: "를", question: "저녁을" };
+    return { label: "야식", suffix: "을", question: "야식을" };
+  };
+
+  const mealInfo = getMealInfo();
+
   const animatedButtonOpacity = useAnimatedStyle(() => ({
     transform: [
       { scale: withTiming(1 - showTextBubble.value, { duration: 300 }) },
@@ -24,15 +38,19 @@ const TimeQuestion = ({ showTextBubble }) => {
     <View style={styles.container}>
       <View style={styles.textRow}>
         <View style={styles.timePill}>
-          <Text style={styles.timePillText}>점심식사</Text>
+          <Text style={styles.timePillText}>{mealInfo.label}</Text>
         </View>
-        <Text style={styles.questionText}>를 고민 중인가요?</Text>
+        <Text style={styles.questionText}>
+          {mealInfo.suffix} 고민 중인가요?
+        </Text>
       </View>
       <AnimatedTouchableOpacity
         style={[styles.alreadyButton, animatedButtonOpacity]}
         onPress={handlePress}
       >
-        <Text style={styles.alreadyText}>이미 점심을 먹었다면?</Text>
+        <Text style={styles.alreadyText}>
+          이미 {mealInfo.question} 먹었다면?
+        </Text>
       </AnimatedTouchableOpacity>
     </View>
   );
