@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { View, StyleSheet, Animated, TouchableOpacity, Pressable } from "react-native";
-
+import Svg, { Polygon, Circle } from "react-native-svg";
 import Marshmallow from "../svg/Marshmallow";
 import Colors from "../../constants/colors";
 import { fetchMarshmallows } from "../../services/marshmallow";
@@ -17,7 +17,7 @@ const ITEM_HEIGHT = 160;
 const MARSHMALLOW_SIZE = 160;
 
 const TARGET_VIEW_RATIO = 0.45;
-const FIXED_TOP_PADDING = 160;
+const FIXED_TOP_PADDING = 300;
 const FIXED_BOTTOM_PADDING = 250;
 
 const MarshmallowStick = ({ onClick }) => {
@@ -102,7 +102,7 @@ const MarshmallowStick = ({ onClick }) => {
   }, []);
 
   const stickHeight = useMemo(
-    () => ITEM_HEIGHT * marshmallows.length + 100,
+    () => ITEM_HEIGHT * marshmallows.length + 200,
     [marshmallows.length]
   );
 
@@ -114,7 +114,7 @@ const MarshmallowStick = ({ onClick }) => {
     const screenTargetY = listHeight * TARGET_VIEW_RATIO;
     let targetOffset = itemCenterY - screenTargetY + FIXED_TOP_PADDING;
 
-    
+
     const contentHeight = (ITEM_HEIGHT * marshmallows.length) + FIXED_TOP_PADDING + FIXED_BOTTOM_PADDING;
     const maxOffset = contentHeight - listHeight;
 
@@ -125,6 +125,21 @@ const MarshmallowStick = ({ onClick }) => {
       animated: true,
     });
   };
+  // 막대기 만들기
+  const STICK_TOP_WIDTH = 3;
+  const STICK_BOTTOM_WIDTH = 25;
+  const CANVAS_WIDTH = 20;
+  const RADIUS = STICK_TOP_WIDTH / 2;
+
+  const stickPoints = useMemo(() => {
+    const cx = CANVAS_WIDTH / 2;
+    return `
+      ${cx - STICK_TOP_WIDTH / 2},${RADIUS}
+      ${cx + STICK_TOP_WIDTH / 2},${RADIUS}
+      ${cx + STICK_BOTTOM_WIDTH / 2},${stickHeight}
+      ${cx - STICK_BOTTOM_WIDTH / 2},${stickHeight}
+    `;
+  }, [stickHeight]);
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Animated.View
@@ -132,18 +147,32 @@ const MarshmallowStick = ({ onClick }) => {
           styles.stick,
           {
             height: stickHeight,
+            // SVG를 담기 위해 너비를 넉넉하게 잡습니다.
+            width: CANVAS_WIDTH,
+            top: FIXED_TOP_PADDING - 80,
             transform: [
               {
-                translateY: scrollY.interpolate({
-                  inputRange: [-FIXED_TOP_PADDING, ITEM_HEIGHT * marshmallows.length],
-                  outputRange: [0, -ITEM_HEIGHT * Math.max(marshmallows.length - 1, 0)],
-                  extrapolate: "extend",
-                }),
+                translateY: Animated.multiply(scrollY, -1)
               },
             ],
           },
         ]}
-      />
+      >
+        {/* ✅ 기존의 backgroundColor View 대신 SVG 사용 */}
+        <Svg height={stickHeight} width={CANVAS_WIDTH}>
+          <Circle 
+            cx={CANVAS_WIDTH / 2} 
+            cy={RADIUS} 
+            r={RADIUS} 
+            fill={Colors.burn} 
+          />
+          <Polygon
+            points={stickPoints}
+            fill={Colors.burn} // 꼬치 색상
+          />
+        </Svg>
+      </Animated.View>
+
       <Animated.FlatList
         ref={listRef}
         onLayout={(e) => setListHeight(e.nativeEvent.layout.height)}
@@ -185,7 +214,7 @@ const MarshmallowStick = ({ onClick }) => {
         snapToAlignment="center"
         contentContainerStyle={{
           paddingHorizontal: 100,
-          paddingTop: FIXED_TOP_PADDING, 
+          paddingTop: FIXED_TOP_PADDING,
           paddingBottom: FIXED_BOTTOM_PADDING,
         }}
 
@@ -208,8 +237,5 @@ const styles = StyleSheet.create({
   },
   stick: {
     position: "absolute",
-    top: 155,
-    width: 10,
-    backgroundColor: Colors.burn,
   },
 });
