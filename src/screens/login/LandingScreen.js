@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { memo, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Alert,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -12,7 +19,20 @@ import Colors from "../../constants/colors";
 import GoogleIcon from "../../assets/icons/google.svg";
 import KakaoIcon from "../../assets/icons/kakao.svg";
 import AppleIcon from "../../assets/icons/apple.svg";
-import DebugButton from "../../components/DebugButton";
+import LottieView from "lottie-react-native";
+
+const MarshmallowAnimation = memo(() => {
+  return (
+    <LottieView
+      source={require("../../assets/lottie/marshmallow-rotate.json")}
+      autoPlay
+      loop
+      width={200}
+      height={185}
+      renderMode="hardware"
+    />
+  );
+});
 
 const LandingScreen = () => {
   const navigation = useNavigation();
@@ -61,17 +81,22 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.marshmallow}>
+        <MarshmallowAnimation />
+      </View>
       <Text style={styles.logo}>밥땡</Text>
 
       <TouchableOpacity
         style={styles.guestButton}
-        onPress={() => console.log("아직 게스트는 안만듬")}
+        onPress={() => Alert.alert("게스트 기능은 곧 제공될 예정입니다.")}
+        activeOpacity={0.7}
       >
         <Text style={styles.guestButtonText}>게스트로 둘러보기</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.signUpButton}
         onPress={() => navigation.navigate("SignUp", { from: "Landing" })}
+        activeOpacity={0.7}
       >
         <Text style={styles.signUpButtonText}>회원가입</Text>
       </TouchableOpacity>
@@ -80,6 +105,7 @@ const LandingScreen = () => {
         <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "white" }]}
           onPress={onGoogleLoginPress}
+          activeOpacity={0.7}
         >
           <GoogleIcon width={22} height={22} />
         </TouchableOpacity>
@@ -89,12 +115,14 @@ const LandingScreen = () => {
             { backgroundColor: Colors.kakao_yellow },
           ]}
           onPress={onKakaoLoginPress}
+          activeOpacity={0.7}
         >
           <KakaoIcon width={24} height={24} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "black" }]}
           onPress={onAppleLoginPress}
+          activeOpacity={0.7}
         >
           <AppleIcon width={24} height={24} />
         </TouchableOpacity>
@@ -108,12 +136,6 @@ const LandingScreen = () => {
       >
         이미 계정이 있다면? 로그인
       </Text>
-
-      <DebugButton
-        index={0}
-        label={"Server response check"}
-        onPress={() => checkPing()}
-      />
     </SafeAreaView>
   );
 };
@@ -133,10 +155,15 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   logo: {
-    color: "white",
-    fontSize: 48,
-    fontWeight: "bold",
-    marginBottom: 192,
+    color: Colors.background_yellow,
+    fontFamily: "KCCGanpan",
+    fontSize: 20,
+    marginBottom: 90,
+  },
+  marshmallow: {
+    marginBottom: -24,
+    justifyContent: "center",
+    alignItems: "center",
   },
   guestButton: {
     width: "100%",

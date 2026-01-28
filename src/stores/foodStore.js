@@ -111,4 +111,13 @@ export const useFoodStore = create((set, get) => ({
       likedFoodIDs: likedIDs,
     });
   },
+
+  clearStore: () => {
+    set({
+      foodsByID: {},
+      mainFoodIDs: [],
+      categoryFoodIDs: [],
+      likedFoodIDs: [],
+    });
+  },
 }));

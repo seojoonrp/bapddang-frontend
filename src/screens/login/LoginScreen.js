@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import {
   SafeAreaView,
@@ -46,7 +47,7 @@ const LoginScreen = ({ navigation }) => {
         console.log("Login failed");
       }
     } catch (error) {
-      console.log("Login page error:", error);
+      Alert.alert("로그인 실패", "아이디 또는 비밀번호를 확인해주세요.");
     } finally {
       setLoading(false);
     }

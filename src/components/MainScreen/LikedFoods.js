@@ -73,37 +73,62 @@ const LikedFoods = () => {
           중에서 골라볼까요?
         </Text>
       </View>
-      <View style={styles.row}>
-        <View style={styles.foodsContainer}>
-          {displayItems.map((item) => (
-            <TouchableOpacity
-              key={item.food.id}
-              style={styles.food}
-              activeOpacity={0.7}
-              onPress={() => {
-                setSelectedFoodID(item.food.id);
-                setShowInfo(true);
+
+      {displayItems.length === 0 ? (
+        <View
+          style={[
+            styles.row,
+            { height: 60, justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Text style={styles.placeholderText}>음식의&nbsp;</Text>
+          <HeartIcon size={15} fillColor={Colors.point_red} strokeWidth={0} />
+          <Text style={styles.placeholderText}>
+            를 눌러&nbsp;
+            <Text
+              style={{
+                color: Colors.point_red,
+                fontFamily: "NanumSquareRoundEB",
               }}
             >
-              <Image
-                source={{ uri: item.food.imageURL }}
-                style={styles.foodImage}
-              />
-            </TouchableOpacity>
-          ))}
+              좋아요
+            </Text>
+            를 표시해보세요!
+          </Text>
         </View>
-        <View style={styles.dotContainer}>
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
+      ) : (
+        <View style={styles.row}>
+          <View style={styles.foodsContainer}>
+            {displayItems.map((item) => (
+              <TouchableOpacity
+                key={item.food.id}
+                style={styles.food}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setSelectedFoodID(item.food.id);
+                  setShowInfo(true);
+                }}
+              >
+                <Image
+                  source={{ uri: item.food.imageURL }}
+                  style={styles.foodImage}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={styles.dotContainer}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
+          <TouchableOpacity
+            style={styles.allContainer}
+            onPress={() => navigation.navigate("Liked")}
+          >
+            <AllIcon width={55} height={56} />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.allContainer}
-          onPress={() => navigation.navigate("Liked")}
-        >
-          <AllIcon width={55} height={56} />
-        </TouchableOpacity>
-      </View>
+      )}
 
       <ReanimatedModal visible={showInfo} onClose={() => setShowInfo(false)}>
         <FoodInfoModal
@@ -151,6 +176,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
     color: Colors.burn,
+    letterSpacing: -0.3,
+  },
+  placeholderText: {
+    fontSize: 13,
+    fontFamily: "NanumSquareRoundB",
+    color: Colors.slightly_burn,
     letterSpacing: -0.3,
   },
   row: {
