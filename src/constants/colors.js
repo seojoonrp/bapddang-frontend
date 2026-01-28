@@ -19,6 +19,7 @@ const Colors = {
   bg_white: "#FEFDFA",
   kakao_yellow: "#FEE500",
   pressed_button: "#A94946",
+  setting_gray: "#E92F05",
 };
 
 export default Colors;

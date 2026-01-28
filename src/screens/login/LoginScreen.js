@@ -107,9 +107,17 @@ const LoginScreen = ({ navigation }) => {
         </View>
 
         <TouchableOpacity
-          style={styles.loginButton}
+          style={[
+            styles.loginButton,
+            {
+              backgroundColor: isComplete
+                ? Colors.background_yellow
+                : "#bbbab8",
+            },
+          ]}
           onPress={onLoginPress}
           disabled={!isComplete || loading}
+          activeOpacity={0.7}
         >
           <Text style={styles.loginButtonText}>로그인</Text>
         </TouchableOpacity>
@@ -192,6 +200,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background_yellow,
     paddingVertical: 16,
     borderWidth: 1,
+    borderColor: Colors.slightly_burn,
     marginTop: 144,
     marginBottom: 16,
   },

@@ -233,11 +233,12 @@ const SignUpScreen = () => {
             {
               backgroundColor: isComplete
                 ? Colors.background_yellow
-                : Colors.slightly_burn,
+                : "#bbbab8",
             },
           ]}
           onPress={() => setShowTerms(true)}
           disabled={!isComplete}
+          activeOpacity={0.7}
         >
           <Text style={styles.nextButtonText}>다음</Text>
         </TouchableOpacity>
@@ -311,6 +312,7 @@ const SignUpScreen = () => {
               ]}
               onPress={handleAgree}
               disabled={!isAllAgreed}
+              activeOpacity={0.7}
             >
               <Text
                 style={[

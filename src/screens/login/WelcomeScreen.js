@@ -14,6 +14,7 @@ const WelcomeScreen = () => {
       <TouchableOpacity
         style={styles.nextButton}
         onPress={() => navigation.replace("Login")}
+        activeOpacity={0.7}
       >
         <Text style={styles.nextButtonText}>로그인하러 가기</Text>
       </TouchableOpacity>

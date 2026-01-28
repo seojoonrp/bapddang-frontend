@@ -17,10 +17,11 @@ const SettingScreen = () => {
           style={styles.backContainer}
           onPress={() => navigation.goBack()}
         >
-          <ChevronIcon width={28} height={28} color={Colors.nurim} />
+          <ChevronIcon width={28} height={28} color={Colors.setting_gray} />
         </TouchableOpacity>
         <Text style={styles.headerText}>설정</Text>
       </View>
+
       <View style={styles.infoRowContainer}>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>앱 버전</Text>
@@ -31,14 +32,16 @@ const SettingScreen = () => {
           <Text style={styles.infoValue}>@bapddang</Text>
         </View>
       </View>
+
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.button} onPress={handleLogout}>
           <Text style={styles.buttonText}>로그아웃</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: Colors.background_white }]}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.buttonText, { color: Colors.nurim }]}>
+          <Text style={[styles.buttonText, { color: Colors.setting_gray }]}>
             회원 탈퇴
           </Text>
         </TouchableOpacity>
@@ -72,9 +75,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerText: {
-    color: Colors.nurim,
-    fontSize: 32,
-    fontFamily: "KCCGanpan",
+    color: Colors.setting_gray,
+    fontSize: 24,
+    fontFamily: "NanumSquareRoundEB",
+    letterSpacing: -0.3,
   },
   infoRowContainer: {
     width: "100%",
@@ -89,12 +93,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 18,
-    color: Colors.nurim,
+    color: Colors.setting_gray,
     fontFamily: "NanumSquareRoundB",
   },
   infoValue: {
     fontSize: 18,
-    color: Colors.slightly_burn,
+    color: "#c69090",
     fontFamily: "NanumSquareRoundR",
   },
   buttonRow: {
@@ -104,13 +108,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    width: 140,
+    width: 130,
     height: 48,
-    backgroundColor: Colors.nurim,
+    backgroundColor: Colors.setting_gray,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
-    borderColor: Colors.nurim,
+    borderRadius: 99,
+    borderColor: Colors.setting_gray,
     borderWidth: 1.5,
   },
   buttonText: {

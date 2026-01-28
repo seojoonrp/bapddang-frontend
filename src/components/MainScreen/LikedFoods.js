@@ -84,16 +84,15 @@ const LikedFoods = () => {
           <Text style={styles.placeholderText}>음식의&nbsp;</Text>
           <HeartIcon size={15} fillColor={Colors.point_red} strokeWidth={0} />
           <Text style={styles.placeholderText}>
-            를 눌러&nbsp;
+            를 눌러 음식을&nbsp;
             <Text
               style={{
                 color: Colors.point_red,
                 fontFamily: "NanumSquareRoundEB",
               }}
             >
-              좋아요
+              찜해보세요!
             </Text>
-            를 표시해보세요!
           </Text>
         </View>
       ) : (
@@ -204,6 +203,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  foodImage: {
+    width: "92%",
+    height: "92%",
+    borderRadius: 99,
+  },
   dotContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -217,10 +221,5 @@ const styles = StyleSheet.create({
   },
   allContainer: {
     marginTop: -2,
-  },
-  foodImage: {
-    width: "92%",
-    height: "92%",
-    borderRadius: 99,
   },
 });
