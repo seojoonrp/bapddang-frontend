@@ -11,6 +11,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import Triangle from "../../assets/icons/dropdown.svg";
+import ResetIcon from "../../assets/icons/refresh.svg";
 import Colors from "../../constants/colors";
 import { categoryGroups } from "../../constants/data/categoryData";
 import Animated, {
@@ -27,16 +28,21 @@ const CategorySelector = ({ onSelect }) => {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
   const [isOpen, setIsOpen] = useState(false);
-  const wasOpen = useRef(false);
   const [selected, setSelected] = useState([]);
 
-  // 닫힐 때 선택된 카테고리 전달
+  const selectedRef = useRef(selected);
+  const wasOpen = useRef(false);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
   useEffect(() => {
     if (wasOpen.current && !isOpen) {
-      onSelect(selected);
+      onSelect(selectedRef.current);
     }
     wasOpen.current = isOpen;
-  }, [isOpen, onSelect, selected]);
+  }, [isOpen, onSelect]);
 
   const toggleCategory = (item) => {
     if (selected.includes(item)) {
@@ -44,6 +50,10 @@ const CategorySelector = ({ onSelect }) => {
     } else {
       setSelected([...selected, item]);
     }
+  };
+
+  const resetCategories = () => {
+    setSelected([]);
   };
 
   const displayText = useMemo(() => {
@@ -167,6 +177,14 @@ const CategorySelector = ({ onSelect }) => {
               </View>
             ))}
           </ScrollView>
+
+          <TouchableOpacity
+            style={styles.resetContainer}
+            onPress={resetCategories}
+            activeOpacity={0.7}
+          >
+            <ResetIcon width={20} height={20} />
+          </TouchableOpacity>
         </Animated.View>
       )}
     </View>
@@ -246,7 +264,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.background_yellow,
     padding: 4,
-    overflow: "hidden",
     zIndex: 501,
     boxShadow: "0 4px 6px 2px rgba(0, 0, 0, 0.15)",
   },
@@ -291,5 +308,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light_text_gray,
     marginHorizontal: 24,
     marginVertical: 4,
+  },
+  resetContainer: {
+    position: "absolute",
+    top: -2,
+    right: -44,
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.background_white,
+    borderColor: Colors.background_yellow,
+    borderWidth: 3,
+    borderRadius: 99,
   },
 });
