@@ -102,7 +102,7 @@ const MarshmallowStick = ({ onClick }) => {
   }, []);
 
   const stickHeight = useMemo(
-    () => ITEM_HEIGHT * marshmallows.length + 200,
+    () => ITEM_HEIGHT * marshmallows.length + 500,
     [marshmallows.length]
   );
 
