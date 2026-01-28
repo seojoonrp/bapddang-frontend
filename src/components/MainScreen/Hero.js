@@ -8,7 +8,9 @@ import { useModeStore } from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import { memo } from "react";
-import EditAndLike from "./EditAndLike";
+import Fire from "../../assets/images/fire.svg";
+import Stick from "../../assets/images/stick.svg";
+import LottieView from "lottie-react-native";
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const { mode, modeColor } = useModeStore();
@@ -33,6 +35,23 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         </Animated.Text>
         <ModeSwitch />
       </View>
+
+      <View style={styles.stick}>
+        <Stick width={422} height={80} />
+      </View>
+
+      <View style={styles.marshmallow}>
+        <LottieView
+          source={require("../../assets/lottie/marshmallow-rotate.json")}
+          autoPlay
+          loop
+          style={{ width: 117, height: 137 }}
+        />
+      </View>
+
+      <View style={styles.fire}>
+        <Fire width={47} height={80} />
+      </View>
     </Animated.View>
   );
 };
@@ -48,6 +67,16 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     overflow: "hidden",
     zIndex: 10,
+  },
+  fire: {
+    position: "absolute",
+    bottom: 0,
+    left: 110,
+  },
+  stick: {
+    position: "absolute",
+    bottom: 85,
+    left: -190,
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,

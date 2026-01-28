@@ -14,7 +14,6 @@ export const categoryGroups = [
       "치즈",
       "패스트푸드",
       "빵",
-      ,
       "해산물",
       "죽",
     ],
