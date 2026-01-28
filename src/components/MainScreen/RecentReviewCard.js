@@ -5,8 +5,23 @@ import StarIcon from "../../assets/icons/star.svg";
 import Colors from "../../constants/colors";
 
 const RecentReviewCard = ({ data, setSelectedFoodID, setShowInfo }) => {
-  const calculatePastTimeText = (timestamp) => {
-    return "2분 전"; // TODO
+  const calculatePastTimeText = (createdAt) => {
+    const now = new Date();
+    const createdDate = new Date(createdAt);
+    const diffInMs = now - createdDate;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMinutes < 1) {
+      return "방금 전";
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}분 전`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}시간 전`;
+    } else {
+      return `${diffInDays}일 전`;
+    }
   };
 
   return (
@@ -29,9 +44,11 @@ const RecentReviewCard = ({ data, setSelectedFoodID, setShowInfo }) => {
               {calculatePastTimeText(data.createdAt)}
             </Text>
           </View>
-          <View style={styles.commentPill}>
-            <Text style={styles.commentText}>{data.comment}</Text>
-          </View>
+          {data.comment.length > 0 && (
+            <View style={styles.commentPill}>
+              <Text style={styles.commentText}>{data.comment}</Text>
+            </View>
+          )}
         </View>
       </View>
 
