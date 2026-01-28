@@ -15,7 +15,7 @@ export const fetchMainFoods = async ({ speed, count }) => {
 
 export const fetchCategoryFoods = async ({ categories, speed, count }) => {
   try {
-    const result = await api.get("/foods/", {
+    const result = await api.get("/foods/category", {
       params: { category: categories, speed, count },
     });
     return result;
