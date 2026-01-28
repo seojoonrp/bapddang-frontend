@@ -81,8 +81,30 @@ export const useHeroAnimations = (scrollY, scrollThreshold) => {
     ),
   }));
 
+  const animatedCharacterStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(
+        scrollY.value,
+        [0, scrollThreshold * 0.7],
+        [1, 0],
+        Extrapolation.CLAMP,
+      ),
+      transform: [
+        {
+          translateY: interpolate(
+            scrollY.value,
+            [0, scrollThreshold],
+            [0, 20],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    };
+  });
+
   return {
     containerStyle,
     textStyle,
+    animatedCharacterStyle,
   };
 };

@@ -12,13 +12,24 @@ import Fire from "../../assets/images/fire.svg";
 import Stick from "../../assets/images/stick.svg";
 import LottieView from "lottie-react-native";
 
+const MarshmallowAnimation = memo(() => {
+  return (
+    <LottieView
+      source={require("../../assets/lottie/marshmallow-rotate.json")}
+      autoPlay
+      loop
+      width={200}
+      height={185}
+      renderMode="hardware"
+    />
+  );
+});
+
 const Hero = ({ scrollY, scrollThreshold }) => {
   const { mode, modeColor } = useModeStore();
 
-  const { containerStyle, textStyle } = useHeroAnimations(
-    scrollY,
-    scrollThreshold,
-  );
+  const { containerStyle, textStyle, animatedCharacterStyle } =
+    useHeroAnimations(scrollY, scrollThreshold);
 
   return (
     <Animated.View style={[styles.container, containerStyle]}>
@@ -36,22 +47,21 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         <ModeSwitch />
       </View>
 
-      <View style={styles.stick}>
-        <Stick width={422} height={80} />
-      </View>
+      <Animated.View
+        style={[styles.characterContainer, animatedCharacterStyle]}
+      >
+        <View style={styles.fire}>
+          <Fire width={47} height={80} />
+        </View>
 
-      <View style={styles.marshmallow}>
-        <LottieView
-          source={require("../../assets/lottie/marshmallow-rotate.json")}
-          autoPlay
-          loop
-          style={{ width: 117, height: 137 }}
-        />
-      </View>
+        <View style={styles.stick}>
+          <Stick width={422} height={80} />
+        </View>
 
-      <View style={styles.fire}>
-        <Fire width={47} height={80} />
-      </View>
+        <View style={styles.marshmallow}>
+          <MarshmallowAnimation />
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 };
@@ -68,15 +78,25 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     zIndex: 10,
   },
+  characterContainer: {
+    flex: 1,
+    marginLeft: -10,
+  },
   fire: {
     position: "absolute",
     bottom: 0,
-    left: 110,
+    left: 100,
+  },
+  marshmallow: {
+    position: "absolute",
+    bottom: 10,
+    left: 35,
+    transform: [{ rotate: "105deg" }],
   },
   stick: {
     position: "absolute",
-    bottom: 85,
-    left: -190,
+    bottom: 80,
+    left: -180,
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,
