@@ -16,6 +16,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { useFoodStore } from "../../stores/foodStore";
 import * as Location from "expo-location";
+import * as Linking from "expo-linking";
+
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 const FoodInfoModal = ({ foodID, onClose }) => {
   if (!foodID) return null;
@@ -74,6 +78,22 @@ const FoodInfoModal = ({ foodID, onClose }) => {
     }
   }, [selectedPlace]);
 
+  const openKakaoMap = () => {
+    if (!selectedPlace) return;
+
+    const { place_name, x, y } = selectedPlace;
+    const url = `kakaomap://search?q=${encodeURIComponent(place_name)}&lookMode=1`;
+    const webUrl = `https://map.kakao.com/link/search/${encodeURIComponent(place_name)}`;
+
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        Linking.openURL(webUrl);
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.whiteContainer}>
@@ -131,16 +151,18 @@ const FoodInfoModal = ({ foodID, onClose }) => {
             )}
 
             {selectedPlace && (
-              <Animated.View
+              <AnimatedTouchableOpacity
                 entering={ZoomInEasyDown.duration(250)}
                 exiting={ZoomOutEasyDown.duration(200)}
                 style={styles.placeInfoContainer}
+                onPress={openKakaoMap}
+                activeOpacity={0.75}
               >
                 <Text style={styles.placeName}>{selectedPlace.place_name}</Text>
                 <Text style={styles.placeAddress}>
                   {selectedPlace.address_name}
                 </Text>
-              </Animated.View>
+              </AnimatedTouchableOpacity>
             )}
           </View>
 
