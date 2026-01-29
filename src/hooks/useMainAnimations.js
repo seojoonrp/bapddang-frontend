@@ -13,7 +13,7 @@ import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import { useModeStore } from "../stores/modeStore";
 import { useMainLayout } from "./useMainLayout";
-import { use } from "react";
+import { use, useMemo } from "react";
 
 export const useMainAnimations = (scrollThreshold) => {
   const scrollY = useSharedValue(0);
@@ -173,20 +173,23 @@ export const useMainAnimations = (scrollThreshold) => {
     ],
   }));
 
-  return {
-    scrollY,
-    panGesture,
-    animatedStyles: {
-      logo: animatedLogoStyle,
-      iconOverlay: animatedIconOverlayStyle,
-      headerLine: animatedHeaderLineStyle,
-      middleContent: animatedMiddleContentStyle,
-      bottomSheet: animatedBottomSheetStyle,
-      circle: animatedCircleStyle,
-      editAndLike: animatedEditAndLikeStyle,
-      originalHandleText: animatedOriginalHandleText,
-      newHandleText: animatedNewHandleText,
-      bottomSheetContent: animatedBottomSheetContent,
-    },
-  };
+  return useMemo(
+    () => ({
+      scrollY,
+      panGesture,
+      animatedStyles: {
+        logo: animatedLogoStyle,
+        iconOverlay: animatedIconOverlayStyle,
+        headerLine: animatedHeaderLineStyle,
+        middleContent: animatedMiddleContentStyle,
+        bottomSheet: animatedBottomSheetStyle,
+        circle: animatedCircleStyle,
+        editAndLike: animatedEditAndLikeStyle,
+        originalHandleText: animatedOriginalHandleText,
+        newHandleText: animatedNewHandleText,
+        bottomSheetContent: animatedBottomSheetContent,
+      },
+    }),
+    [modeColor],
+  );
 };

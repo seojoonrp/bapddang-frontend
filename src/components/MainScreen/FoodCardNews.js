@@ -1,7 +1,8 @@
 // src/components/MainScreen/FoodCardNews.js
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,7 +10,10 @@ import Animated, {
   interpolate,
   interpolateColor,
   Extrapolation,
-  runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
+  runOnJS,
+  withRepeat,
+  withTiming,
+  Easing, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
 } from "react-native-reanimated";
 import FoodInfoModal from "./FoodInfoModal";
 import Colors from "../../constants/colors";
@@ -17,12 +21,62 @@ import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
 import { useFoodStore } from "../../stores/foodStore";
 import { useFoodFeed } from "../../hooks/useFoodFeed";
+import { LinearGradient } from "expo-linear-gradient";
+import { ScrollView } from "react-native-gesture-handler";
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const OVER_SCROLL_THRESHOLD = 90;
 
+const SkeletonCard = memo(({ size }) => {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(progress.value, [0, 1], [-size, size]);
+    return {
+      transform: [{ translateX }],
+    };
+  });
+
+  return (
+    <View
+      style={[
+        styles.cardContainer,
+        {
+          borderWidth: 0,
+          width: size,
+          height: size,
+          overflow: "hidden",
+          backgroundColor: "#e0e0e0",
+          marginRight: 15,
+        },
+      ]}
+    >
+      <AnimatedLinearGradient
+        colors={["#e0e0e0", "#f5f5f5", "#e0e0e0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[StyleSheet.absoluteFill, { width: "200%" }, animatedStyle]}
+      />
+    </View>
+  );
+});
+
 const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
   const item = useFoodStore((state) => state.foodsByID[foodID]);
-  if (!item) return null;
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  if (!foodID || !item) {
+    return <SkeletonCard size={size} />;
+  }
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -39,6 +93,12 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
 
   return (
     <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
+      {!imageLoaded && (
+        <View style={StyleSheet.absoluteFill}>
+          <SkeletonCard size={size} />
+        </View>
+      )}
+
       <Animated.View
         style={[
           styles.cardContainer,
@@ -46,8 +106,18 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
           animatedStyle,
         ]}
       >
-        <Image source={{ uri: item.food.imageURL }} style={styles.cardImage} />
-        <Text style={styles.foodText}>{item.food.name}</Text>
+        <Image
+          source={{ uri: item.food.imageURL }}
+          style={[styles.cardImage, !imageLoaded && { opacity: 0 }]}
+          contentFit="cover"
+          cachePolicy={"memory-disk"}
+          priority="high"
+          onLoad={() => setImageLoaded(true)}
+          transition={200}
+        />
+        <Text style={[styles.foodText, !imageLoaded && { opacity: 0 }]}>
+          {item.food.name}
+        </Text>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -65,6 +135,8 @@ const FoodCardNews = ({
   const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
     categories,
   });
+
+  const displayData = isLoading ? [null, null, null] : foodIDs;
 
   const sidePadding = (screenWidth - size) / 2;
 
@@ -152,8 +224,6 @@ const FoodCardNews = ({
     };
   });
 
-  if (isLoading) return null;
-
   return (
     <View style={styles.container}>
       {canLoadMore && (
@@ -168,8 +238,10 @@ const FoodCardNews = ({
 
       <Animated.FlatList
         ref={flatListRef}
-        data={foodIDs}
-        keyExtractor={(id) => id.toString()}
+        data={displayData}
+        keyExtractor={(item, index) =>
+          item ? item.toString() : `skeleton-${index}`
+        }
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={size}
@@ -177,6 +249,9 @@ const FoodCardNews = ({
         contentContainerStyle={{ paddingHorizontal: sidePadding }}
         scrollEventThrottle={16}
         onScroll={scrollHandler}
+        initialNumToRender={3}
+        windowSize={5}
+        maxToRenderPerBatch={5}
         renderItem={({ item: id, index }) => (
           <CardItem
             foodID={id}
