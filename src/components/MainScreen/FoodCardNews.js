@@ -120,10 +120,13 @@ const FoodCardNews = ({
 
   useEffect(() => {
     scrollX.value = 0;
+    prevLengthRef.current = 0;
+
     if (flatListRef.current) {
-      flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      });
     }
-    prevLengthRef.current = foodIDs.length;
   }, [type, categories]);
 
   const handleCardPress = useCallback((foodID) => {
@@ -132,7 +135,11 @@ const FoodCardNews = ({
   }, []);
 
   useEffect(() => {
-    if (!isExtraLoading && foodIDs.length > prevLengthRef.current) {
+    if (
+      !isExtraLoading &&
+      foodIDs.length > prevLengthRef.current &&
+      prevLengthRef.current !== 0
+    ) {
       const newIndex = prevLengthRef.current;
       requestAnimationFrame(() => {
         flatListRef.current?.scrollToIndex({
