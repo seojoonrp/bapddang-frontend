@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Pressable,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Modal from "react-native-modal";
@@ -67,7 +68,11 @@ const SignUpScreen = () => {
   const [pwSame, setPwSame] = useState(false);
 
   const isComplete =
-    usernameCondition && !usernameExists && pwCondition && pwSame;
+    usernameCondition &&
+    !usernameExists &&
+    isUsernameChecked &&
+    pwCondition &&
+    pwSame;
 
   const [loading, setLoading] = useState(false);
 
@@ -93,7 +98,13 @@ const SignUpScreen = () => {
   }, [username]);
 
   const handleCheckUsername = async () => {
-    if (!usernameCondition) return;
+    if (!usernameCondition) {
+      Alert.alert(
+        "아이디 형식 오류",
+        "아이디를 3자 이상 15자 이하로 입력해주세요!",
+      );
+      return;
+    }
 
     setCheckingUsername(true);
     try {
@@ -138,16 +149,28 @@ const SignUpScreen = () => {
 
         <View style={[styles.inputContainer, { marginBottom: 8 }]}>
           <Text style={styles.inputFieldText}>ID</Text>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.flexInput}
-              placeholder="아이디를 입력해주세요..."
-              value={username}
-              onChangeText={setUsername}
-              onBlur={handleCheckUsername}
-              autoCapitalize="none"
-              placeholderTextColor={Colors.placeholder_gray}
-            />
+          <View style={styles.idInputContainer}>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.flexInput}
+                placeholder="아이디를 입력해주세요..."
+                value={username}
+                onChangeText={(text) => {
+                  setUsername(text);
+                  setIsUsernameChecked(false);
+                }}
+                autoCapitalize="none"
+                placeholderTextColor={Colors.placeholder_gray}
+              />
+            </View>
+
+            <TouchableOpacity
+              onPress={handleCheckUsername}
+              style={styles.checkButton}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.checkButtonText}>중복 확인</Text>
+            </TouchableOpacity>
           </View>
           <StatusMessage
             okMessage="3자 이상 15자 이하"
@@ -243,6 +266,7 @@ const SignUpScreen = () => {
           <Text style={styles.nextButtonText}>다음</Text>
         </TouchableOpacity>
 
+        {/* 이용약관 모달 */}
         <Modal
           isVisible={showTerms}
           animationIn="slideInUp"
@@ -340,7 +364,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.point_red,
     justifyContent: "flex-end",
     alignItems: "center",
-    width: "100%",
     gap: 12,
     paddingHorizontal: 12,
   },
@@ -361,6 +384,13 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: "100%",
   },
+  idInputContainer: {
+    width: "100%",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   inputFieldText: {
     fontFamily: "NanumSquareRoundEB",
     fontSize: 16,
@@ -369,13 +399,27 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   inputWrapper: {
-    width: "100%",
+    flexGrow: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.background_white,
     borderRadius: 20,
     paddingHorizontal: 20,
     height: 60,
+  },
+  checkButton: {
+    backgroundColor: "#b91914",
+    paddingHorizontal: 16,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  checkButtonText: {
+    color: Colors.background_white,
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 16,
+    letterSpacing: -0.3,
   },
   flexInput: {
     flex: 1,

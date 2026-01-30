@@ -81,11 +81,6 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.marshmallow}>
-        <MarshmallowAnimation />
-      </View>
-      <Text style={styles.logo}>밥땡</Text>
-
       <TouchableOpacity
         style={styles.guestButton}
         onPress={() => Alert.alert("게스트 기능은 곧 제공될 예정입니다.")}
