@@ -180,11 +180,6 @@ const FoodCardNews = ({
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
       [Colors.light_gray, Colors.point_red],
     );
-    const backgroundColor = interpolateColor(
-      scrollX.value,
-      [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-      [Colors.background_yellow, Colors.point_red],
-    );
     const borderRadius = interpolate(
       scrollX.value,
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
@@ -194,10 +189,18 @@ const FoodCardNews = ({
 
     return {
       borderColor,
-      backgroundColor,
       borderTopLeftRadius: borderRadius,
       borderBottomLeftRadius: borderRadius,
       transform: [{ translateX }, { translateY: size * 0.1 }],
+    };
+  });
+  const animatedFooterTextStyle = useAnimatedStyle(() => {
+    return {
+      color: interpolateColor(
+        scrollX.value,
+        [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
+        [Colors.background_yellow, Colors.point_red],
+      ),
     };
   });
 
@@ -207,7 +210,7 @@ const FoodCardNews = ({
         <Animated.View
           style={[styles.footer, { height: size * 0.8 }, animatedFooterStyle]}
         >
-          <Animated.Text style={styles.footerText}>
+          <Animated.Text style={[styles.footerText, animatedFooterTextStyle]}>
             당겨서{"\n"}음식{"\n"}더 보기
           </Animated.Text>
         </Animated.View>
@@ -287,8 +290,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     textShadowColor: "black",
-    textShadowOffset: { width: 0, height: -5 },
-    textShadowRadius: 50,
+    textShadowRadius: 80,
     shadowOpacity: 1,
   },
   paginationContainer: {
@@ -311,7 +313,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     textAlign: "left",
-    color: Colors.background_yellow,
     fontSize: 14,
     fontFamily: "NanumSquareRoundB",
     lineHeight: 20,
