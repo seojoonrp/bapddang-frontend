@@ -1,7 +1,13 @@
 // src/components/MainScreen/FoodCardNews.js
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  InteractionManager,
+} from "react-native";
 import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
@@ -10,10 +16,7 @@ import Animated, {
   interpolate,
   interpolateColor,
   Extrapolation,
-  runOnJS,
-  withRepeat,
-  withTiming,
-  Easing, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
+  runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
 } from "react-native-reanimated";
 import FoodInfoModal from "./FoodInfoModal";
 import Colors from "../../constants/colors";
@@ -21,62 +24,17 @@ import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
 import { useFoodStore } from "../../stores/foodStore";
 import { useFoodFeed } from "../../hooks/useFoodFeed";
-import { LinearGradient } from "expo-linear-gradient";
-import { ScrollView } from "react-native-gesture-handler";
-
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+import LoadingPlaceholer from "../common/LoadingPlaceholer";
+import { useShallow } from "zustand/shallow";
 
 const OVER_SCROLL_THRESHOLD = 90;
-
-const SkeletonCard = memo(({ size }) => {
-  const progress = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withRepeat(
-      withTiming(1, { duration: 1500, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const translateX = interpolate(progress.value, [0, 1], [-size, size]);
-    return {
-      transform: [{ translateX }],
-    };
-  });
-
-  return (
-    <View
-      style={[
-        styles.cardContainer,
-        {
-          borderWidth: 0,
-          width: size,
-          height: size,
-          overflow: "hidden",
-          backgroundColor: "#e0e0e0",
-          marginRight: 15,
-        },
-      ]}
-    >
-      <AnimatedLinearGradient
-        colors={["#e0e0e0", "#f5f5f5", "#e0e0e0"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={[StyleSheet.absoluteFill, { width: "200%" }, animatedStyle]}
-      />
-    </View>
-  );
-});
+const SKELETON_DATA = [null, null, null];
 
 const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
-  const item = useFoodStore((state) => state.foodsByID[foodID]);
+  const item = useFoodStore(
+    useShallow((state) => (foodID ? state.foodsByID[foodID] : null)),
+  );
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  if (!foodID || !item) {
-    return <SkeletonCard size={size} />;
-  }
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -91,14 +49,8 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
     ],
   }));
 
-  return (
-    <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
-      {!imageLoaded && (
-        <View style={StyleSheet.absoluteFill}>
-          <SkeletonCard size={size} />
-        </View>
-      )}
-
+  if (!item || !foodID) {
+    return (
       <Animated.View
         style={[
           styles.cardContainer,
@@ -106,18 +58,36 @@ const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
           animatedStyle,
         ]}
       >
+        <LoadingPlaceholer text="음식 정보를 불러오는 중..." />
+      </Animated.View>
+    );
+  }
+
+  return (
+    <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
+      <Animated.View
+        style={[
+          styles.cardContainer,
+          { width: size, height: size },
+          animatedStyle,
+        ]}
+      >
+        {!imageLoaded && (
+          <View style={[StyleSheet.absoluteFill]}>
+            <LoadingPlaceholer text="이미지 로딩 중..." />
+          </View>
+        )}
+
         <Image
           source={{ uri: item.food.imageURL }}
-          style={[styles.cardImage, !imageLoaded && { opacity: 0 }]}
+          style={[styles.cardImage]}
           contentFit="cover"
           cachePolicy={"memory-disk"}
-          priority="high"
           onLoad={() => setImageLoaded(true)}
-          transition={200}
+          transition={300}
         />
-        <Text style={[styles.foodText, !imageLoaded && { opacity: 0 }]}>
-          {item.food.name}
-        </Text>
+
+        {imageLoaded && <Text style={styles.foodText}>{item.food.name}</Text>}
       </Animated.View>
     </TouchableOpacity>
   );
@@ -136,7 +106,7 @@ const FoodCardNews = ({
     categories,
   });
 
-  const displayData = isLoading ? [null, null, null] : foodIDs;
+  const displayData = isLoading ? SKELETON_DATA : foodIDs;
 
   const sidePadding = (screenWidth - size) / 2;
 
@@ -144,7 +114,7 @@ const FoodCardNews = ({
   const [showInfo, setShowInfo] = useState(false);
 
   const scrollX = useSharedValue(0);
-  const maxScrollX = size * (foodIDs.length - 1);
+  const maxScrollX = size * (displayData.length - 1);
   const flatListRef = useRef(null);
   const prevLengthRef = useRef(foodIDs.length);
 
@@ -249,9 +219,9 @@ const FoodCardNews = ({
         contentContainerStyle={{ paddingHorizontal: sidePadding }}
         scrollEventThrottle={16}
         onScroll={scrollHandler}
-        initialNumToRender={3}
-        windowSize={5}
-        maxToRenderPerBatch={5}
+        initialNumToRender={2}
+        windowSize={3}
+        maxToRenderPerBatch={3}
         renderItem={({ item: id, index }) => (
           <CardItem
             foodID={id}
@@ -300,6 +270,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 16,
     overflow: "hidden",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
   },
   cardImage: { width: "100%", height: "100%" },
   foodText: {
@@ -309,7 +280,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     textShadowColor: "black",
-    textShadowOffset: { width: 0, height: 5 },
+    textShadowOffset: { width: 0, height: -5 },
     textShadowRadius: 50,
     shadowOpacity: 1,
   },

@@ -58,9 +58,9 @@ const Hero = ({ scrollY, scrollThreshold }) => {
           <Stick width={422} height={80} />
         </View>
 
-        <View style={styles.marshmallow}>
+        {/* <View style={styles.marshmallow}>
           <MarshmallowAnimation />
-        </View>
+        </View> */}
       </Animated.View>
     </Animated.View>
   );

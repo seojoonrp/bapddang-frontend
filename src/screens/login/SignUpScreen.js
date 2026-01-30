@@ -280,7 +280,7 @@ const SignUpScreen = () => {
             <View style={styles.grabBar} />
 
             <Text style={styles.modalTitle}>
-              서비스 이용에 필요한 약관에 동의해주세요.
+              서비스 이용에 필요한 약관에 동의해주세요
             </Text>
 
             <View style={styles.checkboxWrapper}>

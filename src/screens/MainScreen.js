@@ -1,6 +1,6 @@
 // src/screens/MainScreen.js
 
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, InteractionManager } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -14,10 +14,18 @@ import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import EditAndLike from "../components/MainScreen/EditAndLike";
-import DebugButton from "../components/DebugButton";
+import { useEffect, useState } from "react";
 
 const MainScreen = () => {
   const navigation = useNavigation();
+
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      setIsReady(true);
+    });
+    return () => task.cancel();
+  }, []);
 
   const { screenWidth, insets, scrollThreshold } = useMainLayout();
 
@@ -25,6 +33,10 @@ const MainScreen = () => {
     useMainAnimations(scrollThreshold);
 
   const showTextBubble = useSharedValue(0);
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <GestureDetector gesture={panGesture}>

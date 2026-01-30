@@ -47,7 +47,7 @@ export const useFoodFeed = (type, options = {}) => {
 
   useEffect(() => {
     fetchData();
-  }, [type, mode, options.categories]);
+  }, [fetchData]);
 
   return {
     foodIDs,

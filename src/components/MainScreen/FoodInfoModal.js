@@ -7,8 +7,14 @@ import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
 import HeartIcon from "../../components/svg/HeartIcon";
 import KakaoMap from "../common/KakaoMap";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
   ZoomIn,
   ZoomInEasyDown,
   ZoomOut,
@@ -17,9 +23,52 @@ import Animated, {
 import { useFoodStore } from "../../stores/foodStore";
 import * as Location from "expo-location";
 import * as Linking from "expo-linking";
+import { LinearGradient } from "expo-linear-gradient";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+
+const SkeletonCard = memo(() => {
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, {
+        duration: 1500,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(progress.value, [0, 1], [-200, 200]);
+    return {
+      transform: [{ translateX }],
+    };
+  });
+
+  return (
+    <View
+      style={{
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        backgroundColor: "#e0e0e0",
+        marginRight: 15,
+      }}
+    >
+      <AnimatedLinearGradient
+        colors={["#e0e0e0", "#f5f5f5", "#e0e0e0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[StyleSheet.absoluteFill, { width: "200%" }, animatedStyle]}
+      />
+    </View>
+  );
+});
 
 const FoodInfoModal = ({ foodID, onClose }) => {
   if (!foodID) return null;
@@ -144,9 +193,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
               />
             ) : (
               <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>
-                  지도를 불러오는 중입니다...
-                </Text>
+                <SkeletonCard />
               </View>
             )}
 
@@ -319,9 +366,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.background_light_gray,
   },
   loadingText: {
     fontFamily: "NanumSquareB",

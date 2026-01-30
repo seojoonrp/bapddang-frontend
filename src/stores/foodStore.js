@@ -42,13 +42,19 @@ export const useFoodStore = create((set, get) => ({
     const { foodsByID } = get();
     const currentIDs = get()[`${type}FoodIDs`] || [];
 
+    const currentIDSet = new Set(currentIDs);
     const newFoodsByID = { ...foodsByID };
-    const newIDs = data
-      .filter((item) => !currentIDs.includes(item.food.id))
-      .map((item) => {
-        newFoodsByID[item.food.id] = item;
-        return item.food.id;
-      });
+    const newIDs = [];
+
+    for (const item of data) {
+      const id = item.food.id;
+      if (!currentIDSet.has(id)) {
+        newFoodsByID[id] = item;
+        newIDs.push(id);
+      }
+    }
+
+    if (newIDs.length === 0) return;
 
     set({
       foodsByID: newFoodsByID,
