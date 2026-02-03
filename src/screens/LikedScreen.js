@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
     color: Colors.point_red,
     fontSize: 24,
     fontFamily: "NanumSquareRoundEB",
-    letterSpacing: -0.3,
   },
   foodsContainer: {
     flex: 1,

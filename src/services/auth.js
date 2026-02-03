@@ -129,7 +129,7 @@ export const handleAppleLogin = async () => {
 
     const result = await api.post("/auth/apple", {
       identityToken: credential.identityToken,
-      fullName: credential.fullName,
+      authorizationCode: credential.authorizationCode,
     });
     return await processAuthResult(result, "Apple");
   } catch (error) {

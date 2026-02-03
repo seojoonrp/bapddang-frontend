@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "NanumSquareRoundEB",
     color: Colors.point_red,
-    letterSpacing: -0.3,
     marginRight: 4,
   },
   rightIconContainer: {

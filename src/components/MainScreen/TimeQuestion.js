@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
   timePillText: {
     color: Colors.point_red,
     fontFamily: "NanumSquareRoundEB",
-    letterSpacing: -0.3,
     fontSize: 18,
   },
   questionText: {
@@ -102,6 +101,5 @@ const styles = StyleSheet.create({
     color: Colors.text_gray,
     fontSize: 12,
     fontFamily: "NanumSquareRoundB",
-    letterSpacing: -0.2,
   },
 });

@@ -27,6 +27,5 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontFamily: "NanumSquareRoundB",
-    letterSpacing: -0.3,
   },
 });

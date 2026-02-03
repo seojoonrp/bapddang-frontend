@@ -1,34 +1,43 @@
 import { useEffect, useState } from "react";
-import * as Font from "expo-font";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
 import Navigation from "./Navigation";
 import { initGoogleLogin } from "./services/auth";
 import { PortalProvider } from "@gorhom/portal";
 
+SplashScreen.preventAutoHideAsync();
+
 const App = () => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [loaded, error] = useFonts({
+    NanumSquareEB: require("./assets/fonts/NanumSquareOTF_acEB.otf"),
+    NanumSquareB: require("./assets/fonts/NanumSquareOTF_acB.otf"),
+    NanumSquareR: require("./assets/fonts/NanumSquareOTF_acR.otf"),
+    NanumSquareL: require("./assets/fonts/NanumSquareOTF_acL.otf"),
+    NanumSquareRoundEB: require("./assets/fonts/NanumSquareRoundOTFEB.otf"),
+    NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundOTFB.otf"),
+    NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundOTFR.otf"),
+    NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundOTFL.otf"),
+    KCCGanpan: require("./assets/fonts/KCCGanpan.otf"),
+  });
 
   useEffect(() => {
-    Font.loadAsync({
-      NanumSquareEB: require("./assets/fonts/NanumSquareOTF_acEB.otf"),
-      NanumSquareB: require("./assets/fonts/NanumSquareOTF_acB.otf"),
-      NanumSquareR: require("./assets/fonts/NanumSquareOTF_acR.otf"),
-      NanumSquareL: require("./assets/fonts/NanumSquareOTF_acL.otf"),
-      NanumSquareRoundEB: require("./assets/fonts/NanumSquareRoundOTFEB.otf"),
-      NanumSquareRoundB: require("./assets/fonts/NanumSquareRoundOTFB.otf"),
-      NanumSquareRoundR: require("./assets/fonts/NanumSquareRoundOTFR.otf"),
-      NanumSquareRoundL: require("./assets/fonts/NanumSquareRoundOTFL.otf"),
-      KCCGanpan: require("./assets/fonts/KCC-Ganpan.ttf"),
-    }).then(() => setFontsLoaded(true));
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+      initGoogleLogin();
+    }
 
-    initGoogleLogin();
-  }, []);
+    if (error) {
+      console.error("error while loading font:", error);
+    }
+  }, [loaded, error]);
 
-  if (!fontsLoaded) return null;
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <SafeAreaProvider>

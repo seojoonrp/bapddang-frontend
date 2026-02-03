@@ -78,7 +78,6 @@ const styles = StyleSheet.create({
     color: Colors.setting_gray,
     fontSize: 24,
     fontFamily: "NanumSquareRoundEB",
-    letterSpacing: -0.3,
   },
   infoRowContainer: {
     width: "100%",

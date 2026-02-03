@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
     color: Colors.burn,
     fontFamily: "NanumSquareRoundEB",
     fontSize: 24,
-    letterSpacing: -0.5,
   },
   likeRow: {
     flexDirection: "row",
@@ -305,7 +304,6 @@ const styles = StyleSheet.create({
   distanceText: {
     fontFamily: "NanumSquareB",
     fontSize: 14,
-    letterSpacing: -0.3,
     color: Colors.slightly_burn,
   },
   closeButton: {

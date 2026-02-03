@@ -175,13 +175,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
     color: Colors.burn,
-    letterSpacing: -0.3,
   },
   placeholderText: {
     fontSize: 13,
     fontFamily: "NanumSquareRoundB",
     color: Colors.slightly_burn,
-    letterSpacing: -0.3,
   },
   row: {
     flexDirection: "row",

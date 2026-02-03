@@ -419,7 +419,6 @@ const styles = StyleSheet.create({
     color: Colors.background_white,
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
-    letterSpacing: -0.3,
   },
   flexInput: {
     flex: 1,

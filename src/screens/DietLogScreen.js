@@ -280,7 +280,7 @@ const DietLogScreen = () => {
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {}}>
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
@@ -653,7 +653,6 @@ const styles = StyleSheet.create({
     color: Colors.burn,
     fontSize: 28,
     fontFamily: "NanumSquareB",
-    letterSpacing: -0.5,
   },
   backdrop: {
     position: "absolute",

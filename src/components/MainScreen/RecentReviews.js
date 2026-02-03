@@ -106,7 +106,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
     color: Colors.burn,
-    letterSpacing: -0.3,
   },
   cardContainer: {
     width: "100%",
