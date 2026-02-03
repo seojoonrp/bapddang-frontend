@@ -1,5 +1,11 @@
 import { useRef, useState, useEffect, useMemo } from "react";
-import { View, StyleSheet, Animated, TouchableOpacity, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Animated,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 import Svg, { Polygon, Circle } from "react-native-svg";
 import Marshmallow from "../svg/Marshmallow";
 import Colors from "../../constants/colors";
@@ -13,6 +19,7 @@ import Marsh_3_2 from "../../assets/images/marshmallows/marsh_3-2.svg";
 import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
 import Marsh_5 from "../../assets/images/marshmallows/marsh_5.svg";
+import { Text } from "react-native";
 const ITEM_HEIGHT = 160;
 const MARSHMALLOW_SIZE = 160;
 
@@ -30,7 +37,7 @@ const MarshmallowStick = ({ onClick }) => {
   const bottomPadding = useMemo(() => {
     if (listHeight <= 0) return 200;
     // (리스트 높이 * (1 - 타겟비율)) - (아이템 절반)
-    return listHeight * (1 - TARGET_VIEW_RATIO) - (ITEM_HEIGHT / 2);
+    return listHeight * (1 - TARGET_VIEW_RATIO) - ITEM_HEIGHT / 2;
   }, [listHeight]);
 
   const pickVariantOnce = (key) => {
@@ -61,17 +68,21 @@ const MarshmallowStick = ({ onClick }) => {
         const v = pickVariantOnce(key);
         return v === 0 ? Marsh_3_1 : Marsh_3_2;
       }
-      case -1: { // 리뷰 완료
+      case -1: {
+        // 리뷰 완료
         const v = pickVariantOnce(key);
         //console.log("pickVariantOnce for -1 status:", v);
         return v === 0 ? Marsh_4_1 : Marsh_4_2;
       }
-      case -2: return Marsh_5;
+      case -2:
+        return Marsh_5;
       default:
         return Marshmallow;
     }
   };
   const DEBUG_STICK = true;
+
+  // load marshmallows
   useEffect(() => {
     let mounted = true;
 
@@ -82,20 +93,18 @@ const MarshmallowStick = ({ onClick }) => {
           const aw = Number(a.week ?? a.weekIndex ?? a.weekNumber ?? NaN);
           const bw = Number(b.week ?? b.weekIndex ?? b.weekNumber ?? NaN);
 
-
           if (Number.isFinite(aw) && Number.isFinite(bw)) return bw - aw;
-
 
           return Number(b.id) - Number(a.id);
         });
         if (mounted) setMarshmallows(sorted);
-        console.log("render marshmallows length:", marshmallows.length);
-      }
-      catch (e) {
+      } catch (e) {
         console.log("Error fetching marshmallows:", e);
       }
     };
+
     load();
+
     return () => {
       mounted = false;
     };
@@ -103,7 +112,7 @@ const MarshmallowStick = ({ onClick }) => {
 
   const stickHeight = useMemo(
     () => ITEM_HEIGHT * marshmallows.length + 500,
-    [marshmallows.length]
+    [marshmallows.length],
   );
 
   const scrollToIndexCustom = (index) => {
@@ -114,8 +123,10 @@ const MarshmallowStick = ({ onClick }) => {
     const screenTargetY = listHeight * TARGET_VIEW_RATIO;
     let targetOffset = itemCenterY - screenTargetY + FIXED_TOP_PADDING;
 
-
-    const contentHeight = (ITEM_HEIGHT * marshmallows.length) + FIXED_TOP_PADDING + FIXED_BOTTOM_PADDING;
+    const contentHeight =
+      ITEM_HEIGHT * marshmallows.length +
+      FIXED_TOP_PADDING +
+      FIXED_BOTTOM_PADDING;
     const maxOffset = contentHeight - listHeight;
 
     const finalOffset = Math.max(0, Math.min(targetOffset, maxOffset));
@@ -125,6 +136,7 @@ const MarshmallowStick = ({ onClick }) => {
       animated: true,
     });
   };
+
   // 막대기 만들기
   const STICK_TOP_WIDTH = 3;
   const STICK_BOTTOM_WIDTH = 25;
@@ -140,6 +152,7 @@ const MarshmallowStick = ({ onClick }) => {
       ${cx - STICK_BOTTOM_WIDTH / 2},${stickHeight}
     `;
   }, [stickHeight]);
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Animated.View
@@ -152,24 +165,20 @@ const MarshmallowStick = ({ onClick }) => {
             top: FIXED_TOP_PADDING - 80,
             transform: [
               {
-                translateY: Animated.multiply(scrollY, -1)
+                translateY: Animated.multiply(scrollY, -1),
               },
             ],
           },
         ]}
       >
-        {/* ✅ 기존의 backgroundColor View 대신 SVG 사용 */}
         <Svg height={stickHeight} width={CANVAS_WIDTH}>
-          <Circle 
-            cx={CANVAS_WIDTH / 2} 
-            cy={RADIUS} 
-            r={RADIUS} 
-            fill={Colors.burn} 
+          <Circle
+            cx={CANVAS_WIDTH / 2}
+            cy={RADIUS}
+            r={RADIUS}
+            fill={Colors.burn}
           />
-          <Polygon
-            points={stickPoints}
-            fill={Colors.burn} // 꼬치 색상
-          />
+          <Polygon points={stickPoints} fill={Colors.burn} />
         </Svg>
       </Animated.View>
 
@@ -179,13 +188,11 @@ const MarshmallowStick = ({ onClick }) => {
         style={styles.listContainer}
         data={marshmallows}
         keyExtractor={(item) => item.id.toString()}
-
         getItemLayout={(_, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
           index,
         })}
-
         renderItem={({ item, index }) => {
           const SvgComp = getMarshmallowSvgByStatus(item);
           return (
@@ -201,13 +208,19 @@ const MarshmallowStick = ({ onClick }) => {
                 alignItems: "center",
                 zIndex: marshmallows.length - index,
                 elevation: marshmallows.length - index,
+                borderColor: "black",
+                borderWidth: 1,
               }}
             >
               <SvgComp width={MARSHMALLOW_SIZE} height={MARSHMALLOW_SIZE} />
+
+              <Text style={styles.debugText}>index: {index}</Text>
+              <Text style={[styles.debugText, { top: 16 }]}>
+                status: {item.status}
+              </Text>
             </TouchableOpacity>
           );
         }}
-
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
         decelerationRate="fast"
@@ -217,10 +230,9 @@ const MarshmallowStick = ({ onClick }) => {
           paddingTop: FIXED_TOP_PADDING,
           paddingBottom: FIXED_BOTTOM_PADDING,
         }}
-
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false } // layout 속성 의존 시 false, 단순 transform이면 true 권장되나 현재 구조상 false 유지
+          { useNativeDriver: false }, // layout 속성 의존 시 false, 단순 transform이면 true 권장되나 현재 구조상 false 유지
         )}
         scrollEventThrottle={16}
       />
@@ -237,5 +249,13 @@ const styles = StyleSheet.create({
   },
   stick: {
     position: "absolute",
+  },
+  debugText: {
+    position: "absolute",
+    top: 0,
+    right: -64,
+    fontSize: 12,
+    textAlign: "right",
+    color: "black",
   },
 });

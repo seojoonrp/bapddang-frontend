@@ -103,9 +103,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questionText: {
+    color: Colors.burn,
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
-    color: Colors.burn,
+    letterSpacing: -0.3,
   },
   cardContainer: {
     width: "100%",

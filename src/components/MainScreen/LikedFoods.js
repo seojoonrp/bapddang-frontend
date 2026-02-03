@@ -172,14 +172,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   questionText: {
+    color: Colors.burn,
     fontSize: 16,
     fontFamily: "NanumSquareRoundEB",
-    color: Colors.burn,
+    letterSpacing: -0.3,
   },
   placeholderText: {
+    color: Colors.slightly_burn,
     fontSize: 13,
     fontFamily: "NanumSquareRoundB",
-    color: Colors.slightly_burn,
+    letterSpacing: -0.3,
   },
   row: {
     flexDirection: "row",

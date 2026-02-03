@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,10 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import { fetchFoodItemsByNames } from "../../services/food";
 import { updateReview } from "../../services/review";
 import { pickImage } from "../../utils/imagePicker";
-
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
-
 import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
@@ -35,15 +31,15 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
 
   // foodItems 받아오기
   useEffect(() => {
-    if(existingReview) {
-        const foodNames = existingReview.foods 
-        ? existingReview.foods.map(f => f.foodName || f.name).join(" & ")
+    if (existingReview) {
+      const foodNames = existingReview.foods
+        ? existingReview.foods.map((f) => f.foodName || f.name).join(" & ")
         : "";
-        setName(foodNames);
-        setSelectedTime(existingReview.mealTime || "");
-        setImageURL(existingReview.imageURL || "");
-        setComment(existingReview.comment || "");
-        setRating(existingReview.rating || 0);
+      setName(foodNames);
+      setSelectedTime(existingReview.mealTime || "");
+      setImageURL(existingReview.imageURL || "");
+      setComment(existingReview.comment || "");
+      setRating(existingReview.rating || 0);
     }
   }, [existingReview]);
 
@@ -63,15 +59,15 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
 
       await updateReview(existingReview.id, updateData);
 
-      Alert.alert("수정 완료", "리뷰가 성공적으로 수정되었습니다.");
-      
+      Alert.alert("수정 완료", "식단이 성공적으로 수정되었습니다.");
+
       if (onUpdateSuccess) {
-        onUpdateSuccess(); 
+        onUpdateSuccess();
       }
       onClose();
     } catch (error) {
-      console.error("리뷰 수정 실패: ", error);
-      Alert.alert("수정 실패", "리뷰를 수정하는 데 실패했습니다.");
+      console.error("수정 실패: ", error);
+      Alert.alert("수정 실패", "식단을 수정하는 데 실패했습니다.");
     }
   };
 
@@ -128,8 +124,6 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
               </TouchableOpacity>
             </View>
 
-            
-
             {/* 별점 */}
             <View style={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((i) => (
@@ -148,16 +142,19 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
 
             <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={[styles.bottomButton, { backgroundColor: Colors.point_red }]}
+                style={[
+                  styles.bottomButton,
+                  { backgroundColor: Colors.point_red },
+                ]}
                 onPress={handleSubmit}
               >
                 <Text style={[styles.bottomButtonText]}>등록</Text>
               </TouchableOpacity>
             </View>
-            </ScrollView>
-        </View> 
+          </ScrollView>
+        </View>
       </View>
-    </View >
+    </View>
   );
 };
 
@@ -200,14 +197,14 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     maxHeight: 600, // 나도 싫지만 이게 최선인듯 이거 맞나..?
     backgroundColor: "white",
-    paddingHorizontal : 10,
-    paddingTop : 17,
-    paddingBottom : 10,
+    paddingHorizontal: 10,
+    paddingTop: 17,
+    paddingBottom: 10,
     overflow: "hidden",
   },
   outerFrame: {
     width: "100%",
-    borderColor: Colors.light_gray, 
+    borderColor: Colors.light_gray,
     borderWidth: 1,
     borderRadius: 13,
     backgroundColor: "white",
@@ -262,7 +259,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: 312,
     height: 51,
-    marginTop : 22,
+    marginTop: 22,
     fontFamily: "NanumSquareB",
     fontSize: 16,
     color: Colors.burn,

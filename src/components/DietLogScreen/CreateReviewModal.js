@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,25 +8,19 @@ import {
   ScrollView,
   Image,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { fetchFoodItemsByNames } from "../../services/food";
 import { createReview } from "../../services/review";
 import { pickImage } from "../../utils/imagePicker";
-
 import IconBar from "./IconBar";
 import TagContainer from "../TagContainer";
-
 import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 
-const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuccess }) => {
+const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
   const [name, setName] = useState("");
 
   const timeOption = ["아침", "점심", "저녁", "기타"];
@@ -37,13 +31,9 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuc
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(0);
 
-  const mainColor =
-    reviewMode === "fast" ? Colors.point_red : Colors.point_green;
-
   // foodItems 받아오기
   useEffect(() => {
     if (!foodNames || foodNames.length === 0) {
-      
       console.log("No food names provided");
       return;
     }
@@ -70,14 +60,12 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuc
     try {
       if (!selectedTime || rating <= 0) {
         Alert.alert("시간과 별점을 필수로 선택해주세요.");
-        console.log("Please select both time and rating");
         return;
       }
 
       const created = await createReview({
         name: name,
         foods: foodItems,
-        speed: reviewMode,
         mealTime: selectedTime,
         imageURL: imageURL,
         comment: comment,
@@ -85,11 +73,11 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuc
       });
       await new Promise((r) => setTimeout(r, 300));
       await onCreateSuccess?.(created);
-      Alert.alert("리뷰 등록 완료", "리뷰가 성공적으로 등록되었습니다.");
+      Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.");
       onClose();
     } catch (error) {
-      console.error("리뷰 저장 실패: ", error);
-      Alert.alert("저장 실패", "리뷰를 저장하는 데 실패했습니다.");
+      console.error("식단 저장 실패: ", error);
+      Alert.alert("저장 실패", "식단을 저장하는 데 실패했습니다.");
     }
   };
   const COMMENT_MAX = 50;
@@ -99,108 +87,112 @@ const CreateReviewModal = ({ onClose, foodNames, reviewMode, onBack, onCreateSuc
   };
 
   return (
-      <View style={styles.container}>
-        <IconBar onClose={onClose} />
-        <View style={[styles.header, { backgroundColor: mainColor }]}>
-          <Star />
-          <Text
-            style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 24 }]}
+    <View style={styles.container}>
+      <IconBar onClose={onClose} />
+      <View style={[styles.header, { backgroundColor: Colors.point_red }]}>
+        <Star />
+        <Text
+          style={[styles.headerText, { fontSize: name.length > 11 ? 18 : 24 }]}
+        >
+          {name}
+        </Text>
+        <Star />
+      </View>
+
+      <View style={styles.outerFrame}>
+        <View style={styles.contentBox}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="on-drag"
           >
-            {name}
-          </Text>
-          <Star />
-        </View>
+            {/* 시간대 */}
+            <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
+            <TagContainer
+              tags={timeOption}
+              mode="select_single"
+              onPress={(time) => setSelectedTime(time)}
+              selectedTag={selectedTime}
+              containerStyle={{ marginBottom: 24 }}
+            />
 
-        <View style={styles.outerFrame}>
-          <View style={styles.contentBox}>
-            <ScrollView
-              contentContainerStyle={styles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="always"
-              keyboardDismissMode="on-drag"
-            >
-              {/* 시간대 */}
-              <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
-              <TagContainer
-                tags={timeOption}
-                mode="select_single"
-                onPress={(time) => setSelectedTime(time)}
-                selectedTag={selectedTime}
-                containerStyle={{ marginBottom: 24 }}
-              />
-
-              {/* 이미지 */}
-              <View style={{ width: "100%", alignItems: "center" }}>
-                <TouchableOpacity
-                  onPress={() => pickImage({ setImageUrl: setImageURL })}
-                  style={[styles.imageBox,
-                  imageURL !== "" ? styles.imageBoxWithImage : null
-                  ]}
-                >
-                  {imageURL !== "" ? (
-                    <Image
-                      source={{ uri: imageURL }}
-                      style={styles.imagePreview}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={styles.placeholder}>
-                      <Ionicons name="camera" size={20} color="#BFA6A1" />
-                      <Text style={styles.placeholderText}>
-                        사진을 추가해보세요!
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              {/* 별점 */}
-              <View style={styles.ratingRow}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                    <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={{ width: "100%", marginTop: 20 }}>
-                <View style={styles.inputWrap}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="한줄평을 남겨보세요..."
-                    value={comment}
-                    onChangeText={handleChangeComment}
-                    maxLength={50}
-                    returnKeyType="done"
-                    onSubmitEditing={Keyboard.dismiss}
+            {/* 이미지 */}
+            <View style={{ width: "100%", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={() => pickImage({ setImageUrl: setImageURL })}
+                style={[
+                  styles.imageBox,
+                  imageURL !== "" ? styles.imageBoxWithImage : null,
+                ]}
+              >
+                {imageURL !== "" ? (
+                  <Image
+                    source={{ uri: imageURL }}
+                    style={styles.imagePreview}
+                    resizeMode="cover"
                   />
-                  <View style={styles.charBadge}>
-                    <Text style={styles.charBadgeText}>
-                      {comment.length}/{COMMENT_MAX}
+                ) : (
+                  <View style={styles.placeholder}>
+                    <Ionicons name="camera" size={20} color="#BFA6A1" />
+                    <Text style={styles.placeholderText}>
+                      사진을 추가해보세요!
                     </Text>
                   </View>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* 별점 */}
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <TouchableOpacity key={i} onPress={() => setRating(i)}>
+                  <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={{ width: "100%", marginTop: 20 }}>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="한줄평을 남겨보세요..."
+                  value={comment}
+                  onChangeText={handleChangeComment}
+                  maxLength={50}
+                  returnKeyType="done"
+                  onSubmitEditing={Keyboard.dismiss}
+                />
+                <View style={styles.charBadge}>
+                  <Text style={styles.charBadgeText}>
+                    {comment.length}/{COMMENT_MAX}
+                  </Text>
                 </View>
               </View>
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.bottomButton,
-                    { backgroundColor: Colors.text_gray },
-                  ]}
-                  onPress={onBack}
-                >
-                  <Text style={styles.bottomButtonText}>이전</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.bottomButton, { backgroundColor: mainColor }]}
-                  onPress={handleSubmit}
-                >
-                  <Text style={[styles.bottomButtonText]}>등록</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
+            </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.bottomButton,
+                  { backgroundColor: Colors.text_gray },
+                ]}
+                onPress={onBack}
+              >
+                <Text style={styles.bottomButtonText}>이전</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.bottomButton,
+                  { backgroundColor: Colors.point_red },
+                ]}
+                onPress={handleSubmit}
+              >
+                <Text style={[styles.bottomButtonText]}>등록</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
-      </View >
+      </View>
+    </View>
   );
 };
 

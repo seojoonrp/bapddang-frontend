@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "../stores/authStore";
-import { fetchReviewsByDay } from "../services/review";
+import { deleteReview, fetchReviewsByDay } from "../services/review";
 import Colors from "../constants/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -75,15 +75,12 @@ const DietLogScreen = () => {
     return { transform: [{ translateY }] };
   });
 
-  // 추가버튼 관련
   const user = useAuthStore((state) => state.user);
 
   const [displayMonth, setDisplayMonth] = useState(null);
   const [displayWeekofMonth, setDisplayWeekofMonth] = useState(null);
   const [weekDates, setWeekDates] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState([]);
-  const [selectedMode, setSelectedMode] = useState("fast"); // 'fast' | 'slow'
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const [activeModal, setActiveModal] = useState("none");
   const [nextModal, setNextModal] = useState(null);
@@ -95,12 +92,11 @@ const DietLogScreen = () => {
   const [selectedDay, setSelectedDay] = useState(initialDay);
   const [currentMaxWeek, setCurrentMaxWeek] = useState(initialWeek);
   const [selectedWeek, setSelectedWeek] = useState(initialWeek);
-  // 리뷰 가져오기
+
   const [dailyReviews, setDailyReviews] = useState([]);
-  const [selectedReviewId, setSelectedReviewId] = useState(null);
   const [activeUpdateModal, setActiveUpdateModal] = useState("none");
   const [editingReview, setEditingReview] = useState(null);
-  // 이 부분 좀 정리 필요
+
   useFocusEffect(
     useCallback(() => {
       let alive = true;
@@ -200,8 +196,6 @@ const DietLogScreen = () => {
 
   const handleSelectFood = (foods, mode) => {
     setSelectedFoods(foods);
-    setSelectedMode(mode);
-    setSelectedReviewId(null);
     setActiveModal("none");
     setNextModal("review");
   };
@@ -229,14 +223,17 @@ const DietLogScreen = () => {
     setEditingReview(target);
     setActiveUpdateModal(true);
   };
+
+  const handleDeleteReview = (reviewId) => {
+    setDailyReviews((prev) => prev.filter((r) => r.id !== reviewId));
+  };
+
   const handleUpdateSuccess = () => {
     fetchDailyData();
     setActiveUpdateModal(false);
   };
-  const handleDeleteReview = async (reviewId) => {
-    console.log("Deleting review with ID:", reviewId);
-    return; // temp
-  };
+
+  // 날짜 관련
   const getWeekOfMonth = (date) => {
     const y = date.getFullYear();
     const m = date.getMonth();
@@ -442,12 +439,10 @@ const DietLogScreen = () => {
             onClose={handleCloseModal}
             onBack={handleBack}
             foodNames={selectedFoods}
-            reviewMode={selectedMode}
             onCreateSuccess={(createdReview) => {
               if (createdReview) {
                 setDailyReviews((prev) => [createdReview, ...prev]); // 즉시 반영
               }
-              fetchDailyData(); // 서버값으로 재동기화
             }}
           />
         </Modal>

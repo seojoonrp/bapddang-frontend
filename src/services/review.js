@@ -22,6 +22,16 @@ export const updateReview = async (reviewId, updatedData) => {
   }
 };
 
+export const deleteReview = async (reviewId) => {
+  try {
+    await api.delete(`/reviews/${reviewId}`);
+    console.log("Review deleted successfully");
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const fetchReviewsByDay = async (day) => {
   try {
     const reviews = await api.get("/users/me/reviews", {
