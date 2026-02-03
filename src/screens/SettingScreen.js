@@ -3,7 +3,7 @@
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { handleLogout } from "../services/auth";
+import { handleLogout, handleDeleteAccount } from "../services/auth";
 import ChevronIcon from "../assets/icons/chevron.svg";
 import Colors from "../constants/colors";
 
@@ -40,6 +40,7 @@ const SettingScreen = () => {
         <TouchableOpacity
           style={[styles.button, { backgroundColor: Colors.background_white }]}
           activeOpacity={0.7}
+          onPress={handleDeleteAccount}
         >
           <Text style={[styles.buttonText, { color: Colors.setting_gray }]}>
             회원 탈퇴

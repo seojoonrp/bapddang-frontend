@@ -162,3 +162,14 @@ export const handleLogout = async () => {
     throw error;
   }
 };
+
+export const handleDeleteAccount = async () => {
+  try {
+    await api.delete("/users/me");
+    await handleLogout();
+    console.log("Successfully deleted account and logged out.");
+  } catch (error) {
+    console.log("Failed to delete account:", error);
+    throw error;
+  }
+};
