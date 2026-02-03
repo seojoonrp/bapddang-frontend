@@ -20,20 +20,29 @@
       "infoPlist": {
         "CFBundleURLTypes": [
           {
-            "CFBundleURLSchemes": [
-              "kakaoe12b185c584f7612e5f0d6398ebd1030"
-            ]
+            "CFBundleURLSchemes": ["kakaoe12b185c584f7612e5f0d6398ebd1030"]
           }
         ],
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "splash": {
+        "image": "./src/assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
       }
     },
     "android": {
+      "package": "com.happetite.bobttaeng",
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "splash": {
+        "image": "./src/assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
