@@ -12,7 +12,7 @@ import Marsh_3_1 from "../../assets/images/marshmallows/marsh_3-1.svg";
 import Marsh_3_2 from "../../assets/images/marshmallows/marsh_3-2.svg";
 import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
-import Marsh_5 from "../../assets/images/marshmallows/marsh_5.svg";
+import QuestionMarshmallow from "../common/QuestionMarshmallow";
 import { useNavigation } from "@react-navigation/native";
 import AnimatedMarshmallow from "../common/AnimatedMarshmallow";
 
@@ -28,7 +28,7 @@ const getMarshmallowSvgByStatus = (status, variant) => {
     case -1:
       return variant === 0 ? Marsh_4_1 : Marsh_4_2;
     case -2:
-      return Marsh_5;
+      return QuestionMarshmallow;
     default:
       return null;
   }

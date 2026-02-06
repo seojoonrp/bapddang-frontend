@@ -7,9 +7,7 @@ import {
   Pressable,
 } from "react-native";
 import Svg, { Polygon, Circle } from "react-native-svg";
-import Marshmallow from "../svg/Marshmallow";
 import Colors from "../../constants/colors";
-import { fetchMarshmallows } from "../../services/marshmallow";
 import Marsh_1_1 from "../../assets/images/marshmallows/marsh_1-1.svg";
 import Marsh_1_2 from "../../assets/images/marshmallows/marsh_1-2.svg";
 import Marsh_2_1 from "../../assets/images/marshmallows/marsh_2-1.svg";
@@ -18,7 +16,7 @@ import Marsh_3_1 from "../../assets/images/marshmallows/marsh_3-1.svg";
 import Marsh_3_2 from "../../assets/images/marshmallows/marsh_3-2.svg";
 import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
-import Marsh_5 from "../../assets/images/marshmallows/marsh_5.svg";
+import QuestionMarshmallow from "../common/QuestionMarshmallow";
 import { Text } from "react-native";
 import { useMarshmallowStore } from "../../stores/marshmallowStore";
 const ITEM_HEIGHT = 160;
@@ -72,20 +70,16 @@ const MarshmallowStick = ({ onClick }) => {
         return v === 0 ? Marsh_3_1 : Marsh_3_2;
       }
       case -1: {
-        // 리뷰 완료
         const v = pickVariantOnce(key);
-        //console.log("pickVariantOnce for -1 status:", v);
         return v === 0 ? Marsh_4_1 : Marsh_4_2;
       }
       case -2:
-        return Marsh_5;
+        return QuestionMarshmallow;
       default:
-        return Marshmallow;
+        return Marsh_1_1;
     }
   };
-  const DEBUG_STICK = true;
 
-  // load marshmallows
   useEffect(() => {
     if (marshmallows.length === 0) {
       fetchMarshmallowsFromStore();
@@ -100,7 +94,6 @@ const MarshmallowStick = ({ onClick }) => {
   const scrollToIndexCustom = (index) => {
     if (!listRef.current || listHeight <= 0) return;
 
-    // 1. 목표 위치 계산
     const itemCenterY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
     const screenTargetY = listHeight * TARGET_VIEW_RATIO;
     let targetOffset = itemCenterY - screenTargetY + FIXED_TOP_PADDING;
@@ -119,7 +112,6 @@ const MarshmallowStick = ({ onClick }) => {
     });
   };
 
-  // 막대기 만들기
   const STICK_TOP_WIDTH = 3;
   const STICK_BOTTOM_WIDTH = 25;
   const CANVAS_WIDTH = 20;
@@ -198,16 +190,9 @@ const MarshmallowStick = ({ onClick }) => {
                 alignItems: "center",
                 zIndex: marshmallows.length - index,
                 elevation: marshmallows.length - index,
-                borderColor: "black",
-                borderWidth: 1,
               }}
             >
               <SvgComp width={MARSHMALLOW_SIZE} height={MARSHMALLOW_SIZE} />
-
-              <Text style={styles.debugText}>index: {index}</Text>
-              <Text style={[styles.debugText, { top: 16 }]}>
-                status: {item.status}
-              </Text>
             </TouchableOpacity>
           );
         }}
@@ -240,13 +225,5 @@ const styles = StyleSheet.create({
   },
   stick: {
     position: "absolute",
-  },
-  debugText: {
-    position: "absolute",
-    top: 0,
-    right: -64,
-    fontSize: 12,
-    textAlign: "right",
-    color: "black",
   },
 });
