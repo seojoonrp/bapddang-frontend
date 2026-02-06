@@ -5,11 +5,14 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { useModeStore } from "../../stores/modeStore";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
 const TimeQuestion = ({ showTextBubble }) => {
+  const modeColor = useModeStore((state) => state.modeColor);
+
   const hour = new Date().getHours();
 
   const getMealInfo = () => {
@@ -38,7 +41,9 @@ const TimeQuestion = ({ showTextBubble }) => {
     <View style={styles.container}>
       <View style={styles.textRow}>
         <View style={styles.timePill}>
-          <Text style={styles.timePillText}>{mealInfo.label}</Text>
+          <Text style={[styles.timePillText, { color: modeColor }]}>
+            {mealInfo.label}
+          </Text>
         </View>
         <Text style={styles.questionText}>
           {mealInfo.suffix} 고민 중인가요?

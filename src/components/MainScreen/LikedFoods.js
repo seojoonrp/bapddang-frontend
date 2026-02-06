@@ -15,7 +15,7 @@ import FoodInfoModal from "./FoodInfoModal";
 const LikedFoods = () => {
   const navigation = useNavigation();
 
-  const { mode, modeColor } = useModeStore();
+  const modeColor = useModeStore((state) => state.modeColor);
 
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -60,7 +60,7 @@ const LikedFoods = () => {
     <View style={styles.container}>
       <View style={styles.labelRow}>
         <View style={styles.heartBorder}>
-          <View style={styles.heartContainer}>
+          <View style={[styles.heartContainer, { backgroundColor: modeColor }]}>
             <HeartIcon
               size={14}
               fillColor={Colors.background_white}
@@ -69,7 +69,7 @@ const LikedFoods = () => {
           </View>
         </View>
         <Text style={styles.questionText}>
-          <Text style={{ color: Colors.point_red }}>찜해둔 메뉴&nbsp;</Text>
+          <Text style={{ color: modeColor }}>찜해둔 메뉴&nbsp;</Text>
           중에서 골라볼까요?
         </Text>
       </View>
@@ -87,7 +87,7 @@ const LikedFoods = () => {
             를 눌러 음식을&nbsp;
             <Text
               style={{
-                color: Colors.point_red,
+                color: modeColor,
                 fontFamily: "NanumSquareRoundEB",
               }}
             >

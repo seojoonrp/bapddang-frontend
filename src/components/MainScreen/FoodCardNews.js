@@ -1,13 +1,7 @@
 // src/components/MainScreen/FoodCardNews.js
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  InteractionManager,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
@@ -26,72 +20,78 @@ import { useFoodStore } from "../../stores/foodStore";
 import { useFoodFeed } from "../../hooks/useFoodFeed";
 import LoadingPlaceholer from "../common/LoadingPlaceholer";
 import { useShallow } from "zustand/shallow";
+import { useModeStore } from "../../stores/modeStore";
 
 const OVER_SCROLL_THRESHOLD = 90;
 const SKELETON_DATA = [null, null];
 
-const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
-  const item = useFoodStore(
-    useShallow((state) => (foodID ? state.foodsByID[foodID] : null)),
-  );
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          scrollX.value,
-          [(index - 1) * size, index * size, (index + 1) * size],
-          [ratio, 1.0, ratio],
-          Extrapolation.CLAMP,
-        ),
-      },
-    ],
-  }));
-
-  if (!item || !foodID) {
-    return (
-      <Animated.View
-        style={[
-          styles.cardContainer,
-          { width: size, height: size },
-          animatedStyle,
-        ]}
-      >
-        <LoadingPlaceholer text="음식 정보를 불러오는 중..." />
-      </Animated.View>
+const CardItem = memo(
+  ({ foodID, index, scrollX, size, onPress, ratio, modeColor }) => {
+    const item = useFoodStore(
+      useShallow((state) => (foodID ? state.foodsByID[foodID] : null)),
     );
-  }
+    const [imageLoaded, setImageLoaded] = useState(false);
 
-  return (
-    <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
-      <Animated.View
-        style={[
-          styles.cardContainer,
-          { width: size, height: size },
-          animatedStyle,
-        ]}
-      >
-        {!imageLoaded && (
-          <View style={[StyleSheet.absoluteFill]}>
-            <LoadingPlaceholer text="이미지 로딩 중..." />
-          </View>
-        )}
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          scale: interpolate(
+            scrollX.value,
+            [(index - 1) * size, index * size, (index + 1) * size],
+            [ratio, 1.0, ratio],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    }));
 
-        <Image
-          source={{ uri: item.food.imageURL }}
-          style={[styles.cardImage]}
-          contentFit="cover"
-          cachePolicy={"memory-disk"}
-          onLoad={() => setImageLoaded(true)}
-          transition={300}
-        />
+    if (!item || !foodID) {
+      return (
+        <Animated.View
+          style={[
+            styles.cardContainer,
+            { width: size, height: size },
+            animatedStyle,
+          ]}
+        >
+          <LoadingPlaceholer
+            text="음식 정보를 불러오는 중..."
+            color={modeColor}
+          />
+        </Animated.View>
+      );
+    }
 
-        {imageLoaded && <Text style={styles.foodText}>{item.food.name}</Text>}
-      </Animated.View>
-    </TouchableOpacity>
-  );
-});
+    return (
+      <TouchableOpacity onPress={() => onPress(foodID)} activeOpacity={0.7}>
+        <Animated.View
+          style={[
+            styles.cardContainer,
+            { width: size, height: size },
+            animatedStyle,
+          ]}
+        >
+          {!imageLoaded && (
+            <View style={[StyleSheet.absoluteFill]}>
+              <LoadingPlaceholer text="이미지 로딩 중..." color={modeColor} />
+            </View>
+          )}
+
+          <Image
+            source={{ uri: item.food.imageURL }}
+            style={[styles.cardImage]}
+            contentFit="cover"
+            cachePolicy={"memory-disk"}
+            onLoad={() => setImageLoaded(true)}
+            transition={300}
+          />
+
+          {imageLoaded && <Text style={styles.foodText}>{item.food.name}</Text>}
+        </Animated.View>
+      </TouchableOpacity>
+    );
+  },
+);
 
 const FoodCardNews = ({
   type,
@@ -105,6 +105,15 @@ const FoodCardNews = ({
   const { foodIDs, isLoading, isExtraLoading, loadMore } = useFoodFeed(type, {
     categories,
   });
+
+  const mode = useModeStore((state) => state.mode);
+  const modeColor = useModeStore((state) => state.modeColor);
+  const noFoodMessage =
+    type === "main"
+      ? "오류가 발생했습니다. 다시 시도해주세요."
+      : "선택한 카테고리에 해당되는 " +
+        (mode === "fast" ? "고속" : "저속") +
+        "노화 음식이 없어요.";
 
   const displayData = isLoading ? SKELETON_DATA : foodIDs;
 
@@ -178,7 +187,7 @@ const FoodCardNews = ({
     const borderColor = interpolateColor(
       scrollX.value,
       [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-      [Colors.light_gray, Colors.point_red],
+      [Colors.light_gray, modeColor],
     );
     const borderRadius = interpolate(
       scrollX.value,
@@ -199,7 +208,7 @@ const FoodCardNews = ({
       color: interpolateColor(
         scrollX.value,
         [maxScrollX, maxScrollX + OVER_SCROLL_THRESHOLD],
-        [Colors.background_yellow, Colors.point_red],
+        [Colors.background_yellow, modeColor],
       ),
     };
   });
@@ -214,11 +223,20 @@ const FoodCardNews = ({
           size={size}
           onPress={handleCardPress}
           ratio={animationRatio}
+          modeColor={modeColor}
         />
       );
     },
-    [size, handleCardPress, animationRatio],
+    [size, handleCardPress, animationRatio, modeColor],
   );
+
+  if (foodIDs.length === 0) {
+    return (
+      <View style={[styles.container, { height: size }]}>
+        <Text style={styles.noFoodText}>{noFoodMessage}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -331,5 +349,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  noFoodText: {
+    color: Colors.slightly_burn,
+    fontSize: 12,
+    fontFamily: "NanumSquareRoundR",
+    letterSpacing: -0.3,
   },
 });

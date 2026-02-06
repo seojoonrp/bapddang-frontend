@@ -34,6 +34,8 @@ export const useFoodFeed = (type, options = {}) => {
         if (data) {
           if (isLoadMore) appendFoods(type, data);
           else setFoods(type, data);
+        } else {
+          setFoods(type, []);
         }
       } catch (error) {
         console.error(`Error fetching ${type} food data:`, error);

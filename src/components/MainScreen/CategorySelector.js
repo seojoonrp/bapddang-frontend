@@ -21,10 +21,13 @@ import Animated, {
   FadeInUp,
   FadeOutUp,
 } from "react-native-reanimated";
+import { useModeStore } from "../../stores/modeStore";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CategorySelector = ({ onSelect }) => {
+  const modeColor = useModeStore((state) => state.modeColor);
+
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -116,7 +119,10 @@ const CategorySelector = ({ onSelect }) => {
             activeOpacity={0.8}
             onPress={() => setIsOpen(!isOpen)}
           >
-            <Text style={styles.selectedTextStyle} numberOfLines={1}>
+            <Text
+              style={[styles.selectedTextStyle, { color: modeColor }]}
+              numberOfLines={1}
+            >
               {displayText}
             </Text>
 

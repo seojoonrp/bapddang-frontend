@@ -15,6 +15,7 @@ import Animated, {
   ZoomOutEasyDown,
 } from "react-native-reanimated";
 import { useFoodStore } from "../../stores/foodStore";
+import { useModeStore } from "../../stores/modeStore";
 import * as Location from "expo-location";
 import * as Linking from "expo-linking";
 import LoadingPlaceholer from "../common/LoadingPlaceholer";
@@ -32,6 +33,8 @@ const FoodInfoModal = ({ foodID, onClose }) => {
 
   const { user } = useAuthStore();
   const [location, setLocation] = useState(null);
+
+  const modeColor = useModeStore((state) => state.modeColor);
 
   useEffect(() => {
     (async () => {
@@ -172,7 +175,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
                 <Text style={styles.distanceText}>
                   <Text
                     style={{
-                      color: Colors.point_red,
+                      color: modeColor,
                       fontFamily: "NanumSquareEB",
                     }}
                   >

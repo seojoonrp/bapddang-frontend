@@ -20,7 +20,6 @@ const MainBottomSheet = ({ animatedStyle, scrollThreshold }) => {
     if (categories === selectedCategories) return;
 
     setSelectedCategories(categories);
-    // TODO : API 요청
   };
 
   return (

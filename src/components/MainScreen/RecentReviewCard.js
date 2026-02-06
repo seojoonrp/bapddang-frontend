@@ -3,8 +3,11 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import StarIcon from "../../assets/icons/star.svg";
 import Colors from "../../constants/colors";
+import { useModeStore } from "../../stores/modeStore";
 
 const RecentReviewCard = ({ data, setSelectedFoodID, setShowInfo }) => {
+  const modeColor = useModeStore((state) => state.modeColor);
+
   const calculatePastTimeText = (createdAt) => {
     const now = new Date();
     const createdDate = new Date(createdAt);
@@ -58,7 +61,7 @@ const RecentReviewCard = ({ data, setSelectedFoodID, setShowInfo }) => {
             key={index}
             width={14}
             height={14}
-            color={index < data.rating ? Colors.point_red : "#D9D9D9"}
+            color={index < data.rating ? modeColor : "#D9D9D9"}
           />
         ))}
       </View>

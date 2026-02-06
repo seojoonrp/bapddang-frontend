@@ -9,8 +9,11 @@ import { fetchRecentReviews } from "../../services/review";
 import ReanimatedModal from "../common/ReanimatedModal";
 import FoodInfoModal from "./FoodInfoModal";
 import { useFoodStore } from "../../stores/foodStore";
+import { useModeStore } from "../../stores/modeStore";
 
 const RecentReviews = () => {
+  const modeColor = useModeStore((state) => state.modeColor);
+
   const [reviewData, setReviewData] = useState([]);
   useEffect(() => {
     const fetchRecent = async () => {
@@ -41,12 +44,12 @@ const RecentReviews = () => {
     <View style={styles.container}>
       <View style={styles.labelRow}>
         <View style={styles.checkBorder}>
-          <View style={styles.checkContainer}>
+          <View style={[styles.checkContainer, { backgroundColor: modeColor }]}>
             <CheckIcon width={18} height={18} />
           </View>
         </View>
         <Text style={styles.questionText}>
-          <Text style={{ color: Colors.point_red }}>지금 선택받은 메뉴</Text>
+          <Text style={{ color: modeColor }}>지금 선택받은 메뉴</Text>
           에요!
         </Text>
       </View>
