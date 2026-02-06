@@ -15,6 +15,18 @@ import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import EditAndLike from "../components/MainScreen/EditAndLike";
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../stores/authStore";
+import ReanimatedModal from "../components/common/ReanimatedModal";
+import LastMarshmallowModal from "../components/MainScreen/LastMarshmallowModal";
+import DebugButton from "../components/DebugButton";
+
+const testMarshmallow = {
+  week: 12,
+  reviewCount: 7,
+  totalRating: 29,
+  status: 2,
+  isComplete: true,
+};
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -34,45 +46,72 @@ const MainScreen = () => {
 
   const showTextBubble = useSharedValue(0);
 
+  const lastWeekData = useAuthStore((state) => state.lastWeekData);
+  const clearLastWeekData = useAuthStore((state) => state.clearLastWeekData);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (lastWeekData) setIsModalVisible(true);
+  }, [lastWeekData]);
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    clearLastWeekData();
+  };
+
   if (!isReady) {
     return null;
   }
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <MainHeader
-          animatedStyles={animatedStyles}
-          onBellPress={() => console.log("Bell pressed")}
-          onSettingsPress={() => navigation.navigate("Setting")}
-        />
-
-        <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
-
-        <EditAndLike
-          onEdit={() => navigation.navigate("DietLog")}
-          onLike={() => navigation.navigate("Liked")}
-          animatedStyle={animatedStyles}
-          showTextBubble={showTextBubble}
-        />
-
-        <Animated.View style={animatedStyles.middleContent}>
-          <TimeQuestion showTextBubble={showTextBubble} />
-          <FoodCardNews
-            type="main"
-            screenWidth={screenWidth}
-            size={screenWidth * MAIN_LAYOUT.CARDNEWS_RATIO}
-            canLoadMore={true}
-            animationRatio={0.91}
+    <>
+      <GestureDetector gesture={panGesture}>
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+          <MainHeader
+            animatedStyles={animatedStyles}
+            onBellPress={() => console.log("Bell pressed")}
+            onSettingsPress={() => navigation.navigate("Setting")}
           />
-        </Animated.View>
 
-        <MainBottomSheet
-          animatedStyle={animatedStyles}
-          scrollThreshold={scrollThreshold}
+          <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
+
+          <EditAndLike
+            onEdit={() => navigation.navigate("DietLog")}
+            onLike={() => navigation.navigate("Liked")}
+            animatedStyle={animatedStyles}
+            showTextBubble={showTextBubble}
+          />
+
+          <Animated.View style={animatedStyles.middleContent}>
+            <TimeQuestion showTextBubble={showTextBubble} />
+            <FoodCardNews
+              type="main"
+              screenWidth={screenWidth}
+              size={screenWidth * MAIN_LAYOUT.CARDNEWS_RATIO}
+              canLoadMore={true}
+              animationRatio={0.91}
+            />
+          </Animated.View>
+
+          <MainBottomSheet
+            animatedStyle={animatedStyles}
+            scrollThreshold={scrollThreshold}
+          />
+        </View>
+      </GestureDetector>
+      <ReanimatedModal visible={isModalVisible} onClose={handleCloseModal}>
+        <LastMarshmallowModal
+          marshmallow={testMarshmallow}
+          onClose={handleCloseModal}
         />
-      </View>
-    </GestureDetector>
+      </ReanimatedModal>
+
+      <DebugButton
+        index={0}
+        label={"Show modal"}
+        onPress={() => setIsModalVisible(true)}
+      />
+    </>
   );
 };
 

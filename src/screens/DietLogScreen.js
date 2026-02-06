@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "../stores/authStore";
-import { deleteReview, fetchReviewsByDay } from "../services/review";
+import { useReviewStore } from "../stores/reviewStore";
 import Colors from "../constants/colors";
 import MarshmallowStick from "../components/DietLogScreen/MarshmallowStick";
 import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
@@ -41,6 +41,8 @@ import { BlurView } from "expo-blur";
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 220;
 const SHEET_OPEN_MARGIN = 32;
+
+const EMPTY_ARRAY = [];
 
 const DietLogScreen = () => {
   const navigation = useNavigation();
@@ -87,151 +89,28 @@ const DietLogScreen = () => {
   const [back, setBack] = useState(false);
 
   const userDay = user?.day || 1;
-  const initialWeek = Math.ceil(userDay / 7);
+  const initialWeek = user?.week || Math.ceil(userDay / 7);
   const initialDay = ((userDay - 1) % 7) + 1;
   const [selectedDay, setSelectedDay] = useState(initialDay);
-  const [currentMaxWeek, setCurrentMaxWeek] = useState(initialWeek);
   const [selectedWeek, setSelectedWeek] = useState(initialWeek);
+  const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
 
-  const [dailyReviews, setDailyReviews] = useState([]);
-  const [activeUpdateModal, setActiveUpdateModal] = useState("none");
-  const [editingReview, setEditingReview] = useState(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      let alive = true;
-
-      (async () => {
-        const uid = user?.uid;
-        if (!uid) return;
-
-        try {
-          const userDay = user?.day ?? 1;
-          console.log("User day on focus:", userDay);
-          const calculatedWeek = Math.ceil(userDay / 7);
-          const currentDayofThisWeek = ((userDay - 1) % 7) + 1;
-          if (alive) {
-            setCurrentMaxWeek(calculatedWeek);
-            setSelectedWeek(calculatedWeek);
-            setSelectedDay(currentDayofThisWeek);
-          }
-        } catch (e) {
-          console.log("getUserWeek failed:", e);
-        }
-      })();
-
-      return () => {
-        alive = false;
-      };
-    }, [user]),
+  const dailyReviews = useReviewStore(
+    (state) => state.reviewsByDay[targetAbsoluteDay] || EMPTY_ARRAY,
   );
+  const {
+    getReviewsForDay,
+    addReviewToStore,
+    updateReviewInStore,
+    deleteReviewFromStore,
+  } = useReviewStore();
 
   useEffect(() => {
-    if (!user?.createdAt) return;
-    const startDate = new Date(user.createdAt);
-    const weekStartOffset = (selectedWeek - 1) * 7;
-    startDate.setDate(startDate.getDate() + weekStartOffset);
-
-    const selectedDate = new Date(startDate);
-    selectedDate.setDate(startDate.getDate() + (selectedDay - 1));
-
-    setDisplayMonth(selectedDate.getMonth() + 1);
-    setDisplayWeekofMonth(getWeekOfMonth(selectedDate));
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date.getDate());
-    }
-    setWeekDates(dates);
-  }, [selectedWeek, selectedDay, user?.createdAt]);
-
-  const fetchDailyData = useCallback(async () => {
-    const targetAbsoluteDay = (selectedWeek - 1) * 7 + selectedDay;
-    console.log(
-      `Fetching reviews for Week ${selectedWeek}, Day ${selectedDay} (Absolute: ${targetAbsoluteDay})`,
-    );
-
-    try {
-      const reviews = await fetchReviewsByDay(targetAbsoluteDay);
-      setDailyReviews(reviews || []);
-    } catch (e) {
-      console.log("Failed to fetch reviews for day:", e);
-      setDailyReviews([]);
-    }
-  }, [selectedWeek, selectedDay]);
-
-  useEffect(() => {
-    fetchDailyData();
-  }, [fetchDailyData]);
-
-  const handleMarshmallowClick = (offset) => {
-    const targetWeek = currentMaxWeek - offset;
-    if (targetWeek < 1) {
-      return;
-    }
-
-    setSelectedWeek(targetWeek);
-    setSelectedDay(1);
-  };
-
-  const handleCloseModal = () => {
-    setActiveModal("none");
-  };
-
-  const handleBack = () => {
-    setActiveModal("none");
-    setNextModal("foodSelect");
-    setBack(true);
-  };
-
-  const handleHideFoodSelect = () => {
-    if (nextModal) {
-      setActiveModal(nextModal);
-      setNextModal(null);
-    } else {
-      setSelectedFoods([]);
-    }
-  };
-
-  const handleSelectFood = (foods, mode) => {
-    setSelectedFoods(foods);
-    setActiveModal("none");
-    setNextModal("review");
-  };
-
-  const handleHideReview = () => {
-    if (!back) {
-      setSelectedFoods([]);
-      setActiveModal("none");
-    } else {
-      if (nextModal) {
-        setActiveModal(nextModal);
-        setNextModal(null);
-      }
-      setBack(false);
-    }
-  };
-
-  const handleEditReview = (reviewId) => {
-    const target = dailyReviews.find((r) => r.id === reviewId);
-    if (!target) {
-      console.log("Review not found for ID:", reviewId);
-      return;
-    }
-    console.log("Editing review with ID:", reviewId);
-    setEditingReview(target);
-    setActiveUpdateModal(true);
-  };
-
-  const handleDeleteReview = (reviewId) => {
-    setDailyReviews((prev) => prev.filter((r) => r.id !== reviewId));
-  };
-
-  const handleUpdateSuccess = () => {
-    fetchDailyData();
-    setActiveUpdateModal(false);
-  };
+    const loadData = async () => {
+      await getReviewsForDay(targetAbsoluteDay);
+    };
+    loadData();
+  }, [targetAbsoluteDay, getReviewsForDay]);
 
   // 날짜 관련
   const getWeekOfMonth = (date) => {
@@ -264,6 +143,110 @@ const DietLogScreen = () => {
     return { width: `${fillWidth.value}%` };
   });
 
+  // Day/Week을 바탕으로 실제 표시 날짜 계산
+  useEffect(() => {
+    if (!user?.createdAt) return;
+    const startDate = new Date(user.createdAt);
+    const weekStartOffset = (selectedWeek - 1) * 7;
+    startDate.setDate(startDate.getDate() + weekStartOffset);
+
+    const selectedDate = new Date(startDate);
+    selectedDate.setDate(startDate.getDate() + (selectedDay - 1));
+
+    setDisplayMonth(selectedDate.getMonth() + 1);
+    setDisplayWeekofMonth(getWeekOfMonth(selectedDate));
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      dates.push(date.getDate());
+    }
+    setWeekDates(dates);
+  }, [selectedWeek, selectedDay, user?.createdAt]);
+
+  const handleMarshmallowClick = (offset) => {
+    const targetWeek = initialWeek - offset;
+    if (targetWeek < 1) {
+      return;
+    }
+    setSelectedWeek(targetWeek);
+    setSelectedDay(1);
+  };
+
+  // 리뷰 로직 관련
+  const handleUpdateReview = (reviewID) => {
+    const target = dailyReviews.find((r) => r.id === reviewID);
+    if (!target) {
+      console.log("Review not found for ID:", reviewID);
+      return;
+    }
+    console.log("Editing review with ID:", reviewID);
+    setEditingReview(target);
+    setActiveUpdateModal(true);
+  };
+
+  const handleDeleteReview = (reviewID) => {
+    deleteReviewFromStore(targetAbsoluteDay, reviewID);
+  };
+
+  const handleCreateSuccess = (createdReview) => {
+    if (createdReview) {
+      addReviewToStore(targetAbsoluteDay, createdReview);
+    }
+    setActiveModal("none");
+    setSelectedFoods([]);
+  };
+
+  const handleUpdateSuccess = (updatedReview) => {
+    if (updatedReview) {
+      updateReviewInStore(targetAbsoluteDay, updatedReview);
+    }
+    setActiveUpdateModal(false);
+    setEditingReview(null);
+  };
+
+  // 모달 로직 관련
+  const [activeUpdateModal, setActiveUpdateModal] = useState("none");
+  const [editingReview, setEditingReview] = useState(null);
+
+  const handleCloseModal = () => {
+    setActiveModal("none");
+  };
+
+  const handleBack = () => {
+    setActiveModal("none");
+    setNextModal("foodSelect");
+    setBack(true);
+  };
+
+  const handleHideFoodSelect = () => {
+    if (nextModal) {
+      setActiveModal(nextModal);
+      setNextModal(null);
+    } else {
+      setSelectedFoods([]);
+    }
+  };
+
+  const handleSelectFood = (foods) => {
+    setSelectedFoods(foods);
+    setActiveModal("none");
+    setNextModal("review");
+  };
+
+  const handleHideReview = () => {
+    if (!back) {
+      setSelectedFoods([]);
+      setActiveModal("none");
+    } else {
+      if (nextModal) {
+        setActiveModal(nextModal);
+        setNextModal(null);
+      }
+      setBack(false);
+    }
+  };
+
   return (
     <GestureDetector gesture={panGesture}>
       <LinearGradient
@@ -288,11 +271,7 @@ const DietLogScreen = () => {
           </View>
         </BlurView>
 
-        <MarshmallowStick
-          currentMaxWeek={currentMaxWeek}
-          selectedWeek={selectedWeek}
-          onClick={handleMarshmallowClick}
-        />
+        <MarshmallowStick onClick={handleMarshmallowClick} />
 
         <Animated.View
           style={[styles.floatingButtonsContainer, animatedFloatingButtons]}
@@ -390,7 +369,7 @@ const DietLogScreen = () => {
                 renderItem={({ item }) => (
                   <ReviewCard
                     review={item}
-                    onEdit={handleEditReview}
+                    onEdit={handleUpdateReview}
                     onDelete={handleDeleteReview}
                   />
                 )}
@@ -418,8 +397,8 @@ const DietLogScreen = () => {
           <Pressable style={styles.backdrop} onPress={handleCloseModal} />
           <FoodSelectModal
             onClose={handleCloseModal}
-            onSelect={(foods, mode) => {
-              handleSelectFood(foods, mode);
+            onSelect={(foods) => {
+              handleSelectFood(foods);
             }}
             initialFoods={selectedFoods}
           />
@@ -439,11 +418,7 @@ const DietLogScreen = () => {
             onClose={handleCloseModal}
             onBack={handleBack}
             foodNames={selectedFoods}
-            onCreateSuccess={(createdReview) => {
-              if (createdReview) {
-                setDailyReviews((prev) => [createdReview, ...prev]); // 즉시 반영
-              }
-            }}
+            onCreateSuccess={handleCreateSuccess}
           />
         </Modal>
 

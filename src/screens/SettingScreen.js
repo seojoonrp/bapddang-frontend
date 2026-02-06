@@ -38,7 +38,7 @@ const SettingScreen = () => {
           <Text style={styles.buttonText}>로그아웃</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: Colors.background_white }]}
+          style={[styles.button, { backgroundColor: Colors.background_yellow }]}
           activeOpacity={0.7}
           onPress={handleDeleteAccount}
         >
@@ -56,7 +56,7 @@ export default SettingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background_white,
+    backgroundColor: Colors.background_yellow,
     justifyContent: "flex-start",
     alignItems: "center",
     gap: 32,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
-    color: Colors.background_white,
+    color: Colors.background_yellow,
     fontFamily: "NanumSquareRoundB",
   },
 });

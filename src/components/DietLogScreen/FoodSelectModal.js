@@ -29,7 +29,6 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [suggestionQueue, setSuggestionQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [finalNames, setFinalNames] = useState([]);
-  const [currentMode, setCurrentMode] = useState("fast");
 
   // 좋아요한 음식 불러오기
   const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
@@ -64,7 +63,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   };
 
   // 검사 시작
-  const startCheck = (mode) => {
+  const startCheck = () => {
     const rawFiltered = inputList
       .map((s) => (s || "").trim())
       .filter((s) => s.length > 0);
@@ -101,14 +100,13 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
     });
 
     if (queue.length === 0) {
-      completeSelection(autoResolvedNames, mode);
+      completeSelection(autoResolvedNames);
       return;
     }
 
     setSuggestionQueue(queue);
     setCurrentIndex(0);
     setFinalNames(autoResolvedNames);
-    setCurrentMode(mode);
     setIsInCheckMode(true);
   };
 
@@ -120,13 +118,13 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
       setFinalNames(nextFinalNames);
     } else {
       const uniqueFinalNames = [...new Set(nextFinalNames)];
-      completeSelection(uniqueFinalNames, currentMode);
+      completeSelection(uniqueFinalNames);
     }
   };
 
-  const completeSelection = (finalFoodNames, mode) => {
+  const completeSelection = (finalFoodNames) => {
     console.log("Final selected food names:", finalFoodNames);
-    onSelect(finalFoodNames, mode);
+    onSelect(finalFoodNames);
     onClose();
   };
 

@@ -20,6 +20,7 @@ import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
 import Marsh_5 from "../../assets/images/marshmallows/marsh_5.svg";
 import { Text } from "react-native";
+import { useMarshmallowStore } from "../../stores/marshmallowStore";
 const ITEM_HEIGHT = 160;
 const MARSHMALLOW_SIZE = 160;
 
@@ -31,8 +32,10 @@ const MarshmallowStick = ({ onClick }) => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const listRef = useRef(null);
   const [listHeight, setListHeight] = useState(0);
-  const [marshmallows, setMarshmallows] = useState([]);
   const variantCacheRef = useRef(new Map());
+
+  const marshmallows = useMarshmallowStore((state) => state.marshmallows);
+  const { fetchMarshmallowsFromStore } = useMarshmallowStore();
 
   const bottomPadding = useMemo(() => {
     if (listHeight <= 0) return 200;
@@ -84,30 +87,9 @@ const MarshmallowStick = ({ onClick }) => {
 
   // load marshmallows
   useEffect(() => {
-    let mounted = true;
-
-    const load = async () => {
-      try {
-        const data = await fetchMarshmallows();
-        const sorted = [...(data ?? [])].sort((a, b) => {
-          const aw = Number(a.week ?? a.weekIndex ?? a.weekNumber ?? NaN);
-          const bw = Number(b.week ?? b.weekIndex ?? b.weekNumber ?? NaN);
-
-          if (Number.isFinite(aw) && Number.isFinite(bw)) return bw - aw;
-
-          return Number(b.id) - Number(a.id);
-        });
-        if (mounted) setMarshmallows(sorted);
-      } catch (e) {
-        console.log("Error fetching marshmallows:", e);
-      }
-    };
-
-    load();
-
-    return () => {
-      mounted = false;
-    };
+    if (marshmallows.length === 0) {
+      fetchMarshmallowsFromStore();
+    }
   }, []);
 
   const stickHeight = useMemo(

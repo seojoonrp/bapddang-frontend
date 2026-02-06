@@ -204,6 +204,22 @@ const FoodCardNews = ({
     };
   });
 
+  const renderItem = useCallback(
+    ({ item: id, index }) => {
+      return (
+        <CardItem
+          foodID={id}
+          index={index}
+          scrollX={scrollX}
+          size={size}
+          onPress={handleCardPress}
+          ratio={animationRatio}
+        />
+      );
+    },
+    [size, handleCardPress, animationRatio],
+  );
+
   return (
     <View style={styles.container}>
       {canLoadMore && (
@@ -232,21 +248,13 @@ const FoodCardNews = ({
         initialNumToRender={2}
         windowSize={3}
         maxToRenderPerBatch={3}
-        renderItem={({ item: id, index }) => (
-          <CardItem
-            foodID={id}
-            index={index}
-            scrollX={scrollX}
-            size={size}
-            onPress={handleCardPress}
-            ratio={animationRatio}
-          />
-        )}
+        renderItem={renderItem}
         getItemLayout={(data, index) => ({
           length: size,
           offset: size * index,
           index,
         })}
+        removeClippedSubviews={true}
       />
 
       {pagination && (
@@ -290,7 +298,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareRoundB",
     fontSize: 16,
     textShadowColor: "black",
-    textShadowRadius: 80,
+    textShadowRadius: 20,
     shadowOpacity: 1,
   },
   paginationContainer: {

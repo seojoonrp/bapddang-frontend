@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     color: Colors.text_gray,
   },
   commentPill: {
+    alignSelf: "flex-start",
     borderColor: Colors.light_text_gray,
     borderWidth: 1.5,
     borderRadius: 99,

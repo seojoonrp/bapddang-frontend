@@ -57,12 +57,12 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
         imageURL: imageURL,
       };
 
-      await updateReview(existingReview.id, updateData);
+      const updated = await updateReview(existingReview.id, updateData);
 
       Alert.alert("수정 완료", "식단이 성공적으로 수정되었습니다.");
 
       if (onUpdateSuccess) {
-        onUpdateSuccess();
+        onUpdateSuccess(updated);
       }
       onClose();
     } catch (error) {

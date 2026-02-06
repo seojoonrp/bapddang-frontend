@@ -7,6 +7,7 @@ export const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
   isLoggedIn: false,
+  lastWeekData: null,
 
   setLogin: async (userData, token) => {
     await AsyncStorage.setItem("jwt_token", token);
@@ -28,5 +29,13 @@ export const useAuthStore = create((set, get) => ({
 
   updateUser: (userData) => {
     set({ user: userData });
+  },
+
+  setLastWeekData: (weekData) => {
+    set({ lastWeekData: weekData });
+  },
+
+  clearLastWeekData: () => {
+    set({ lastWeekData: null });
   },
 }));

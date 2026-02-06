@@ -37,7 +37,9 @@ export const fetchReviewsByDay = async (day) => {
     const reviews = await api.get("/users/me/reviews", {
       params: { day },
     });
-    console.log(`Successfully fetched ${reviews} reviews on day ${day}.`);
+    console.log(
+      `Successfully fetched ${reviews ? reviews.length : 0} reviews on day ${day}.`,
+    );
     return reviews || [];
   } catch (error) {
     throw error;
@@ -49,7 +51,6 @@ export const fetchRecentReviews = async () => {
     const data = await api.get("/reviews/recent", {
       params: { count: 2 },
     });
-    console.log(`Successfully fetched ${data.length} recent reviews.`);
     return data || [];
   } catch (error) {
     throw error;
