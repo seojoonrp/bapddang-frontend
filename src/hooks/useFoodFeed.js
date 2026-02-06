@@ -9,10 +9,13 @@ export const useFoodFeed = (type, options = {}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExtraLoading, setIsExtraLoading] = useState(false);
 
+  const setFoods = useFoodStore((state) => state.setFoods);
+  const appendFoods = useFoodStore((state) => state.appendFoods);
   const foodIDs = useFoodStore((state) => state[`${type}FoodIDs`] || []);
-  const { setFoods, appendFoods } = useFoodStore();
 
-  const { mode } = useModeStore();
+  const mode = useModeStore((state) => state.mode);
+
+  const categoriesKey = JSON.stringify(options.categories || []);
 
   const fetchData = useCallback(
     async (isLoadMore = false) => {
@@ -44,7 +47,7 @@ export const useFoodFeed = (type, options = {}) => {
         else setIsLoading(false);
       }
     },
-    [type, mode, options.categories],
+    [type, mode, categoriesKey, setFoods, appendFoods],
   );
 
   useEffect(() => {

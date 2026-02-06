@@ -27,9 +27,9 @@ const MarshmallowAnimation = memo(() => {
       source={require("../../assets/lottie/marshmallow-rotate.json")}
       autoPlay
       loop
-      width={200}
+      cacheComposition={true}
+      width={185}
       height={185}
-      renderMode="hardware"
     />
   );
 });
@@ -81,6 +81,10 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.marshmallow}>
+        <MarshmallowAnimation />
+      </View>
+
       <TouchableOpacity
         style={styles.guestButton}
         onPress={() => Alert.alert("게스트 기능은 곧 제공될 예정입니다.")}
@@ -156,7 +160,6 @@ const styles = StyleSheet.create({
     marginBottom: 90,
   },
   marshmallow: {
-    marginBottom: -24,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -18,15 +18,15 @@ const MarshmallowAnimation = memo(() => {
       source={require("../../assets/lottie/marshmallow-rotate.json")}
       autoPlay
       loop
-      width={200}
+      cacheComposition={true}
+      width={185}
       height={185}
-      renderMode="hardware"
     />
   );
 });
 
 const Hero = ({ scrollY, scrollThreshold }) => {
-  const { mode, modeColor } = useModeStore();
+  const mode = useModeStore((state) => state.mode);
 
   const { containerStyle, textStyle, animatedCharacterStyle } =
     useHeroAnimations(scrollY, scrollThreshold);
@@ -58,9 +58,9 @@ const Hero = ({ scrollY, scrollThreshold }) => {
           <Stick width={422} height={80} />
         </View>
 
-        {/* <View style={styles.marshmallow}>
+        <View style={styles.marshmallow}>
           <MarshmallowAnimation />
-        </View> */}
+        </View>
       </Animated.View>
     </Animated.View>
   );

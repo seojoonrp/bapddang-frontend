@@ -90,6 +90,7 @@ const MainScreen = () => {
               size={screenWidth * MAIN_LAYOUT.CARDNEWS_RATIO}
               canLoadMore={true}
               animationRatio={0.91}
+              categories={undefined}
             />
           </Animated.View>
 
