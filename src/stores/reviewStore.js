@@ -10,7 +10,7 @@ export const useReviewStore = create((set, get) => ({
   getReviewsForDay: async (day) => {
     const { reviewsByDay } = get();
 
-    if (reviewsByDay[day] && reviewsByDay[day].length > 0) {
+    if (reviewsByDay[day] !== undefined) {
       return reviewsByDay[day];
     }
 

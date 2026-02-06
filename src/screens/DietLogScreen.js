@@ -18,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useMainAnimations } from "../hooks/useMainAnimations";
 import { GestureDetector } from "react-native-gesture-handler";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
@@ -296,10 +296,7 @@ const DietLogScreen = () => {
         </Animated.View>
 
         <Animated.View
-          style={[
-            styles.bottomSheetWrapper,
-            animatedStyles.bottomSheet, // 공통 스타일 적용
-          ]}
+          style={[styles.bottomSheetWrapper, animatedStyles.bottomSheet]}
         >
           <View style={styles.innerSheetContainer}>
             <View style={styles.handleBar} />

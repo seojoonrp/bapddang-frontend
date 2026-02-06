@@ -135,6 +135,15 @@ const MarshmallowStick = ({ onClick }) => {
     `;
   }, [stickHeight]);
 
+  const handleMomentumScrollEnd = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const index = Math.round(offsetY / ITEM_HEIGHT);
+
+    if (index >= 0 && index < marshmallows.length) {
+      onClick?.(index);
+    }
+  };
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Animated.View
@@ -142,7 +151,6 @@ const MarshmallowStick = ({ onClick }) => {
           styles.stick,
           {
             height: stickHeight,
-            // SVG를 담기 위해 너비를 넉넉하게 잡습니다.
             width: CANVAS_WIDTH,
             top: FIXED_TOP_PADDING - 80,
             transform: [
@@ -205,8 +213,9 @@ const MarshmallowStick = ({ onClick }) => {
         }}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
-        decelerationRate="fast"
+        decelerationRate={0.9}
         snapToAlignment="center"
+        onMomentumScrollEnd={handleMomentumScrollEnd}
         contentContainerStyle={{
           paddingHorizontal: 100,
           paddingTop: FIXED_TOP_PADDING,
@@ -214,7 +223,7 @@ const MarshmallowStick = ({ onClick }) => {
         }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }, // layout 속성 의존 시 false, 단순 transform이면 true 권장되나 현재 구조상 false 유지
+          { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
       />

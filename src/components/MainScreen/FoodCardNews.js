@@ -28,7 +28,7 @@ import LoadingPlaceholer from "../common/LoadingPlaceholer";
 import { useShallow } from "zustand/shallow";
 
 const OVER_SCROLL_THRESHOLD = 90;
-const SKELETON_DATA = [null, null, null];
+const SKELETON_DATA = [null, null];
 
 const CardItem = memo(({ foodID, index, scrollX, size, onPress, ratio }) => {
   const item = useFoodStore(
