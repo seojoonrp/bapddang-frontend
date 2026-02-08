@@ -88,10 +88,6 @@ const DietLogScreen = () => {
   });
 
   const user = useAuthStore((state) => state.user);
-
-  const [displayMonth, setDisplayMonth] = useState(null);
-  const [displayWeekofMonth, setDisplayWeekofMonth] = useState(null);
-  const [weekDates, setWeekDates] = useState([]);
   const [selectedFoods, setSelectedFoods] = useState([]);
 
   const [activeModal, setActiveModal] = useState("none");
@@ -130,22 +126,7 @@ const DietLogScreen = () => {
     loadData();
   }, [targetAbsoluteDay, getReviewsForDay]);
 
-  // 날짜 관련
-  const getWeekOfMonth = (date) => {
-    const y = date.getFullYear();
-    const m = date.getMonth();
-
-    const firstOfMonth = new Date(y, m, 1);
-    const firstDowMon0 = (firstOfMonth.getDay() + 6) % 7;
-
-    return Math.floor((firstDowMon0 + (date.getDate() - 1)) / 7) + 1;
-  };
-
-  const weekOrdinalKorean = (n) => {
-    const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
-    return names[n - 1] ?? `${n}째`;
-  };
-
+  // 날짜 바 애니메이션 관련
   const isCurrentWeek = selectedWeek === initialWeek;
   const dayWidth = (screenWidth - 36) / 7;
   const pointerOffset = (initialDay - 1) * dayWidth + dayWidth / 2 - 7;
@@ -165,18 +146,50 @@ const DietLogScreen = () => {
     return { width: `${fillWidth.value}%` };
   });
 
+  // const animatedRightBorderRadius = useAnimatedStyle(() => {
+  //   const radius = interpolate(
+  //     fillWidth.value,
+  //     [ratio(6) * 100, 100],
+  //     [16, 50],
+  //     Extrapolation.CLAMP,
+  //   );
+  //   return {
+  //     borderTopRightRadius: radius,
+  //     borderBottomRightRadius: radius,
+  //   };
+  // });
+
   // Day/Week을 바탕으로 실제 표시 날짜 계산
+  const [weekDates, setWeekDates] = useState([]);
+  const [displayWeekText, setDisplayWeekText] = useState("");
+
+  const getWeekOfMonth = (date) => {
+    const y = date.getFullYear();
+    const m = date.getMonth();
+
+    const firstOfMonth = new Date(y, m, 1);
+    const firstDowMon0 = (firstOfMonth.getDay() + 6) % 7;
+
+    return Math.floor((firstDowMon0 + (date.getDate() - 1)) / 7) + 1;
+  };
+
+  const weekOrdinalKorean = (n) => {
+    const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
+    return names[n - 1] ?? `${n}째`;
+  };
+
   useEffect(() => {
     if (!user?.createdAt) return;
+
     const startDate = new Date(user.createdAt);
     const weekStartOffset = (selectedWeek - 1) * 7;
     startDate.setDate(startDate.getDate() + weekStartOffset);
 
-    const selectedDate = new Date(startDate);
-    selectedDate.setDate(startDate.getDate() + (selectedDay - 1));
+    const startMonth = startDate.getMonth() + 1;
+    const startWeek = getWeekOfMonth(startDate);
 
-    setDisplayMonth(selectedDate.getMonth() + 1);
-    setDisplayWeekofMonth(getWeekOfMonth(selectedDate));
+    setDisplayWeekText(`${startMonth}월 ${weekOrdinalKorean(startWeek)}주`);
+
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(startDate);
@@ -184,7 +197,7 @@ const DietLogScreen = () => {
       dates.push(date.getDate());
     }
     setWeekDates(dates);
-  }, [selectedWeek, selectedDay, user?.createdAt]);
+  }, [selectedWeek, user?.createdAt]);
 
   const handleMarshmallowClick = (offset) => {
     const targetWeek = initialWeek - offset;
@@ -323,9 +336,10 @@ const DietLogScreen = () => {
           <View style={styles.innerSheetContainer}>
             <View style={styles.handleBar} />
             <Text style={styles.sheetTitleText}>주간 식단기록</Text>
-            <Text style={styles.monthText}>
-              {displayMonth}월 {`${weekOrdinalKorean(displayWeekofMonth)}주`}
-            </Text>
+
+            <Text style={styles.monthText}>{displayWeekText}</Text>
+
+            {/* 요일 선택 바 */}
             <View style={[styles.dayContainer, { zIndex: 999 }]}>
               <View
                 style={[styles.dayTextContainer, { width: screenWidth - 28 }]}
@@ -344,14 +358,14 @@ const DietLogScreen = () => {
                 })}
               </View>
               <Animated.View style={[styles.dayFill, animatedFillWidth]}>
-                <View style={styles.gradientContainer}>
+                <Animated.View style={[styles.gradientContainer]}>
                   <LinearGradient
                     colors={["#FF5A2C", "#E90C05"]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.redGradient}
                   />
-                </View>
+                </Animated.View>
                 <View
                   style={[styles.dayTextContainer, { width: screenWidth - 28 }]}
                 >

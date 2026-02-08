@@ -11,11 +11,11 @@ export default function BackButton({ icon, onPress, index = 0 }) {
     >
       <View
         style={{
-          width: 52,
-          height: 52,
+          width: 50,
+          height: 50,
           position: "absolute",
-          top: 0,
-          left: 0,
+          top: 1,
+          left: 1,
           backgroundColor: "rgba(0,0,0,0.05)",
           borderRadius: 99,
         }}

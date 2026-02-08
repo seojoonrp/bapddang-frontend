@@ -19,13 +19,18 @@ import TagContainer from "../TagContainer";
 import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
+import { useAuthStore } from "../../stores/authStore";
 
 const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
+  const user = useAuthStore((state) => state.user);
+
   const [name, setName] = useState("");
 
+  const dayOption = ["그저께", "어제", "오늘"];
   const timeOption = ["아침", "점심", "저녁", "기타"];
 
   const [foodItems, setFoodItems] = useState([]);
+  const [selectedDay, setSelectedDay] = useState("오늘");
   const [selectedTime, setSelectedTime] = useState("");
   const [imageURL, setImageURL] = useState("");
   const [comment, setComment] = useState("");
@@ -58,10 +63,12 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      if (!selectedTime || rating <= 0) {
+      if (!selectedDay || !selectedTime || rating <= 0) {
         Alert.alert("시간과 별점을 필수로 선택해주세요.");
         return;
       }
+
+      const finalDay = user.day - 2 + dayOption.indexOf(selectedDay);
 
       const created = await createReview({
         name: name,
@@ -70,6 +77,7 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
         imageURL: imageURL,
         comment: comment,
         rating: Number(rating),
+        day: finalDay,
       });
       await new Promise((r) => setTimeout(r, 300));
       await onCreateSuccess?.(created);
@@ -107,8 +115,19 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
             keyboardShouldPersistTaps="always"
             keyboardDismissMode="on-drag"
           >
+            {/* 날짜 */}
+            <Text style={styles.subtitle}>언제 먹었나요?</Text>
+            <TagContainer
+              tags={dayOption}
+              mode="select_single"
+              onPress={(day) => setSelectedDay(day)}
+              selectedTag={selectedDay}
+            />
+
             {/* 시간대 */}
-            <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
+            <Text style={[styles.subtitle, { marginTop: 32 }]}>
+              어느 시간대에 먹었나요?
+            </Text>
             <TagContainer
               tags={timeOption}
               mode="select_single"
