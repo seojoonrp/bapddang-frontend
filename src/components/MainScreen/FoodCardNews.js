@@ -10,7 +10,7 @@ import Animated, {
   interpolate,
   interpolateColor,
   Extrapolation,
-  runOnJS, // TODO : Deprecated래서 scheduleOnRN 쓰면 에러뜸
+  runOnJS,
 } from "react-native-reanimated";
 import FoodInfoModal from "./FoodInfoModal";
 import Colors from "../../constants/colors";

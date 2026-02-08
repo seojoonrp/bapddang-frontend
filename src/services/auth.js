@@ -15,6 +15,9 @@ import { syncUserWeekAndDay } from "./user";
 import { useAuthStore } from "../stores/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFoodStore } from "../stores/foodStore";
+import { useReviewStore } from "../stores/reviewStore";
+import { useMarshmallowStore } from "../stores/marshmallowStore";
+import { useModeStore } from "../stores/modeStore";
 
 export const checkUsernameAvailability = async (username) => {
   try {
@@ -146,7 +149,6 @@ export const handleLogout = async () => {
   try {
     const user = useAuthStore.getState().user;
     const loginMethod = user?.loginMethod;
-    await useFoodStore.getState().clearStore();
 
     if (loginMethod === "google") {
       await GoogleSignin.signOut();
@@ -155,6 +157,12 @@ export const handleLogout = async () => {
     }
 
     await useAuthStore.getState().setLogout();
+
+    useFoodStore.getState().clearStore();
+    useReviewStore.getState().clearStore();
+    useMarshmallowStore.getState().clearStore();
+    useModeStore.getState().clearStore();
+
     console.log(`Logout Success (${loginMethod})`);
   } catch (error) {
     console.log("Logout Service Error:", error);

@@ -27,4 +27,8 @@ export const useMarshmallowStore = create((set) => ({
       set({ isLoading: false });
     }
   },
+
+  clearStore: () => {
+    set({ marshmallows: [] });
+  },
 }));

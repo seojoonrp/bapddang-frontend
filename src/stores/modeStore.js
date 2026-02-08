@@ -32,4 +32,11 @@ export const useModeStore = create((set, get) => ({
     await AsyncStorage.setItem("mode", newMode);
     await AsyncStorage.setItem("modeColor", newModeColor);
   },
+
+  clearStore: () => {
+    set({
+      mode: "fast",
+      modeColor: Colors.point_red,
+    });
+  },
 }));

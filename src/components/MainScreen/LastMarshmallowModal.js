@@ -1,6 +1,5 @@
 // src/components/MainScreen/LastMarshmallowModal.js
 
-import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";

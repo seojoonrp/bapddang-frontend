@@ -63,4 +63,8 @@ export const useReviewStore = create((set, get) => ({
       },
     }));
   },
+
+  clearStore: () => {
+    set({ reviewsByDay: {} });
+  },
 }));

@@ -1,59 +1,22 @@
-import React, { memo, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Alert,
-} from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+// src/screens/login/LandingScreen.js
+
+import { memo } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   handleAppleLogin,
   handleGoogleLogin,
   handleKakaoLogin,
 } from "../../services/auth";
-import api from "../../api/api";
 import Colors from "../../constants/colors";
 import GoogleIcon from "../../assets/icons/google.svg";
 import KakaoIcon from "../../assets/icons/kakao.svg";
 import AppleIcon from "../../assets/icons/apple.svg";
 import LottieView from "lottie-react-native";
 
-const MarshmallowAnimation = memo(() => {
-  return (
-    <LottieView
-      source={require("../../assets/lottie/marshmallow-rotate.json")}
-      autoPlay
-      loop
-      cacheComposition={true}
-      width={185}
-      height={185}
-    />
-  );
-});
-
 const LandingScreen = () => {
   const navigation = useNavigation();
-  const route = useRoute();
-
-  const [isServerOnline, setIsServerOnline] = useState(false);
-  const checkPing = async () => {
-    try {
-      const response = await api.get("/ping");
-      if (response.status === 200) {
-        console.log("Ping response:", response.data);
-        setIsServerOnline(true);
-      } else {
-        console.log("Server is offline or returned an error.");
-        setIsServerOnline(false);
-      }
-    } catch (error) {
-      console.log("Ping error:", error);
-      setIsServerOnline(false);
-    }
-  };
 
   const onGoogleLoginPress = async () => {
     try {
@@ -81,23 +44,19 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.marshmallow}>
-        <MarshmallowAnimation />
-      </View>
-
       <TouchableOpacity
-        style={styles.guestButton}
-        onPress={() => Alert.alert("게스트 기능은 곧 제공될 예정입니다.")}
+        style={styles.signupButton}
+        onPress={() => navigation.navigate("SignUp")}
         activeOpacity={0.7}
       >
-        <Text style={styles.guestButtonText}>게스트로 둘러보기</Text>
+        <Text style={styles.signupButtonText}>회원가입</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.signUpButton}
-        onPress={() => navigation.navigate("SignUp", { from: "Landing" })}
+        style={styles.loginButton}
+        onPress={() => navigation.navigate("Login")}
         activeOpacity={0.7}
       >
-        <Text style={styles.signUpButtonText}>회원가입</Text>
+        <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>
 
       <View style={styles.socialButtonsRow}>
@@ -126,15 +85,6 @@ const LandingScreen = () => {
           <AppleIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
-
-      <Text
-        style={styles.loginButtonText}
-        onPress={() => navigation.navigate("Login")}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        accessibilityRole="button"
-      >
-        이미 계정이 있다면? 로그인
-      </Text>
     </SafeAreaView>
   );
 };
@@ -150,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     paddingHorizontal: 12,
-    paddingBottom: 24,
+    paddingBottom: 40,
     gap: 16,
   },
   logo: {
@@ -163,7 +113,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  guestButton: {
+  signupButton: {
     width: "100%",
     paddingVertical: 16,
     backgroundColor: Colors.burn_red,
@@ -173,13 +123,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  guestButtonText: {
+  signupButtonText: {
     color: Colors.background_yellow,
     textAlign: "center",
     fontFamily: "NanumSquareB",
     fontSize: 16,
   },
-  signUpButton: {
+  loginButton: {
     width: "100%",
     paddingVertical: 16,
     backgroundColor: Colors.background_yellow,
@@ -190,7 +140,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: -4,
   },
-  signUpButtonText: {
+  loginButtonText: {
     color: Colors.burn,
     textAlign: "center",
     fontFamily: "NanumSquareB",
@@ -213,11 +163,5 @@ const styles = StyleSheet.create({
     borderColor: Colors.light_red,
     borderWidth: 1,
     borderRadius: 24,
-  },
-  loginButtonText: {
-    color: Colors.light_red,
-    textAlign: "center",
-    fontFamily: "NanumSquareB",
-    fontSize: 16,
   },
 });

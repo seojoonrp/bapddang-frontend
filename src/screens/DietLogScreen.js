@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import Animated, {
   useSharedValue,
   withTiming,
   Easing,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 import { useMainAnimations } from "../hooks/useMainAnimations";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -37,12 +39,20 @@ import Back from "../assets/icons/back.svg";
 import HeartIcon from "../components/svg/HeartIcon";
 import PlusIcon from "../assets/icons/plus.svg";
 import { BlurView } from "expo-blur";
+import PointerIcon from "../assets/icons/pointer.svg";
 
 const HEADER_HEIGHT = 48;
-const SHEET_HANDLE_HEIGHT = 220;
+const SHEET_HANDLE_HEIGHT = 240;
 const SHEET_OPEN_MARGIN = 32;
 
 const EMPTY_ARRAY = [];
+
+const MEAL_ORDER = {
+  아침: 1,
+  점심: 2,
+  저녁: 3,
+  기타: 4,
+};
 
 const DietLogScreen = () => {
   const navigation = useNavigation();
@@ -58,7 +68,7 @@ const DietLogScreen = () => {
     const translateY = interpolate(
       scrollY.value,
       [0, scrollThreshold],
-      [0, 180],
+      [0, 200],
       Extrapolation.CLAMP,
     );
 
@@ -105,6 +115,14 @@ const DietLogScreen = () => {
     deleteReviewFromStore,
   } = useReviewStore();
 
+  const sortedDailyReviews = useMemo(() => {
+    return [...dailyReviews].sort((a, b) => {
+      const orderA = MEAL_ORDER[a.mealTime] || 99;
+      const orderB = MEAL_ORDER[b.mealTime] || 99;
+      return orderA - orderB;
+    });
+  }, [dailyReviews]);
+
   useEffect(() => {
     const loadData = async () => {
       await getReviewsForDay(targetAbsoluteDay);
@@ -127,6 +145,10 @@ const DietLogScreen = () => {
     const names = ["첫째", "둘째", "셋째", "넷째", "다섯째", "여섯째"];
     return names[n - 1] ?? `${n}째`;
   };
+
+  const isCurrentWeek = selectedWeek === initialWeek;
+  const dayWidth = (screenWidth - 36) / 7;
+  const pointerOffset = (initialDay - 1) * dayWidth + dayWidth / 2 - 7;
 
   const ratio = (day) => {
     return Math.min(day / 7 + (7 - day) / 280, 1);
@@ -356,11 +378,24 @@ const DietLogScreen = () => {
               </Animated.View>
             </View>
 
+            <View style={{ width: screenWidth - 28, height: 28 }}>
+              {isCurrentWeek && (
+                <Animated.View
+                  entering={FadeIn.duration(400)}
+                  exiting={FadeOut.duration(300)}
+                  style={[styles.todayContainer, { left: pointerOffset }]}
+                >
+                  <PointerIcon width={12} height={12} />
+                  <Text style={styles.todayText}>오늘</Text>
+                </Animated.View>
+              )}
+            </View>
+
             <Animated.View
               style={[animatedReviewCardList, { flex: 1, width: "100%" }]}
             >
               <FlatList
-                data={dailyReviews}
+                data={sortedDailyReviews}
                 style={{ width: "100%", marginTop: 30 }}
                 contentContainerStyle={{ paddingBottom: 50 }}
                 renderItem={({ item }) => (
@@ -372,8 +407,11 @@ const DietLogScreen = () => {
                 )}
                 ListEmptyComponent={() => (
                   <View style={{ alignItems: "center", marginTop: 50 }}>
-                    <Text style={{ color: "#999", fontFamily: "NanumSquareR" }}>
-                      기록된 식단이 없습니다.
+                    <Text style={styles.placeholderText}>
+                      기록된 식단이 없습니다.{"\n"}
+                      <Text style={styles.placeholderRed}>
+                        +를 눌러 오늘 먹은 음식을 추가해보세요!
+                      </Text>
                     </Text>
                   </View>
                 )}
@@ -498,6 +536,19 @@ const styles = StyleSheet.create({
     zIndex: 100,
     alignItems: "center",
     gap: 5,
+  },
+  todayContainer: {
+    position: "absolute",
+    top: 0,
+    alignItems: "center",
+    gap: 4,
+    zIndex: 100,
+  },
+  todayText: {
+    fontFamily: "NanumSquareRoundEB",
+    fontSize: 14,
+    color: Colors.point_red,
+    letterSpacing: -0.3,
   },
   redButton: {
     justifyContent: "center",
@@ -626,5 +677,18 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  placeholderText: {
+    color: Colors.text_gray,
+    fontFamily: "NanumSquareR",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 22,
+    marginTop: 32,
+  },
+  placeholderRed: {
+    color: Colors.point_red,
+    fontFamily: "NanumSquareRoundB",
+    letterSpacing: -0.3,
   },
 });

@@ -1,11 +1,5 @@
 import { useRef, useState, useEffect, useMemo } from "react";
-import {
-  View,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
 import Svg, { Polygon, Circle } from "react-native-svg";
 import Colors from "../../constants/colors";
 import Marsh_1_1 from "../../assets/images/marshmallows/marsh_1-1.svg";
@@ -17,8 +11,8 @@ import Marsh_3_2 from "../../assets/images/marshmallows/marsh_3-2.svg";
 import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
 import QuestionMarshmallow from "../common/QuestionMarshmallow";
-import { Text } from "react-native";
 import { useMarshmallowStore } from "../../stores/marshmallowStore";
+
 const ITEM_HEIGHT = 160;
 const MARSHMALLOW_SIZE = 160;
 
@@ -37,7 +31,6 @@ const MarshmallowStick = ({ onClick }) => {
 
   const bottomPadding = useMemo(() => {
     if (listHeight <= 0) return 200;
-    // (리스트 높이 * (1 - 타겟비율)) - (아이템 절반)
     return listHeight * (1 - TARGET_VIEW_RATIO) - ITEM_HEIGHT / 2;
   }, [listHeight]);
 
@@ -45,17 +38,17 @@ const MarshmallowStick = ({ onClick }) => {
     if (!variantCacheRef.current.has(key)) {
       variantCacheRef.current.set(key, Math.random() < 0.5 ? 0 : 1);
     }
-    return variantCacheRef.current.get(key); // 0 or 1
+    return variantCacheRef.current.get(key);
   };
 
   const getMarshmallowSvgByStatus = (item) => {
     const { status, id } = item;
-    const key = `${id}:s${status}`; // 주차(id)별 + status별로 독립 랜덤
+    const key = `${id}:s${status}`;
 
     switch (status) {
       case 0: {
         const v = pickVariantOnce(key);
-        return v === 0 ? Marsh_4_1 : Marsh_4_2; // 잠김 전용 svg 있으면 여기만 바꾸면 됨
+        return v === 0 ? Marsh_4_1 : Marsh_4_2;
       }
       case 1: {
         const v = pickVariantOnce(key);

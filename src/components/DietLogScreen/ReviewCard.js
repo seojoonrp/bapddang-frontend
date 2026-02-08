@@ -55,6 +55,11 @@ const ReviewCard = ({ review, onEdit, onDelete }) => {
     }
   };
 
+  const timeText = (mealTime) => {
+    if (mealTime === "기타") return "";
+    return mealTime + "으로 ";
+  };
+
   return (
     <View style={styles.card}>
       {loading && (
@@ -105,7 +110,7 @@ const ReviewCard = ({ review, onEdit, onDelete }) => {
       )}
 
       <Text style={styles.reviewText}>
-        {review.mealTime}으로{" "}
+        {timeText(review.mealTime)}
         <Text style={{ color: Colors.burn }}>{review.name}</Text>
         {review.name.length > 8 ? "\n" : ""}
         {getJosa(review.name)} 먹었어요!
