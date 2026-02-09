@@ -24,9 +24,15 @@ import CheckCircleNoIcon from "../../assets/icons/check-circle-no.svg";
 import { Portal } from "@gorhom/portal";
 import { LinearGradient } from "expo-linear-gradient";
 import { handleAgreeToTerms } from "../../services/auth";
+import * as Linking from "expo-linking";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MAX_TRANSLATE_Y = -365;
+
+const APP_TERMS_URL =
+  "https://tropical-rule-078.notion.site/302c0b55667c80199d49d45259ee1638?pvs=74";
+const PRIVACY_POLICY_URL =
+  "https://tropical-rule-078.notion.site/302c0b55667c80e5ac9ed1cd9e88a9b1?pvs=74";
 
 const AgreeBottomSheet = ({
   isVisible,
@@ -129,9 +135,11 @@ const AgreeBottomSheet = ({
     onClose();
   };
 
-  if (!isRendered) {
-    return null;
-  }
+  const handleOpenURL = (url) => {
+    Linking.openURL(url).catch((err) => console.error("URL 열기 실패:", err));
+  };
+
+  if (!isRendered) return null;
 
   return (
     <Portal>
@@ -161,31 +169,43 @@ const AgreeBottomSheet = ({
               </Text>
             </Pressable>
 
-            <Pressable
-              style={styles.checkboxRow}
-              onPress={() => setAgreedApp(!agreedApp)}
-            >
-              {agreedApp ? (
-                <CheckCircleYesIcon width={24} height={24} />
-              ) : (
-                <CheckCircleNoIcon width={24} height={24} />
-              )}
-              <Text style={styles.termsText}>[필수] 앱 이용약관 동의</Text>
-            </Pressable>
+            {/* 앱 이용약관 동의 */}
+            <View style={styles.checkboxRow}>
+              <TouchableOpacity
+                onPress={() => setAgreedApp(!agreedApp)}
+                activeOpacity={0.6}
+              >
+                {agreedApp ? (
+                  <CheckCircleYesIcon width={24} height={24} />
+                ) : (
+                  <CheckCircleNoIcon width={24} height={24} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleOpenURL(APP_TERMS_URL)}>
+                <Text style={styles.termsText}>[필수] 앱 이용약관 동의</Text>
+              </TouchableOpacity>
+            </View>
 
-            <Pressable
-              style={styles.checkboxRow}
-              onPress={() => setAgreedPrivacy(!agreedPrivacy)}
-            >
-              {agreedPrivacy ? (
-                <CheckCircleYesIcon width={24} height={24} />
-              ) : (
-                <CheckCircleNoIcon width={24} height={24} />
-              )}
-              <Text style={styles.termsText}>
-                [필수] 개인정보 수집 및 이용 동의
-              </Text>
-            </Pressable>
+            {/* 개인정보 수집 및 이용 동의 */}
+            <View style={styles.checkboxRow}>
+              <TouchableOpacity
+                onPress={() => setAgreedPrivacy(!agreedPrivacy)}
+                activeOpacity={0.6}
+              >
+                {agreedPrivacy ? (
+                  <CheckCircleYesIcon width={24} height={24} />
+                ) : (
+                  <CheckCircleNoIcon width={24} height={24} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleOpenURL(PRIVACY_POLICY_URL)}
+              >
+                <Text style={styles.termsText}>
+                  [필수] 개인정보 수집 및 이용 동의
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity
