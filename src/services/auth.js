@@ -64,9 +64,14 @@ const processAuthResult = async (result, method) => {
       result.user.email || result.user.username,
     );
     console.log("Token:", result.accessToken);
-    return true;
+    return {
+      success: true,
+      isAgreed: result.user.isAgreed,
+    };
   }
-  return false;
+  return {
+    success: false,
+  };
 };
 
 export const handleSignUp = async (username, password) => {
@@ -147,8 +152,12 @@ export const handleAppleLogin = async () => {
 
 export const handleAgreeToTerms = async () => {
   try {
-    await api.patch("/users/me/agree");
+    await api.patch("/users/me/agreement");
     console.log("Successfully agreed to terms.");
+
+    const user = useAuthStore.getState().user;
+    useAuthStore.getState().updateUser({ ...user, isAgreed: true });
+
     return true;
   } catch (error) {
     throw error;

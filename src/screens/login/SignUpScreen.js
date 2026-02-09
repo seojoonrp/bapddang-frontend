@@ -126,10 +126,17 @@ const SignUpScreen = () => {
   const handleAgree = async () => {
     setLoading(true);
 
-    const success = await handleSignUp(username, pw);
-    if (success) {
-      setShowTerms(false);
-      navigation.navigate("Welcome");
+    try {
+      const success = await handleSignUp(username, pw);
+      if (success) {
+        setShowTerms(false);
+        navigation.navigate("Welcome");
+      }
+    } catch (e) {
+      Alert.alert(
+        "회원가입 실패",
+        "회원가입 중 오류가 발생했습니다. 다시 시도해주세요.",
+      );
     }
   };
 

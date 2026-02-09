@@ -1,10 +1,11 @@
 // src/screens/login/LandingScreen.js
 
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
+  handleAgreeToTerms,
   handleAppleLogin,
   handleGoogleLogin,
   handleKakaoLogin,
@@ -14,31 +15,48 @@ import GoogleIcon from "../../assets/icons/google.svg";
 import KakaoIcon from "../../assets/icons/kakao.svg";
 import AppleIcon from "../../assets/icons/apple.svg";
 import LottieView from "lottie-react-native";
+import { useAuthStore } from "../../stores/authStore";
+import AgreeBottomSheet from "../../components/common/AgreeBottomSheet";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
 
-  const onGoogleLoginPress = async () => {
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const user = useAuthStore((state) => state.user);
+  const [showTerms, setShowTerms] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn && user && !user.isAgreed) {
+      setShowTerms(true);
+    }
+  }, [isLoggedIn, user]);
+
+  const onSocialLogin = async (loginFunc) => {
     try {
-      await handleGoogleLogin();
+      const { success, isAgreed } = await loginFunc();
+      if (success && !isAgreed) {
+        setShowTerms(true);
+      }
     } catch (error) {
-      console.log("Failed Google login:", error);
+      console.log("Social login error:", error);
+      Alert.alert(
+        "로그인 실패",
+        "소셜 로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
+      );
     }
   };
 
-  const onKakaoLoginPress = async () => {
+  const handleFinalAgree = async () => {
     try {
-      await handleKakaoLogin();
+      const success = await handleAgreeToTerms();
+      if (success) {
+        setShowTerms(false);
+      }
     } catch (error) {
-      console.log("Failed Kakao login:", error);
-    }
-  };
-
-  const onAppleLoginPress = async () => {
-    try {
-      await handleAppleLogin();
-    } catch (error) {
-      console.log("Failed Apple login:", error);
+      Alert.alert(
+        "약관 동의 실패",
+        "약관 동의에 실패했습니다. 다시 시도해주세요.",
+      );
     }
   };
 
@@ -62,7 +80,7 @@ const LandingScreen = () => {
       <View style={styles.socialButtonsRow}>
         <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "white" }]}
-          onPress={onGoogleLoginPress}
+          onPress={() => onSocialLogin(handleGoogleLogin)}
           activeOpacity={0.7}
         >
           <GoogleIcon width={22} height={22} />
@@ -72,19 +90,27 @@ const LandingScreen = () => {
             styles.socialButton,
             { backgroundColor: Colors.kakao_yellow },
           ]}
-          onPress={onKakaoLoginPress}
+          onPress={() => onSocialLogin(handleKakaoLogin)}
           activeOpacity={0.7}
         >
           <KakaoIcon width={24} height={24} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "black" }]}
-          onPress={onAppleLoginPress}
+          onPress={() => onSocialLogin(handleAppleLogin)}
           activeOpacity={0.7}
         >
           <AppleIcon width={24} height={24} />
         </TouchableOpacity>
       </View>
+
+      <AgreeBottomSheet
+        isVisible={showTerms}
+        onClose={() => setShowTerms(false)}
+        onAgree={handleFinalAgree}
+        isSocial={true}
+        agreeText="서비스 시작하기"
+      />
     </SafeAreaView>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   TextInput,
@@ -13,13 +13,9 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import ChevronIcon from "../../assets/icons/chevron.svg";
 import EyeOpenIcon from "../../assets/icons/eye-open.svg";
 import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
-
-import api from "../../api/api";
 import { handleLocalLogin } from "../../services/auth";
 
 import Colors from "../../constants/colors";
@@ -38,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
     if (!isComplete || loading) return;
 
     try {
-      const success = await handleLocalLogin(username, pw);
+      const { success } = await handleLocalLogin(username, pw);
       setLoading(false);
 
       if (success) {

@@ -204,6 +204,7 @@ const AgreeBottomSheet = ({
             ]}
             onPress={handleAgree}
             disabled={!isAllAgreed}
+            activeOpacity={0.7}
           >
             <Text
               style={[

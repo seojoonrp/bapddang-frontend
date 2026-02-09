@@ -17,7 +17,10 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const user = useAuthStore((state) => state.user);
   const [isLoading, setIsLoading] = useState(true);
+
+  const isFullyAuthorized = isLoggedIn && user && user?.isAgreed;
 
   useEffect(() => {
     const initNavigation = async () => {
@@ -36,7 +39,7 @@ const Navigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
+        {isFullyAuthorized ? (
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="DietLog" component={DietLogScreen} />
