@@ -1,5 +1,10 @@
 import { useRef, useState, useEffect, useMemo } from "react";
-import { View, StyleSheet, Animated, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Animated as RNAnimated,
+  TouchableOpacity,
+} from "react-native";
 import Svg, { Polygon, Circle } from "react-native-svg";
 import Colors from "../../constants/colors";
 import Marsh_1_1 from "../../assets/images/marshmallows/marsh_1-1.svg";
@@ -12,6 +17,7 @@ import Marsh_4_1 from "../../assets/images/marshmallows/marsh_4-1.svg";
 import Marsh_4_2 from "../../assets/images/marshmallows/marsh_4-2.svg";
 import QuestionMarshmallow from "../common/QuestionMarshmallow";
 import { useMarshmallowStore } from "../../stores/marshmallowStore";
+import Animated, { Easing, SlideInDown } from "react-native-reanimated";
 
 const ITEM_HEIGHT = 160;
 const MARSHMALLOW_SIZE = 160;
@@ -21,7 +27,7 @@ const FIXED_TOP_PADDING = 300;
 const FIXED_BOTTOM_PADDING = 250;
 
 const MarshmallowStick = ({ onClick }) => {
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new RNAnimated.Value(0)).current;
   const listRef = useRef(null);
   const [listHeight, setListHeight] = useState(0);
   const variantCacheRef = useRef(new Map());
@@ -129,9 +135,14 @@ const MarshmallowStick = ({ onClick }) => {
     }
   };
 
+  if (marshmallows.length === 0) return null;
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Animated.View
+    <Animated.View
+      entering={SlideInDown.duration(700).easing(Easing.bezier(0, 0.8, 0.2, 1))}
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      <RNAnimated.View
         style={[
           styles.stick,
           {
@@ -140,7 +151,7 @@ const MarshmallowStick = ({ onClick }) => {
             top: FIXED_TOP_PADDING - 80,
             transform: [
               {
-                translateY: Animated.multiply(scrollY, -1),
+                translateY: RNAnimated.multiply(scrollY, -1),
               },
             ],
           },
@@ -155,9 +166,9 @@ const MarshmallowStick = ({ onClick }) => {
           />
           <Polygon points={stickPoints} fill={Colors.burn} />
         </Svg>
-      </Animated.View>
+      </RNAnimated.View>
 
-      <Animated.FlatList
+      <RNAnimated.FlatList
         ref={listRef}
         onLayout={(e) => setListHeight(e.nativeEvent.layout.height)}
         style={styles.listContainer}
@@ -199,13 +210,13 @@ const MarshmallowStick = ({ onClick }) => {
           paddingTop: FIXED_TOP_PADDING,
           paddingBottom: FIXED_BOTTOM_PADDING,
         }}
-        onScroll={Animated.event(
+        onScroll={RNAnimated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
       />
-    </View>
+    </Animated.View>
   );
 };
 

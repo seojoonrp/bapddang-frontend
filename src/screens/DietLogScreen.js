@@ -348,7 +348,18 @@ const DietLogScreen = () => {
             <View style={styles.handleBar} />
             <Text style={styles.sheetTitleText}>주간 식단기록</Text>
 
-            <Text style={styles.monthText}>{displayWeekText}</Text>
+            <Text style={styles.monthText}>
+              {displayWeekText}{" "}
+              <Text
+                style={{
+                  fontFamily: "NanumSquareRoundB",
+                  color: "#e3d3d2",
+                  letterSpacing: -0.3,
+                }}
+              >
+                [{user.week}주차]
+              </Text>
+            </Text>
 
             {/* 요일 선택 바 */}
             <View style={[styles.dayContainer, { zIndex: 999 }]}>

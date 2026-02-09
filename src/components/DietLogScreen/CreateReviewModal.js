@@ -24,8 +24,6 @@ import { useAuthStore } from "../../stores/authStore";
 const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
   const user = useAuthStore((state) => state.user);
 
-  const [name, setName] = useState("");
-
   const dayOption = ["그저께", "어제", "오늘"];
   const timeOption = ["아침", "점심", "저녁", "기타"];
 
@@ -56,10 +54,15 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
   }, [foodNames]);
 
   // 이름 설정
-  useEffect(() => {
-    const names = foodItems.map((f) => f.foodName).join(" & ");
-    setName(names);
-  }, [foodItems]);
+  const adequateName = (names) => {
+    if (names.length === 0) return "";
+    const joined = names.join(" & ");
+    if (joined.length > 15 || names.length > 2) {
+      return names[0] + " 외 " + (names.length - 1) + "개";
+    }
+    return joined;
+  };
+  const [name, setName] = useState(adequateName(foodNames));
 
   const handleSubmit = async () => {
     try {
