@@ -145,6 +145,16 @@ export const handleAppleLogin = async () => {
   }
 };
 
+export const handleAgreeToTerms = async () => {
+  try {
+    await api.patch("/users/me/agree");
+    console.log("Successfully agreed to terms.");
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const handleLogout = async () => {
   try {
     const user = useAuthStore.getState().user;

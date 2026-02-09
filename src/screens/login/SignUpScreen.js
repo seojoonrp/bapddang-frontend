@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -11,7 +11,6 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Modal from "react-native-modal";
 import { checkUsernameAvailability, handleSignUp } from "../../services/auth";
 import ChevronIcon from "../../assets/icons/chevron.svg";
 import EyeOpenIcon from "../../assets/icons/eye-open.svg";
@@ -25,6 +24,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import AgreeBottomSheet from "../../components/common/AgreeBottomSheet";
 
 const StatusMessage = ({
   okMessage,
@@ -124,7 +124,6 @@ const SignUpScreen = () => {
   }, [pw, pwConfirm]);
 
   const handleAgree = async () => {
-    if (loading || !isComplete || !isAllAgreed) return;
     setLoading(true);
 
     const success = await handleSignUp(username, pw);
@@ -267,90 +266,13 @@ const SignUpScreen = () => {
         </TouchableOpacity>
 
         {/* 이용약관 모달 */}
-        <Modal
+        <AgreeBottomSheet
           isVisible={showTerms}
-          animationIn="slideInUp"
-          animationOut="slideOutDown"
-          backdropOpacity={0.4}
-          onBackdropPress={() => setShowTerms(false)}
-          style={styles.modal}
-          useNativeDriver={true}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.grabBar} />
-
-            <Text style={styles.modalTitle}>
-              서비스 이용에 필요한 약관에 동의해주세요
-            </Text>
-
-            <View style={styles.checkboxWrapper}>
-              <Pressable style={styles.checkboxRow} onPress={toggleAll}>
-                {isAllAgreed ? (
-                  <CheckCircleYesIcon width={24} height={24} />
-                ) : (
-                  <CheckCircleNoIcon width={24} height={24} />
-                )}
-                <Text style={styles.termsText}>전체 동의</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.checkboxRow}
-                onPress={() => setAgreedApp(!agreedApp)}
-              >
-                {agreedApp ? (
-                  <CheckCircleYesIcon width={24} height={24} />
-                ) : (
-                  <CheckCircleNoIcon width={24} height={24} />
-                )}
-                <Text style={styles.termsText}>[필수] 앱 이용약관 동의</Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.checkboxRow}
-                onPress={() => setAgreedPrivacy(!agreedPrivacy)}
-              >
-                {agreedPrivacy ? (
-                  <CheckCircleYesIcon width={24} height={24} />
-                ) : (
-                  <CheckCircleNoIcon width={24} height={24} />
-                )}
-                <Text style={styles.termsText}>
-                  [필수] 개인정보 수집 및 이용 동의
-                </Text>
-              </Pressable>
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.modalNextButton,
-                {
-                  backgroundColor: isAllAgreed
-                    ? Colors.point_red
-                    : Colors.text_gray,
-                },
-                {
-                  borderColor: isAllAgreed
-                    ? Colors.burn_red
-                    : Colors.slightly_burn,
-                },
-              ]}
-              onPress={handleAgree}
-              disabled={!isAllAgreed}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.modalNextButtonText,
-                  {
-                    color: isAllAgreed ? Colors.background_yellow : Colors.burn,
-                  },
-                ]}
-              >
-                회원가입 완료
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+          onClose={() => setShowTerms(false)}
+          onAgree={handleAgree}
+          isSocial={false}
+          agreeText="회원가입 완료"
+        />
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -467,69 +389,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "NanumSquareB",
     color: Colors.burn,
-  },
-  modal: {
-    justifyContent: "flex-end",
-    margin: 0,
-  },
-  modalContent: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-    paddingHorizontal: 12,
-    paddingTop: 6,
-    paddingBottom: 84,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  grabBar: {
-    width: 36,
-    height: 5,
-    backgroundColor: Colors.light_gray,
-    borderRadius: 3,
-    marginBottom: 48,
-  },
-  modalTitle: {
-    fontFamily: "NanumSquareEB",
-    fontSize: 18,
-    color: Colors.light_red,
-    marginBottom: 30,
-  },
-  checkboxWrapper: {
-    width: "100%",
-    marginBottom: 30,
-    marginLeft: 48,
-    padding: 4,
-    gap: 16,
-  },
-  checkboxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  termsText: {
-    fontFamily: "NanumSquareRoundB",
-    fontSize: 16,
-    color: Colors.burn,
-    textDecorationLine: "underline",
-  },
-  modalNextButton: {
-    width: "100%",
-    paddingVertical: 16,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    marginTop: 12,
-    borderWidth: 1,
-  },
-  modalNextButtonText: {
-    color: Colors.burn,
-    fontWeight: "bold",
-    fontSize: 16,
-    fontFamily: "NanumSquareB",
   },
   backToLoginText: {
     color: Colors.light_red,

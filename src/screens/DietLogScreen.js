@@ -42,7 +42,7 @@ import { BlurView } from "expo-blur";
 import PointerIcon from "../assets/icons/pointer.svg";
 
 const HEADER_HEIGHT = 48;
-const SHEET_HANDLE_HEIGHT = 240;
+const SHEET_HANDLE_HEIGHT = 260;
 const SHEET_OPEN_MARGIN = 32;
 
 const EMPTY_ARRAY = [];
@@ -64,11 +64,12 @@ const DietLogScreen = () => {
   const { animatedStyles, panGesture, scrollY } =
     useMainAnimations(scrollThreshold);
 
+  // 바텀시트 애니메이션 관련
   const animatedFloatingButtons = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
       [0, scrollThreshold],
-      [0, 200],
+      [0, 220],
       Extrapolation.CLAMP,
     );
 
@@ -80,11 +81,21 @@ const DietLogScreen = () => {
     const translateY = interpolate(
       scrollY.value,
       [0, scrollThreshold],
-      [0, -40],
+      [0, -60],
       Extrapolation.CLAMP,
     );
 
     return { transform: [{ translateY }] };
+  });
+  const animatedReviewCountText = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, scrollThreshold * 0.7],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+
+    return { opacity };
   });
 
   const user = useAuthStore((state) => state.user);
@@ -123,7 +134,7 @@ const DietLogScreen = () => {
     const loadData = async () => {
       await getReviewsForDay(targetAbsoluteDay);
     };
-    loadData();
+    if (targetAbsoluteDay <= user?.day) loadData();
   }, [targetAbsoluteDay, getReviewsForDay]);
 
   // 날짜 바 애니메이션 관련
@@ -204,8 +215,8 @@ const DietLogScreen = () => {
     if (targetWeek < 1) {
       return;
     }
+    if (targetWeek !== selectedWeek) setSelectedDay(1);
     setSelectedWeek(targetWeek);
-    setSelectedDay(1);
   };
 
   // 리뷰 로직 관련
@@ -348,9 +359,9 @@ const DietLogScreen = () => {
                   return (
                     <TouchableOpacity
                       key={num}
+                      style={styles.dayButton}
                       onPress={() => setSelectedDay(num)}
                       activeOpacity={1}
-                      style={styles.dayButton}
                     >
                       <Text style={styles.dayText}>{weekDates[index]}</Text>
                     </TouchableOpacity>
@@ -404,6 +415,14 @@ const DietLogScreen = () => {
                 </Animated.View>
               )}
             </View>
+
+            <Animated.Text
+              style={[styles.recordCountText, animatedReviewCountText]}
+            >
+              {sortedDailyReviews.length === 0
+                ? "기록된 식단이 없어요."
+                : `${sortedDailyReviews.length}개의 식단 기록을 남겼어요!`}
+            </Animated.Text>
 
             <Animated.View
               style={[animatedReviewCardList, { flex: 1, width: "100%" }]}
@@ -563,6 +582,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.point_red,
     letterSpacing: -0.3,
+  },
+  recordCountText: {
+    marginTop: 16,
+    fontFamily: "NanumSquareR",
+    fontSize: 13,
+    color: Colors.text_gray,
   },
   redButton: {
     justifyContent: "center",
