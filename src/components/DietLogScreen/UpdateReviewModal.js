@@ -128,7 +128,10 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
             <View style={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((i) => (
                 <TouchableOpacity key={i} onPress={() => setRating(i)}>
-                  <ReviewStar fill={rating >= i ? Colors.point_red : "white"} />
+                  <ReviewStar
+                    fill={rating >= i ? Colors.point_red : "white"}
+                    stroke={rating >= i ? "#D9D9D9" : Colors.text_gray}
+                  />
                 </TouchableOpacity>
               ))}
             </View>

@@ -115,6 +115,7 @@ const DietLogScreen = () => {
   const dailyReviews = useReviewStore(
     (state) => state.reviewsByDay[targetAbsoluteDay] || EMPTY_ARRAY,
   );
+  const isReviewLoading = useReviewStore((state) => state.isLoading);
   const {
     getReviewsForDay,
     addReviewToStore,
@@ -145,30 +146,38 @@ const DietLogScreen = () => {
   const ratio = (day) => {
     return Math.min(day / 7 + (7 - day) / 280, 1);
   };
+
   const fillWidth = useSharedValue(ratio(selectedDay) * 100);
+  const borderRadiusRight = useSharedValue(32);
+
   useEffect(() => {
     const fillRatio = ratio(selectedDay);
     fillWidth.value = withTiming(fillRatio * 100, {
       duration: 400,
       easing: Easing.inOut(Easing.quad),
     });
+
+    const targetRadius = selectedDay === 7 ? 16 : 32;
+    borderRadiusRight.value = withTiming(targetRadius, {
+      duration: 400,
+      easing: Easing.inOut(Easing.quad),
+    });
   }, [selectedDay]);
+
   const animatedFillWidth = useAnimatedStyle(() => {
-    return { width: `${fillWidth.value}%` };
+    return {
+      width: `${fillWidth.value}%`,
+      borderTopRightRadius: borderRadiusRight.value,
+      borderBottomRightRadius: borderRadiusRight.value,
+    };
   });
 
-  // const animatedRightBorderRadius = useAnimatedStyle(() => {
-  //   const radius = interpolate(
-  //     fillWidth.value,
-  //     [ratio(6) * 100, 100],
-  //     [16, 50],
-  //     Extrapolation.CLAMP,
-  //   );
-  //   return {
-  //     borderTopRightRadius: radius,
-  //     borderBottomRightRadius: radius,
-  //   };
-  // });
+  const animatedGradientRadius = useAnimatedStyle(() => {
+    return {
+      borderTopRightRadius: borderRadiusRight.value,
+      borderBottomRightRadius: borderRadiusRight.value,
+    };
+  });
 
   // Day/Week을 바탕으로 실제 표시 날짜 계산
   const [weekDates, setWeekDates] = useState([]);
@@ -342,7 +351,11 @@ const DietLogScreen = () => {
         </Animated.View>
 
         <Animated.View
-          style={[styles.bottomSheetWrapper, animatedStyles.bottomSheet]}
+          style={[
+            styles.bottomSheetWrapper,
+            { height: SHEET_MAX_HEIGHT },
+            animatedStyles.bottomSheet,
+          ]}
         >
           <View style={styles.innerSheetContainer}>
             <View style={styles.handleBar} />
@@ -380,7 +393,9 @@ const DietLogScreen = () => {
                 })}
               </View>
               <Animated.View style={[styles.dayFill, animatedFillWidth]}>
-                <Animated.View style={[styles.gradientContainer]}>
+                <Animated.View
+                  style={[styles.gradientContainer, animatedGradientRadius]}
+                >
                   <LinearGradient
                     colors={["#FF5A2C", "#E90C05"]}
                     start={{ x: 0, y: 0 }}
@@ -436,12 +451,14 @@ const DietLogScreen = () => {
             </Animated.Text>
 
             <Animated.View
-              style={[animatedReviewCardList, { flex: 1, width: "100%" }]}
+              style={[
+                animatedReviewCardList,
+                { flex: 1, width: "100%", height: "100%" },
+              ]}
             >
               <FlatList
                 data={sortedDailyReviews}
-                style={{ width: "100%", marginTop: 30 }}
-                contentContainerStyle={{ paddingBottom: 50 }}
+                style={{ width: "100%", marginTop: 40 }}
                 renderItem={({ item }) => (
                   <ReviewCard
                     review={item}
@@ -451,12 +468,16 @@ const DietLogScreen = () => {
                 )}
                 ListEmptyComponent={() => (
                   <View style={{ alignItems: "center", marginTop: 50 }}>
-                    <Text style={styles.placeholderText}>
-                      기록된 식단이 없습니다.{"\n"}
-                      <Text style={styles.placeholderRed}>
-                        +를 눌러 오늘 먹은 음식을 추가해보세요!
+                    {isReviewLoading ? (
+                      <Text style={styles.placeholderText}>로딩중...</Text>
+                    ) : (
+                      <Text style={styles.placeholderText}>
+                        기록된 식단이 없습니다.{"\n"}
+                        <Text style={styles.placeholderRed}>
+                          +를 눌러 오늘 먹은 음식을 추가해보세요!
+                        </Text>
                       </Text>
-                    </Text>
+                    )}
                   </View>
                 )}
                 showsVerticalScrollIndicator={false}
@@ -620,7 +641,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: 700,
     zIndex: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -6 },
@@ -690,7 +710,8 @@ const styles = StyleSheet.create({
     top: 0,
     height: "100%",
     borderRadius: 16,
-    boxShadow: "0 2px 0 2px rgba(0, 0, 0, 0.08) inset",
+    borderTopRightRadius: 50,
+    borderBottomRightRadius: 50,
     overflow: "hidden",
   },
   gradientContainer: {
@@ -701,6 +722,8 @@ const styles = StyleSheet.create({
     top: 1.5,
     bottom: 2,
     borderRadius: 16,
+    borderTopRightRadius: 50,
+    borderBottomRightRadius: 50,
     overflow: "hidden",
   },
   redGradient: {
@@ -721,6 +744,7 @@ const styles = StyleSheet.create({
     color: Colors.burn,
     fontSize: 28,
     fontFamily: "NanumSquareB",
+    letterSpacing: -0.5,
   },
   backdrop: {
     position: "absolute",

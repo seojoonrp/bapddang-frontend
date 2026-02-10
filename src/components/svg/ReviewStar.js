@@ -1,7 +1,12 @@
-import React from "react";
 import Svg, { G, Path, Defs, ClipPath, Rect } from "react-native-svg";
+import Colors from "../../constants/colors";
 
-const Star = ({ width = 24, height = 25, fill = "white", stroke = "#521210" }) => (
+const Star = ({
+  width = 24,
+  height = 25,
+  fill = "white",
+  stroke = Colors.slightly_burn,
+}) => (
   <Svg
     width={width}
     height={height}
@@ -18,7 +23,12 @@ const Star = ({ width = 24, height = 25, fill = "white", stroke = "#521210" }) =
     </G>
     <Defs>
       <ClipPath id="clip0">
-        <Rect width="24" height="24" fill="white" transform="translate(0 0.5)" />
+        <Rect
+          width="24"
+          height="24"
+          fill="white"
+          transform="translate(0 0.5)"
+        />
       </ClipPath>
     </Defs>
   </Svg>

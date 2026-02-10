@@ -81,16 +81,6 @@ const SignUpScreen = () => {
 
   const [showTerms, setShowTerms] = useState(false);
 
-  const [agreedApp, setAgreedApp] = useState(false);
-  const [agreedPrivacy, setAgreedPrivacy] = useState(false);
-  const isAllAgreed = agreedApp && agreedPrivacy;
-
-  const toggleAll = () => {
-    const newValue = !isAllAgreed;
-    setAgreedApp(newValue);
-    setAgreedPrivacy(newValue);
-  };
-
   useEffect(() => {
     setUsernameCondition(username.length >= 3 && username.length <= 15);
     setIsUsernameChecked(false);

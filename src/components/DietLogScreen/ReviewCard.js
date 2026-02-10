@@ -122,6 +122,7 @@ const ReviewCard = ({ review, onEdit, onDelete }) => {
             <ReviewStar
               key={i}
               fill={review.rating >= i ? Colors.point_red : "white"}
+              stroke={review.rating >= i ? "#D9D9D9" : Colors.text_gray}
             />
           ))}
         </View>
@@ -210,8 +211,9 @@ const styles = StyleSheet.create({
   reviewText: {
     fontSize: 18,
     textAlign: "center",
-    fontFamily: "NanumSquareB",
+    fontFamily: "NanumSquareRoundB",
     color: Colors.slightly_burn,
+    letterSpacing: -0.3,
   },
   starRow: {
     flexDirection: "row",
@@ -224,7 +226,8 @@ const styles = StyleSheet.create({
   },
   commentText: {
     fontSize: 13,
-    fontFamily: "NanumSquareB",
+    fontFamily: "NanumSquareRoundB",
     color: Colors.text_gray,
+    letterSpacing: -0.2,
   },
 });

@@ -15,6 +15,7 @@ import FoodInfoModal from "./FoodInfoModal";
 const LikedFoods = () => {
   const navigation = useNavigation();
 
+  const mode = useModeStore((state) => state.mode);
   const modeColor = useModeStore((state) => state.modeColor);
 
   const [selectedFoodID, setSelectedFoodID] = useState(null);
@@ -56,6 +57,12 @@ const LikedFoods = () => {
     return shuffledList.slice(0, 4);
   }, [likedFoodIDs, foodsByID]);
 
+  const modeFilteredItems = useMemo(() => {
+    return displayItems.filter(
+      (item) => item.food.speed.includes(mode) || item.food.speed === "both",
+    );
+  }, [displayItems, mode]);
+
   return (
     <View style={styles.container}>
       <View style={styles.labelRow}>
@@ -74,7 +81,7 @@ const LikedFoods = () => {
         </Text>
       </View>
 
-      {displayItems.length === 0 ? (
+      {modeFilteredItems.length === 0 ? (
         <View
           style={[
             styles.row,
@@ -82,9 +89,9 @@ const LikedFoods = () => {
           ]}
         >
           <Text style={styles.placeholderText}>음식의&nbsp;</Text>
-          <HeartIcon size={15} fillColor={Colors.point_red} strokeWidth={0} />
+          <HeartIcon size={15} fillColor={modeColor} strokeWidth={0} />
           <Text style={styles.placeholderText}>
-            를 눌러 음식을&nbsp;
+            를 눌러 {mode === "fast" ? "고속" : "저속"}노화 음식을&nbsp;
             <Text
               style={{
                 color: modeColor,
@@ -98,7 +105,7 @@ const LikedFoods = () => {
       ) : (
         <View style={styles.row}>
           <View style={styles.foodsContainer}>
-            {displayItems.map((item) => (
+            {modeFilteredItems.map((item) => (
               <TouchableOpacity
                 key={item.food.id}
                 style={styles.food}
