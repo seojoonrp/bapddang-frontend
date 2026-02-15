@@ -20,7 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useMainAnimations } from "../hooks/useMainAnimations";
 import { GestureDetector } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
@@ -40,6 +40,7 @@ import HeartIcon from "../components/svg/HeartIcon";
 import PlusIcon from "../assets/icons/plus.svg";
 import { BlurView } from "expo-blur";
 import PointerIcon from "../assets/icons/pointer.svg";
+import SettingsDrawer from "../components/common/SettingsDrawer";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 260;
@@ -302,6 +303,22 @@ const DietLogScreen = () => {
     }
   };
 
+  const [isSettingOpen, setIsSettingOpen] = useState(false);
+  const [shouldReOpen, setShouldReOpen] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldReOpen) {
+        setIsSettingOpen(true);
+        setShouldReOpen(false);
+      }
+    }, [shouldReOpen]),
+  );
+
+  const navigateFromSettings = () => {
+    setIsSettingOpen(false);
+    setShouldReOpen(true);
+  };
+
   return (
     <GestureDetector gesture={panGesture}>
       <LinearGradient
@@ -319,7 +336,7 @@ const DietLogScreen = () => {
                 <BellIcon color={Colors.yellow} width={24} height={24} />
                 <View style={styles.notificationCircle} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("Setting")}>
+              <TouchableOpacity onPress={() => setIsSettingOpen(true)}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
               </TouchableOpacity>
             </View>
@@ -545,6 +562,12 @@ const DietLogScreen = () => {
           index={5.5}
           icon={<Back width={52} height={52} />}
           onPress={() => navigation.goBack()}
+        />
+
+        <SettingsDrawer
+          visible={isSettingOpen}
+          onClose={() => setIsSettingOpen(false)}
+          onNavigate={navigateFromSettings}
         />
       </LinearGradient>
     </GestureDetector>

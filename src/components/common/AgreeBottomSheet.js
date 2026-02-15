@@ -136,7 +136,7 @@ const AgreeBottomSheet = ({
   };
 
   const handleOpenURL = (url) => {
-    Linking.openURL(url).catch((err) => console.error("URL 열기 실패:", err));
+    Linking.openURL(url).catch((err) => console.log("URL 열기 실패:", err));
   };
 
   if (!isRendered) return null;

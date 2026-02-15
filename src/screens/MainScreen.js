@@ -1,7 +1,7 @@
 // src/screens/MainScreen.js
 
 import { View, InteractionManager } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 import { useMainLayout } from "../hooks/useMainLayout";
@@ -14,7 +14,7 @@ import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
 import EditAndLike from "../components/MainScreen/EditAndLike";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "../stores/authStore";
 import { useModeStore } from "../stores/modeStore";
 import ReanimatedModal from "../components/common/ReanimatedModal";
@@ -58,6 +58,20 @@ const MainScreen = () => {
   };
 
   const [isSettingOpen, setIsSettingOpen] = useState(false);
+  const [shouldReOpen, setShouldReOpen] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldReOpen) {
+        setIsSettingOpen(true);
+        setShouldReOpen(false);
+      }
+    }, [shouldReOpen]),
+  );
+
+  const navigateFromSettings = () => {
+    setIsSettingOpen(false);
+    setShouldReOpen(true);
+  };
 
   if (!isReady) {
     return null;
@@ -113,6 +127,7 @@ const MainScreen = () => {
       <SettingsDrawer
         visible={isSettingOpen}
         onClose={() => setIsSettingOpen(false)}
+        onNavigate={navigateFromSettings}
       />
 
       {/* <DebugButton
