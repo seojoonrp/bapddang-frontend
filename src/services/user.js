@@ -11,7 +11,7 @@ export const syncUserWeekAndDay = async () => {
     useAuthStore.getState().updateUser(user);
 
     if (result.isNewWeek) {
-      useAuthStore.getState().setNewWeekData({
+      useAuthStore.getState().setLastWeekData({
         lastMarshmallow: result.lastMarshmallow,
       });
 

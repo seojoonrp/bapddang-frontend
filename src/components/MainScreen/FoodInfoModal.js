@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
     color: Colors.burn,
     fontFamily: "NanumSquareRoundEB",
     fontSize: 24,
+    letterSpacing: -0.2,
   },
   likeRow: {
     flexDirection: "row",

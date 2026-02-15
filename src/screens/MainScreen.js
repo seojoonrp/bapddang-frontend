@@ -1,6 +1,6 @@
 // src/screens/MainScreen.js
 
-import { StyleSheet, View, InteractionManager } from "react-native";
+import { View, InteractionManager } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -11,11 +11,12 @@ import Hero from "../components/MainScreen/Hero";
 import TimeQuestion from "../components/MainScreen/TimeQuestion";
 import FoodCardNews from "../components/MainScreen/FoodCardNews";
 import MainBottomSheet from "../components/MainScreen/MainBottomSheet";
+import EditAndLike from "../components/MainScreen/EditAndLike";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
-import EditAndLike from "../components/MainScreen/EditAndLike";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../stores/authStore";
+import { useModeStore } from "../stores/modeStore";
 import ReanimatedModal from "../components/common/ReanimatedModal";
 import LastMarshmallowModal from "../components/MainScreen/LastMarshmallowModal";
 import DebugButton from "../components/DebugButton";
@@ -30,6 +31,10 @@ const testMarshmallow = {
 
 const MainScreen = () => {
   const navigation = useNavigation();
+
+  const mode = useModeStore((state) => state.mode);
+  const bgColor =
+    mode === "fast" ? Colors.background_yellow : Colors.background_white;
 
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
@@ -66,7 +71,9 @@ const MainScreen = () => {
   return (
     <>
       <GestureDetector gesture={panGesture}>
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View
+          style={{ flex: 1, paddingTop: insets.top, backgroundColor: bgColor }}
+        >
           <MainHeader
             animatedStyles={animatedStyles}
             onBellPress={() => console.log("Bell pressed")}
@@ -107,20 +114,13 @@ const MainScreen = () => {
         />
       </ReanimatedModal>
 
-      <DebugButton
+      {/* <DebugButton
         index={0}
         label={"Show modal"}
         onPress={() => setIsModalVisible(true)}
-      />
+      /> */}
     </>
   );
 };
 
 export default MainScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background_yellow,
-  },
-});

@@ -27,6 +27,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CategorySelector = ({ onSelect }) => {
   const modeColor = useModeStore((state) => state.modeColor);
+  const mode = useModeStore((state) => state.mode);
 
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
@@ -115,7 +116,13 @@ const CategorySelector = ({ onSelect }) => {
             style={[styles.dropdownShadow, animatedDropdownShadowStyle]}
           />
           <TouchableOpacity
-            style={styles.dropdown}
+            style={[
+              styles.dropdown,
+              {
+                borderColor:
+                  mode === "fast" ? Colors.nurim : Colors.border_brown,
+              },
+            ]}
             activeOpacity={0.8}
             onPress={() => setIsOpen(!isOpen)}
           >
@@ -129,7 +136,11 @@ const CategorySelector = ({ onSelect }) => {
             <View style={styles.rightIconContainer}>
               <View style={styles.verticalLine} />
               <Animated.View style={animatedArrowStyle}>
-                <Triangle width={12} height={12} />
+                <Triangle
+                  width={12}
+                  height={12}
+                  color={mode === "fast" ? Colors.nurim : Colors.border_brown}
+                />
               </Animated.View>
             </View>
           </TouchableOpacity>

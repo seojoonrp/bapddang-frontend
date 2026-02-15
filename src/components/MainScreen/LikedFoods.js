@@ -91,7 +91,7 @@ const LikedFoods = () => {
           <Text style={styles.placeholderText}>음식의&nbsp;</Text>
           <HeartIcon size={15} fillColor={modeColor} strokeWidth={0} />
           <Text style={styles.placeholderText}>
-            를 눌러 {mode === "fast" ? "고속" : "저속"}노화 음식을&nbsp;
+            를 눌러 음식을&nbsp;
             <Text
               style={{
                 color: modeColor,

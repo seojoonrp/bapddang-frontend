@@ -12,6 +12,7 @@ const AnimatedTouchableOpacity =
 
 const TimeQuestion = ({ showTextBubble }) => {
   const modeColor = useModeStore((state) => state.modeColor);
+  const mode = useModeStore((state) => state.mode);
 
   const hour = new Date().getHours();
 
@@ -40,7 +41,14 @@ const TimeQuestion = ({ showTextBubble }) => {
   return (
     <View style={styles.container}>
       <View style={styles.textRow}>
-        <View style={styles.timePill}>
+        <View
+          style={[
+            styles.timePill,
+            {
+              borderColor: mode === "fast" ? Colors.nurim : Colors.border_brown,
+            },
+          ]}
+        >
           <Text style={[styles.timePillText, { color: modeColor }]}>
             {mealInfo.label}
           </Text>
