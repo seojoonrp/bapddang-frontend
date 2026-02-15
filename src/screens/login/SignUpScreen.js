@@ -17,8 +17,6 @@ import EyeOpenIcon from "../../assets/icons/eye-open.svg";
 import EyeClosedIcon from "../../assets/icons/eye-closed.svg";
 import CheckYesIcon from "../../assets/icons/check-yes.svg";
 import CheckNoIcon from "../../assets/icons/check-no.svg";
-import CheckCircleYesIcon from "../../assets/icons/check-circle-yes.svg";
-import CheckCircleNoIcon from "../../assets/icons/check-circle-no.svg";
 import Colors from "../../constants/colors";
 import {
   SafeAreaView,
@@ -36,9 +34,9 @@ const StatusMessage = ({
     <View style={styles.statusMessageContainer}>
       {withIcon &&
         (isError ? (
-          <CheckNoIcon width={16} height={16} />
+          <CheckNoIcon width={16} height={16} color={Colors.burn} />
         ) : (
-          <CheckYesIcon width={16} height={16} />
+          <CheckYesIcon width={16} height={16} color={Colors.burn} />
         ))}
       <Text style={styles.statusMessageText}>
         {isError ? errorMessage : okMessage}

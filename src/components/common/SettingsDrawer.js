@@ -180,12 +180,14 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
                   description={`로그인 시 사용한 sns 계정을 포함한${"\n"}아이디와 이메일을 확인합니다.`}
                   onPress={handleAccountInfo}
                 />
-                <SettingItem
-                  icon={<LockIcon width={20} height={20} />}
-                  title="비밀번호 변경"
-                  description="언제든지 비밀번호를 변경하세요."
-                  onPress={handlePasswordChange}
-                />
+                {user?.loginMethod === "local" && (
+                  <SettingItem
+                    icon={<LockIcon width={20} height={20} />}
+                    title="비밀번호 변경"
+                    description="언제든지 비밀번호를 변경하세요."
+                    onPress={handlePasswordChange}
+                  />
+                )}
               </View>
 
               <LinearGradient

@@ -62,8 +62,10 @@ const LastMarshmallowModal = ({ marshmallow, onClose }) => {
           </View>
 
           <Text style={styles.stats}>
-            총 리뷰 {marshmallow.reviewCount}개, 평균 별점{" "}
-            {(marshmallow.totalRating / marshmallow.reviewCount).toFixed(1)}점
+            총 리뷰 {marshmallow.reviewCount}개
+            {marshmallow.reviewCount > 0
+              ? `, 평균 별점 ${(marshmallow.totalRating / marshmallow.reviewCount || 0).toFixed(1)}점`
+              : ""}
           </Text>
           <TouchableOpacity
             style={styles.goSeeButton}

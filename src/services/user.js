@@ -23,3 +23,15 @@ export const syncUserWeekAndDay = async () => {
     throw error;
   }
 };
+
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const result = await api.patch("/users/me/password", {
+      currentPassword,
+      newPassword,
+    });
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
