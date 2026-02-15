@@ -42,7 +42,7 @@ const Hero = ({ scrollY, scrollThreshold }) => {
 
       <View style={styles.switchContainer}>
         <Animated.Text style={[styles.modeText, textStyle]}>
-          {mode === "fast" ? "고속" : "저속"}노화
+          {mode === "fast" ? "푸짐하게" : "건강하게"}
         </Animated.Text>
         <ModeSwitch />
       </View>

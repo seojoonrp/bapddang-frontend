@@ -41,6 +41,8 @@ const LastMarshmallowModal = ({ marshmallow, onClose }) => {
     navigation.navigate("DietLog");
   };
 
+  if (!marshmallow) return null;
+
   return (
     <View style={styles.container}>
       <View style={styles.whiteContainer}>

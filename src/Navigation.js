@@ -7,7 +7,6 @@ import LoginScreen from "./screens/login/LoginScreen";
 import SignUpScreen from "./screens/login/SignUpScreen";
 import LandingScreen from "./screens/login/LandingScreen";
 import WelcomeScreen from "./screens/login/WelcomeScreen";
-import SettingScreen from "./screens/SettingScreen";
 import { handleLoginSession } from "./services/auth";
 import { useAuthStore } from "./stores/authStore";
 import { useEffect, useState } from "react";
@@ -43,7 +42,6 @@ const Navigation = () => {
           <>
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="DietLog" component={DietLogScreen} />
-            <Stack.Screen name="Setting" component={SettingScreen} />
             <Stack.Screen name="Liked" component={LikedScreen} />
           </>
         ) : (

@@ -20,14 +20,7 @@ import { useModeStore } from "../stores/modeStore";
 import ReanimatedModal from "../components/common/ReanimatedModal";
 import LastMarshmallowModal from "../components/MainScreen/LastMarshmallowModal";
 import DebugButton from "../components/DebugButton";
-
-const testMarshmallow = {
-  week: 12,
-  reviewCount: 7,
-  totalRating: 29,
-  status: 2,
-  isComplete: true,
-};
+import SettingsDrawer from "../components/common/SettingsDrawer";
 
 const MainScreen = () => {
   const navigation = useNavigation();
@@ -64,6 +57,8 @@ const MainScreen = () => {
     clearLastWeekData();
   };
 
+  const [isSettingOpen, setIsSettingOpen] = useState(false);
+
   if (!isReady) {
     return null;
   }
@@ -77,7 +72,7 @@ const MainScreen = () => {
           <MainHeader
             animatedStyles={animatedStyles}
             onBellPress={() => console.log("Bell pressed")}
-            onSettingsPress={() => navigation.navigate("Setting")}
+            onSettingsPress={() => setIsSettingOpen(!isSettingOpen)}
           />
 
           <Hero scrollY={scrollY} scrollThreshold={scrollThreshold} />
@@ -107,12 +102,18 @@ const MainScreen = () => {
           />
         </View>
       </GestureDetector>
+
       <ReanimatedModal visible={isModalVisible} onClose={handleCloseModal}>
         <LastMarshmallowModal
-          marshmallow={testMarshmallow}
+          marshmallow={lastWeekData?.lastMarshmallow}
           onClose={handleCloseModal}
         />
       </ReanimatedModal>
+
+      <SettingsDrawer
+        visible={isSettingOpen}
+        onClose={() => setIsSettingOpen(false)}
+      />
 
       {/* <DebugButton
         index={0}
