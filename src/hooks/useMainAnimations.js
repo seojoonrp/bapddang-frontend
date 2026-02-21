@@ -21,7 +21,8 @@ export const useMainAnimations = (scrollThreshold) => {
 
   const { headerHeight, heroHeight } = useMainLayout();
 
-  const { modeColor } = useModeStore();
+  const modeColor = useModeStore((state) => state.modeColor);
+  const mode = useModeStore((state) => state.mode);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -52,7 +53,7 @@ export const useMainAnimations = (scrollThreshold) => {
     color: interpolateColor(
       scrollY.value,
       [0, scrollThreshold],
-      [modeColor, Colors.yellow],
+      [modeColor, mode === "fast" ? Colors.yellow : Colors.background_yellow],
     ),
   }));
 

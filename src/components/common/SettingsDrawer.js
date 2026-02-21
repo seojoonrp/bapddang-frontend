@@ -64,7 +64,7 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
   const handleWithdrawalPress = () => {
     Alert.alert(
       "회원 탈퇴",
-      "정말 회원탈퇴 하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며, 복구할 수 없습니다.",
+      "정말  퇴 하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며, 복구할 수 없습니다.",
       [
         { text: "취소", style: "cancel" },
         {
@@ -272,7 +272,7 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
                   onPress={handleWithdrawalPress}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.withdrawalText}>회원탈퇴</Text>
+                  <Text style={styles.withdrawalText}>회원 탈퇴</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
