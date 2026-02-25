@@ -8,14 +8,12 @@
     "scheme": "bobttaeng",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./src/assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+    "platforms": ["ios"],
     "ios": {
+      "buildNumber": "1",
       "usesAppleSignIn": true,
-      "supportsTablet": true,
+      "supportsTablet": false,
+      "requireFullScreen": true,
       "bundleIdentifier": "com.happetite.bobttaeng",
       "infoPlist": {
         "CFBundleURLTypes": [
@@ -25,27 +23,24 @@
         ],
         "ITSAppUsesNonExemptEncryption": false
       },
-      "splash": {
-        "image": "./src/assets/splash-icon.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "android": {
-      "package": "com.happetite.bobttaeng",
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+          }
+        ]
       },
-      "edgeToEdgeEnabled": true,
       "splash": {
         "image": "./src/assets/splash-icon.png",
+        "imageWidth": 125,
         "resizeMode": "contain",
         "backgroundColor": "#ffffff"
       }
-    },
-    "web": {
-      "favicon": "./src/assets/favicon.png"
     },
     "plugins": [
       "expo-dev-client",
