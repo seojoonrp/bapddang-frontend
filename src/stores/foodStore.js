@@ -127,3 +127,6 @@ export const useFoodStore = create((set, get) => ({
     });
   },
 }));
+
+export const selectLikedFoodItems = (state) =>
+  state.likedFoodIDs.map((id) => state.foodsByID[id]).filter(Boolean);

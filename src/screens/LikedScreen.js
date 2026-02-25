@@ -3,9 +3,10 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useShallow } from "zustand/shallow";
 import { fetchLikedFoods } from "../services/like";
-import { useFoodStore } from "../stores/foodStore";
+import { useFoodStore, selectLikedFoodItems } from "../stores/foodStore";
 import ChevronIcon from "../assets/icons/chevron.svg";
 import Colors from "../constants/colors";
 import FoodInfoModal from "../components/MainScreen/FoodInfoModal";
@@ -20,8 +21,7 @@ const LikedScreen = () => {
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
-  const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
-  const foodsByID = useFoodStore((state) => state.foodsByID);
+  const displayItems = useFoodStore(useShallow(selectLikedFoodItems));
   const setLikedFoods = useFoodStore((state) => state.setLikedFoods);
 
   useEffect(() => {
@@ -38,11 +38,6 @@ const LikedScreen = () => {
 
     loadLikedFoods();
   }, []);
-
-  const displayItems = useMemo(() => {
-    const fullList = likedFoodIDs.map((id) => foodsByID[id]).filter(Boolean);
-    return fullList;
-  }, [likedFoodIDs, foodsByID]);
 
   return (
     <SafeAreaView style={styles.container}>

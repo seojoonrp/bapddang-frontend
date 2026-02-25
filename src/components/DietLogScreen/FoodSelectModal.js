@@ -9,7 +9,8 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import { useFoodStore } from "../../stores/foodStore.js";
+import { useShallow } from "zustand/shallow";
+import { useFoodStore, selectLikedFoodItems } from "../../stores/foodStore.js";
 import { getBestMatches } from "../../utils/nameCheck.js";
 import { standardFoodNames } from "../../constants/data/standardFoodNames.js";
 import Colors from "../../constants/colors";
@@ -31,8 +32,7 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   const [finalNames, setFinalNames] = useState([]);
 
   // 좋아요한 음식 불러오기
-  const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
-  const foodsByID = useFoodStore((state) => state.foodsByID);
+  const likedItems = useFoodStore(useShallow(selectLikedFoodItems));
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -44,11 +44,10 @@ const FoodSelectModal = ({ onClose, onSelect, initialFoods }) => {
   };
 
   const likedFoodNames = useMemo(() => {
-    const fullList = likedFoodIDs.map((id) => foodsByID[id]).filter(Boolean);
-    const shuffledList = shuffleArray(fullList);
+    const shuffledList = shuffleArray(likedItems);
     const names = shuffledList.slice(0, 5).map((item) => item.food.name);
     return [...new Set(names)];
-  }, [likedFoodIDs, foodsByID]);
+  }, [likedItems]);
 
   // 입력 로직
   const updateInput = (index, value) => {

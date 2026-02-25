@@ -10,8 +10,6 @@ import { MAIN_LAYOUT } from "../../constants/layout";
 import { useModeStore } from "../../stores/modeStore";
 
 const MainHeader = ({ animatedStyles, onBellPress, onSettingsPress }) => {
-  const { modeColor } = useModeStore();
-
   return (
     <>
       <View style={styles.headerContainer}>
@@ -20,24 +18,6 @@ const MainHeader = ({ animatedStyles, onBellPress, onSettingsPress }) => {
         </Animated.Text>
 
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={onBellPress} activeOpacity={0.7}>
-            <View style={styles.iconWrapper}>
-              <BellIcon color={Colors.yellow} width={24} height={24} />
-              <Animated.View
-                style={[StyleSheet.absoluteFill, animatedStyles.iconOverlay]}
-              >
-                <BellIcon
-                  color={Colors.background_yellow}
-                  width={24}
-                  height={24}
-                />
-              </Animated.View>
-            </View>
-            <Animated.View
-              style={[styles.notificationCircle, animatedStyles.circle]}
-            />
-          </TouchableOpacity>
-
           <TouchableOpacity onPress={onSettingsPress} activeOpacity={0.7}>
             <View style={styles.iconWrapper}>
               <SettingsIcon color={Colors.yellow} width={24} height={24} />
@@ -55,7 +35,6 @@ const MainHeader = ({ animatedStyles, onBellPress, onSettingsPress }) => {
         </View>
       </View>
 
-      {/* 3. 헤더 하단 보더 라인 (스크롤 시 사라짐) */}
       <Animated.View style={[styles.headerLine, animatedStyles.headerLine]} />
     </>
   );

@@ -3,8 +3,9 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useShallow } from "zustand/shallow";
 import { useModeStore } from "../../stores/modeStore";
-import { useFoodStore } from "../../stores/foodStore";
+import { useFoodStore, selectLikedFoodItems } from "../../stores/foodStore";
 import { fetchLikedFoods } from "../../services/like";
 import Colors from "../../constants/colors";
 import HeartIcon from "../../components/svg/HeartIcon";
@@ -21,8 +22,7 @@ const LikedFoods = () => {
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
 
-  const likedFoodIDs = useFoodStore((state) => state.likedFoodIDs);
-  const foodsByID = useFoodStore((state) => state.foodsByID);
+  const likedItems = useFoodStore(useShallow(selectLikedFoodItems));
   const setLikedFoods = useFoodStore((state) => state.setLikedFoods);
 
   const [loading, setLoading] = useState(true);
@@ -52,10 +52,9 @@ const LikedFoods = () => {
   };
 
   const displayItems = useMemo(() => {
-    const fullList = likedFoodIDs.map((id) => foodsByID[id]).filter(Boolean);
-    const shuffledList = shuffleArray(fullList);
+    const shuffledList = shuffleArray(likedItems);
     return shuffledList.slice(0, 4);
-  }, [likedFoodIDs, foodsByID]);
+  }, [likedItems]);
 
   const modeFilteredItems = useMemo(() => {
     return displayItems.filter(

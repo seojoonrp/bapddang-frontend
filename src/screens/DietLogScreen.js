@@ -332,10 +332,6 @@ const DietLogScreen = () => {
           <View style={styles.headerContent}>
             <Text style={styles.logoText}>밥땡</Text>
             <View style={styles.headerIcons}>
-              <TouchableOpacity onPress={() => {}}>
-                <BellIcon color={Colors.yellow} width={24} height={24} />
-                <View style={styles.notificationCircle} />
-              </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsSettingOpen(true)}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
               </TouchableOpacity>
