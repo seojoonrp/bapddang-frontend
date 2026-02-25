@@ -10,7 +10,6 @@
     "newArchEnabled": true,
     "platforms": ["ios"],
     "ios": {
-      "buildNumber": "1",
       "usesAppleSignIn": true,
       "supportsTablet": false,
       "requireFullScreen": true,
