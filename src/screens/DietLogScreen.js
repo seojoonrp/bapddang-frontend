@@ -117,12 +117,10 @@ const DietLogScreen = () => {
     (state) => state.reviewsByDay[targetAbsoluteDay] || EMPTY_ARRAY,
   );
   const isReviewLoading = useReviewStore((state) => state.isLoading);
-  const {
-    getReviewsForDay,
-    addReviewToStore,
-    updateReviewInStore,
-    deleteReviewFromStore,
-  } = useReviewStore();
+  const getReviewsForDay = useReviewStore((state) => state.getReviewsForDay);
+  const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
+  const updateReviewInStore = useReviewStore((state) => state.updateReviewInStore);
+  const deleteReviewFromStore = useReviewStore((state) => state.deleteReviewFromStore);
 
   const sortedDailyReviews = useMemo(() => {
     return [...dailyReviews].sort((a, b) => {
@@ -230,7 +228,7 @@ const DietLogScreen = () => {
   };
 
   // 리뷰 로직 관련
-  const handleUpdateReview = (reviewID) => {
+  const handleUpdateReview = useCallback((reviewID) => {
     const target = dailyReviews.find((r) => r.id === reviewID);
     if (!target) {
       console.log("Review not found for ID:", reviewID);
@@ -239,11 +237,11 @@ const DietLogScreen = () => {
     console.log("Editing review with ID:", reviewID);
     setEditingReview(target);
     setActiveUpdateModal(true);
-  };
+  }, [dailyReviews]);
 
-  const handleDeleteReview = (reviewID) => {
+  const handleDeleteReview = useCallback((reviewID) => {
     deleteReviewFromStore(targetAbsoluteDay, reviewID);
-  };
+  }, [deleteReviewFromStore, targetAbsoluteDay]);
 
   const handleCreateSuccess = (createdReview) => {
     if (createdReview) {
@@ -318,6 +316,14 @@ const DietLogScreen = () => {
     setIsSettingOpen(false);
     setShouldReOpen(true);
   };
+
+  const renderReviewItem = useCallback(({ item }) => (
+    <ReviewCard
+      review={item}
+      onEdit={handleUpdateReview}
+      onDelete={handleDeleteReview}
+    />
+  ), [handleUpdateReview, handleDeleteReview]);
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -472,13 +478,7 @@ const DietLogScreen = () => {
               <FlatList
                 data={sortedDailyReviews}
                 style={{ width: "100%", marginTop: 40 }}
-                renderItem={({ item }) => (
-                  <ReviewCard
-                    review={item}
-                    onEdit={handleUpdateReview}
-                    onDelete={handleDeleteReview}
-                  />
-                )}
+                renderItem={renderReviewItem}
                 ListEmptyComponent={() => (
                   <View style={{ alignItems: "center", marginTop: 50 }}>
                     {isReviewLoading ? (
