@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { updateReview } from "../../services/review";
@@ -18,6 +19,8 @@ import Colors from "../../constants/colors";
 import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 
+const COMMENT_MAX = 50;
+
 const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
   const [name, setName] = useState("");
 
@@ -27,6 +30,7 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
   const [selectedTime, setSelectedTime] = useState("");
   const [imageURL, setImageURL] = useState("");
   const [comment, setComment] = useState("");
+  const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [rating, setRating] = useState(0);
 
   // foodItems 받아오기
@@ -71,6 +75,10 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
     }
   };
 
+  const handleChangeComment = (t) => {
+    setComment(t.slice(0, COMMENT_MAX));
+  };
+
   return (
     <View style={styles.overlay}>
       <IconBar onClose={onClose} />
@@ -89,7 +97,8 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="on-drag"
           >
             {/* 시간대 */}
             <Text style={styles.subtitle}>어느 시간대에 먹었나요?</Text>
@@ -137,10 +146,21 @@ const UpdateReviewModal = ({ onClose, existingReview, onUpdateSuccess }) => {
             </View>
 
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { fontSize: comment.length > 12 ? 14 : 16 },
+              ]}
               placeholder="한줄평을 남겨보세요..."
-              value={comment}
-              onChangeText={setComment}
+              value={
+                isCommentFocused || comment.length <= 12
+                  ? comment
+                  : comment.slice(0, 10) + "..."
+              }
+              onChangeText={handleChangeComment}
+              onFocus={() => setIsCommentFocused(true)}
+              onBlur={() => setIsCommentFocused(false)}
+              returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}
             />
 
             <View style={styles.buttonRow}>

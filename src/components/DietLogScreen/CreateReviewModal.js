@@ -21,6 +21,8 @@ import Star from "../svg/Star";
 import ReviewStar from "../svg/ReviewStar";
 import { useAuthStore } from "../../stores/authStore";
 
+const COMMENT_MAX = 50;
+
 const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
   const user = useAuthStore((state) => state.user);
 
@@ -32,6 +34,7 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
   const [selectedTime, setSelectedTime] = useState("");
   const [imageURL, setImageURL] = useState("");
   const [comment, setComment] = useState("");
+  const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [rating, setRating] = useState(0);
 
   // foodItems 받아오기
@@ -91,7 +94,6 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
       Alert.alert("저장 실패", "식단을 저장하는 데 실패했습니다.");
     }
   };
-  const COMMENT_MAX = 50;
 
   const handleChangeComment = (t) => {
     setComment(t.slice(0, COMMENT_MAX));
@@ -179,10 +181,19 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
             <View style={{ width: "100%", marginTop: 20 }}>
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { fontSize: comment.length > 12 ? 14 : 16 },
+                  ]}
                   placeholder="한줄평을 남겨보세요..."
-                  value={comment}
+                  value={
+                    isCommentFocused || comment.length <= 12
+                      ? comment
+                      : comment.slice(0, 10) + "..."
+                  }
                   onChangeText={handleChangeComment}
+                  onFocus={() => setIsCommentFocused(true)}
+                  onBlur={() => setIsCommentFocused(false)}
                   maxLength={50}
                   returnKeyType="done"
                   onSubmitEditing={Keyboard.dismiss}
@@ -339,7 +350,6 @@ const styles = StyleSheet.create({
     paddingRight: 64,
     paddingLeft: 64,
     fontFamily: "NanumSquareRoundB",
-    fontSize: 16,
     color: Colors.burn,
   },
   charBadge: {
