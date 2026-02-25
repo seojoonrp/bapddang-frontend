@@ -24,7 +24,6 @@ import { useAuthStore } from "../../stores/authStore";
 import { handleLogout, handleDeleteAccount } from "../../services/auth";
 import PersonIcon from "../../assets/icons/settings/person.svg";
 import LockIcon from "../../assets/icons/settings/lock.svg";
-import FilterIcon from "../../assets/icons/settings/filter.svg";
 import SendIcon from "../../assets/icons/settings/send.svg";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
@@ -106,10 +105,6 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
     navigation.navigate("ChangePassword");
     onNavigate();
   };
-  const handleFilter = () => {
-    navigation.navigate("FilterNotification");
-    onNavigate();
-  };
 
   const handleReview = () => console.log("리뷰 남기기"); // TODO
 
@@ -188,34 +183,6 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
                     onPress={handlePasswordChange}
                   />
                 )}
-              </View>
-
-              <LinearGradient
-                style={styles.gradientBar}
-                colors={[
-                  Colors.text_gray,
-                  Colors.text_gray,
-                  Colors.background_white,
-                ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              />
-
-              <View style={styles.section}>
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    { marginBottom: 8, marginLeft: 20 },
-                  ]}
-                >
-                  알림
-                </Text>
-                <SettingItem
-                  icon={<FilterIcon width={20} height={20} />}
-                  title="필터"
-                  description="불필요한 알람을 뮤트하세요."
-                  onPress={handleFilter}
-                />
               </View>
 
               <LinearGradient
@@ -406,6 +373,7 @@ const styles = StyleSheet.create({
   },
   gradientBar: {
     marginTop: 12,
+    marginBottom: -4,
     width: "92%",
     alignSelf: "flex-end",
     height: 0.4,

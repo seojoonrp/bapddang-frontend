@@ -389,7 +389,7 @@ const DietLogScreen = () => {
                   letterSpacing: -0.3,
                 }}
               >
-                [{user.week}주차]
+                [{selectedWeek}주차]
               </Text>
             </Text>
 
