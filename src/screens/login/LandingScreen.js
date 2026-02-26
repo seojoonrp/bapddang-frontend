@@ -62,7 +62,12 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AppLogo width={122} height={211} style={{ marginBottom: 75 }} />
+      <AppLogo
+        width={122}
+        height={211}
+        style={{ marginBottom: 75 }}
+        color={Colors.background_white}
+      />
 
       <TouchableOpacity
         style={styles.signupButton}

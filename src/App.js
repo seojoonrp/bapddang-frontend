@@ -10,6 +10,7 @@ import { initGoogleLogin, handleLoginSession } from "./services/auth";
 import api from "./api/api";
 import { PortalProvider } from "@gorhom/portal";
 import { Alert } from "react-native";
+import AnimatedSplash from "./components/AnimatedSplash";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,6 +29,7 @@ const App = () => {
 
   const [isReady, setIsReady] = useState(false);
   const [serverError, setServerError] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
 
   useEffect(() => {
     const prepare = async () => {
@@ -70,6 +72,12 @@ const App = () => {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PortalProvider>
           <Navigation />
+          {splashVisible && (
+            <AnimatedSplash
+              isReady={isReady && (fontsLoaded || !!fontError)}
+              onAnimationComplete={() => setSplashVisible(false)}
+            />
+          )}
         </PortalProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
