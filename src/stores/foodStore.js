@@ -71,6 +71,7 @@ export const useFoodStore = create((set, get) => ({
     const updatedFood = {
       ...target,
       isLiked: newIsLiked,
+      likedAt: newIsLiked ? new Date().toISOString() : null,
       food: {
         ...target.food,
         likeCount: newIsLiked
@@ -94,20 +95,21 @@ export const useFoodStore = create((set, get) => ({
     });
   },
 
-  setLikedFoods: (foods) => {
-    if (foods.length === 0) return;
+  setLikedFoods: (likedFoods) => {
+    if (likedFoods.length === 0) return;
 
     const { foodsByID } = get();
     const newFoodsByID = { ...foodsByID };
 
-    const uniqueInputFoods = Array.from(
-      new Map(foods.map((f) => [f.id, f])).values(),
+    const uniqueItems = Array.from(
+      new Map(likedFoods.map((item) => [item.food.id, item])).values(),
     );
 
-    const likedIDs = uniqueInputFoods.map((food) => {
+    const likedIDs = uniqueItems.map(({ food, likedAt }) => {
       newFoodsByID[food.id] = {
-        food: food,
+        food,
         isLiked: true,
+        likedAt,
       };
       return food.id;
     });

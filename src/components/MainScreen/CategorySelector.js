@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
-    fontFamily: "NanumSquareEB",
+    fontFamily: "NanumSquareB",
     color: Colors.slightly_burn,
   },
   optionTextActive: {

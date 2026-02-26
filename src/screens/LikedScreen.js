@@ -23,6 +23,8 @@ import DetailsIcon from "../assets/icons/liked/details.svg";
 import EditIcon from "../assets/icons/liked/edit.svg";
 import DeleteIcon from "../assets/icons/liked/delete.svg";
 import LikedCategorySelector from "../components/LikedScreen/LikedCategorySelector";
+import { getRelativeTime } from "../utils/date";
+import SortSelector from "../components/LikedScreen/SortSelector";
 
 const LikedScreen = () => {
   const navigation = useNavigation();
@@ -38,9 +40,14 @@ const LikedScreen = () => {
   const setLikedFoods = useFoodStore((state) => state.setLikedFoods);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSort, setSelectedSort] = useState(0); // 0: 최신순, 1: 오래된순, 2: 이름순
 
   const handleSelectCategories = useCallback((categories) => {
     setSelectedCategories(categories);
+  }, []);
+
+  const handleSelectSort = useCallback((sortOption) => {
+    setSelectedSort(sortOption);
   }, []);
 
   useEffect(() => {
@@ -63,11 +70,26 @@ const LikedScreen = () => {
       if (activeTab === "건강하게") return item.food.speed === "slow";
       return true;
     });
-    if (selectedCategories.length === 0) return tabFiltered;
-    return tabFiltered.filter((item) =>
-      selectedCategories.every((cat) => item.food.categories.includes(cat)),
-    );
-  }, [displayItems, selectedCategories, activeTab]);
+    var categoryFiltered = tabFiltered;
+    if (selectedCategories.length > 0) {
+      categoryFiltered = tabFiltered.filter((item) =>
+        selectedCategories.some((cat) => item.food.categories.includes(cat)),
+      );
+    }
+    if (selectedSort === 0) {
+      return categoryFiltered.sort(
+        (a, b) => new Date(b.likedAt) - new Date(a.likedAt),
+      );
+    } else if (selectedSort === 1) {
+      return categoryFiltered.sort(
+        (a, b) => new Date(a.likedAt) - new Date(b.likedAt),
+      );
+    } else if (selectedSort === 2) {
+      return categoryFiltered.sort((a, b) =>
+        a.food.name.localeCompare(b.food.name),
+      );
+    }
+  }, [displayItems, selectedCategories, activeTab, selectedSort]);
 
   const handleCreateReview = (id) => {
     console.log(`기록하기 클릭: ${id}`);
@@ -112,7 +134,11 @@ const LikedScreen = () => {
 
             <View style={styles.foodTextContainer}>
               <Text style={styles.foodName}>{item.food.name}</Text>
-              <Text style={styles.foodDate}>5일 전 찜했어요</Text>
+              <Text style={styles.foodDate}>
+                {getRelativeTime(item.likedAt)
+                  ? `${getRelativeTime(item.likedAt)} 찜했어요`
+                  : "찜했어요"}
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -189,7 +215,10 @@ const LikedScreen = () => {
         ))}
       </View>
 
-      <LikedCategorySelector onSelect={handleSelectCategories} />
+      <View style={styles.selectorContainer}>
+        <LikedCategorySelector onSelect={handleSelectCategories} />
+        <SortSelector onSelect={handleSelectSort} />
+      </View>
 
       <View style={styles.foodsContainer}>
         {filteredItems.length === 0 && (
@@ -225,6 +254,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background_white,
   },
+  selectorContainer: {
+    flexDirection: "row",
+  },
   header: {
     width: "100%",
     height: 56,
@@ -244,7 +276,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     marginBottom: 12,
     justifyContent: "space-between",
     borderBottomColor: Colors.light_text_gray,

@@ -22,11 +22,13 @@ import Animated, {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const LikedCategorySelector = ({ onSelect }) => {
+const textOptions = ["최신 순으로", "오래된 순으로", "이름 순으로"];
+
+const SortSelector = ({ onSelect }) => {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(0);
 
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
@@ -40,32 +42,12 @@ const LikedCategorySelector = ({ onSelect }) => {
     wasOpen.current = isOpen;
   }, [isOpen]);
 
-  const toggleCategory = (item) => {
-    if (selected.includes(item)) {
-      setSelected(selected.filter((cat) => cat !== item));
-    } else {
-      setSelected([...selected, item]);
-    }
-  };
-
-  const resetCategories = () => {
-    setSelected([]);
+  const selectSortOption = (option) => {
+    setSelected(option);
   };
 
   const animatedOverlayStyle = useAnimatedStyle(() => ({
     opacity: withTiming(isOpen ? 1 : 0, { duration: 300 }),
-  }));
-
-  const animatedDropdownStyle = useAnimatedStyle(() => ({
-    backgroundColor: withTiming(
-      isOpen ? Colors.text_gray : Colors.background_white,
-      {
-        duration: 300,
-      },
-    ),
-    borderColor: withTiming(isOpen ? Colors.text_gray : Colors.nurim, {
-      duration: 300,
-    }),
   }));
 
   return (
@@ -92,7 +74,7 @@ const LikedCategorySelector = ({ onSelect }) => {
           onPress={() => setIsOpen(!isOpen)}
         >
           <Text style={styles.selectedTextStyle} numberOfLines={1}>
-            카테고리
+            정렬
           </Text>
 
           <View style={styles.rightIconContainer}>
@@ -107,65 +89,37 @@ const LikedCategorySelector = ({ onSelect }) => {
           exiting={FadeOutUp.duration(300)}
           style={styles.listContainer}
         >
-          <ScrollView
-            style={styles.scrollView}
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 4 }}
-          >
-            {categoryGroups.map((group, index) => (
-              <View key={group.id}>
-                <View style={styles.optionsWrapper}>
-                  {group.items.map((category) => {
-                    const isSelected = selected.includes(category);
-                    return (
-                      <TouchableOpacity
-                        key={category}
-                        style={[
-                          styles.optionItem,
-                          isSelected && styles.optionItemActive,
-                        ]}
-                        onPress={() => toggleCategory(category)}
-                        activeOpacity={0.7}
-                      >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            isSelected && styles.optionTextActive,
-                          ]}
-                        >
-                          {category}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                {index < categoryGroups.length - 1 && (
-                  <View style={styles.divider} />
-                )}
-              </View>
-            ))}
-          </ScrollView>
-
-          <TouchableOpacity
-            style={styles.resetContainer}
-            onPress={resetCategories}
-            activeOpacity={0.7}
-          >
-            <ResetIcon width={20} height={20} />
-          </TouchableOpacity>
+          {textOptions.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.optionItem,
+                selected === index && styles.optionItemActive,
+              ]}
+              onPress={() => selectSortOption(index)}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  selected === index && styles.optionTextActive,
+                ]}
+              >
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </Animated.View>
       )}
     </View>
   );
 };
 
-export default LikedCategorySelector;
+export default SortSelector;
 
 const styles = StyleSheet.create({
   container: {
-    marginLeft: 20,
+    marginLeft: 6,
     zIndex: 1000,
   },
   overlay: {
@@ -200,12 +154,6 @@ const styles = StyleSheet.create({
     marginLeft: 2,
     marginRight: -2,
   },
-  verticalLine: {
-    width: 1,
-    height: "70%",
-    backgroundColor: Colors.text_gray,
-    marginRight: 5,
-  },
   questionText: {
     marginLeft: 6,
     fontSize: 17,
@@ -216,7 +164,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     top: 38,
-    width: 270,
+    width: 180,
     backgroundColor: Colors.background_white,
     borderRadius: 20,
     maxHeight: 240,
@@ -226,59 +174,27 @@ const styles = StyleSheet.create({
     zIndex: 501,
     boxShadow: "0 4px 6px 2px rgba(0, 0, 0, 0.15)",
   },
-  scrollView: {
-    borderRadius: 16,
-    borderColor: Colors.light_text_gray,
-    borderWidth: 1,
-    padding: 4,
-  },
-  optionsWrapper: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 6,
-    gap: 6,
-  },
   optionItem: {
     display: "flex",
-    borderWidth: 0.4,
     borderColor: Colors.light_gray,
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    gap: 10,
-    boxShadow: "0px -2px 4px 0px #A94946 inset, 0px -2px 6px 2px #FDEDC0 inset",
   },
   optionItemActive: {
-    backgroundColor: Colors.nurim,
-    borderColor: Colors.nurim,
-    boxShadow: "",
+    backgroundColor: Colors.light_text_gray,
   },
   optionText: {
     fontSize: 16,
-    fontFamily: "NanumSquareEB",
-    color: Colors.slightly_burn,
-  },
-  optionTextActive: {
-    color: Colors.background_yellow,
+    fontFamily: "NanumSquareB",
+    color: Colors.nurim,
+    letterSpacing: 0.6,
   },
   divider: {
     height: 1.5,
     backgroundColor: Colors.light_text_gray,
     marginHorizontal: 24,
     marginVertical: 4,
-  },
-  resetContainer: {
-    position: "absolute",
-    top: -2,
-    right: -44,
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: Colors.background_white,
-    borderColor: Colors.background_yellow,
-    borderWidth: 3,
-    borderRadius: 99,
   },
 });
