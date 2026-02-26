@@ -5,6 +5,7 @@ import {
   View,
   Image,
   FlatList,
+  Alert,
 } from "react-native";
 import {
   SafeAreaView,
@@ -13,7 +14,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useShallow } from "zustand/shallow";
-import { fetchLikedFoods } from "../services/like";
+import { fetchLikedFoods, handleUnlike } from "../services/like";
 import { useFoodStore, selectLikedFoodItems } from "../stores/foodStore";
 import ChevronIcon from "../assets/icons/chevron.svg";
 import Colors from "../constants/colors";
@@ -25,6 +26,7 @@ import DeleteIcon from "../assets/icons/liked/delete.svg";
 import LikedCategorySelector from "../components/LikedScreen/LikedCategorySelector";
 import { getRelativeTime } from "../utils/date";
 import SortSelector from "../components/LikedScreen/SortSelector";
+import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 
 const LikedScreen = () => {
   const navigation = useNavigation();
@@ -35,9 +37,12 @@ const LikedScreen = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [activeTab, setActiveTab] = useState("푸짐하게");
   const [expandedFoodID, setExpandedFoodID] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewFoodName, setReviewFoodName] = useState("");
 
   const displayItems = useFoodStore(useShallow(selectLikedFoodItems));
   const setLikedFoods = useFoodStore((state) => state.setLikedFoods);
+  const toggleLike = useFoodStore((state) => state.toggleLike);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSort, setSelectedSort] = useState(0); // 0: 최신순, 1: 오래된순, 2: 이름순
@@ -91,12 +96,33 @@ const LikedScreen = () => {
     }
   }, [displayItems, selectedCategories, activeTab, selectedSort]);
 
-  const handleCreateReview = (id) => {
-    console.log(`기록하기 클릭: ${id}`);
+  const handleCreateReview = (name) => {
+    setExpandedFoodID(null);
+    setReviewFoodName(name);
+    setShowReviewModal(true);
   };
 
-  const handleDelete = (id) => {
-    console.log(`지우기 클릭: ${id}`);
+  const handleReviewSuccess = () => {
+    setShowReviewModal(false);
+    setReviewFoodName("");
+    Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.", [
+      { text: "확인", style: "cancel" },
+      {
+        text: "식단기록 화면으로 이동",
+        onPress: () => navigation.navigate("DietLog"),
+      },
+    ]);
+    return true;
+  };
+
+  const handleDelete = async (id) => {
+    toggleLike(id);
+    setExpandedFoodID(null);
+    try {
+      await handleUnlike(id);
+    } catch (error) {
+      toggleLike(id);
+    }
   };
 
   const toggleExpand = useCallback((id) => {
@@ -166,7 +192,7 @@ const LikedScreen = () => {
 
               <TouchableOpacity
                 style={styles.expandedActionButton}
-                onPress={() => handleCreateReview(item.food.id)}
+                onPress={() => handleCreateReview(item.food.name)}
                 activeOpacity={0.7}
               >
                 <EditIcon width={22} height={22} />
@@ -241,6 +267,17 @@ const LikedScreen = () => {
         <FoodInfoModal
           foodID={selectedFoodID}
           onClose={() => setShowInfo(false)}
+        />
+      </ReanimatedModal>
+
+      <ReanimatedModal
+        visible={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+      >
+        <CreateReviewModal
+          onClose={() => setShowReviewModal(false)}
+          foodNames={[reviewFoodName]}
+          onCreateSuccess={handleReviewSuccess}
         />
       </ReanimatedModal>
     </View>

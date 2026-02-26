@@ -86,8 +86,10 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
         day: finalDay,
       });
       await new Promise((r) => setTimeout(r, 300));
-      await onCreateSuccess?.(created);
-      Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.");
+      const handled = await onCreateSuccess?.(created);
+      if (!handled) {
+        Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.");
+      }
       onClose();
     } catch (error) {
       console.error("식단 저장 실패: ", error);
@@ -206,15 +208,17 @@ const CreateReviewModal = ({ onClose, foodNames, onBack, onCreateSuccess }) => {
               </View>
             </View>
             <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[
-                  styles.bottomButton,
-                  { backgroundColor: Colors.text_gray },
-                ]}
-                onPress={onBack}
-              >
-                <Text style={styles.bottomButtonText}>이전</Text>
-              </TouchableOpacity>
+              {onBack && (
+                <TouchableOpacity
+                  style={[
+                    styles.bottomButton,
+                    { backgroundColor: Colors.text_gray },
+                  ]}
+                  onPress={onBack}
+                >
+                  <Text style={styles.bottomButtonText}>이전</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={[
                   styles.bottomButton,
