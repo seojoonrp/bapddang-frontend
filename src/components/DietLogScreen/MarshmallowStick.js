@@ -24,20 +24,24 @@ const MARSHMALLOW_SIZE = 160;
 
 const TARGET_VIEW_RATIO = 0.45;
 const FIXED_TOP_PADDING = 300;
-const FIXED_BOTTOM_PADDING = 250;
+const FIXED_BOTTOM_PADDING_MIN = 250;
 
 const MarshmallowStick = ({ onClick }) => {
   const scrollY = useRef(new RNAnimated.Value(0)).current;
   const listRef = useRef(null);
   const [listHeight, setListHeight] = useState(0);
   const variantCacheRef = useRef(new Map());
+  const isTapScrollRef = useRef(false);
 
   const marshmallows = useMarshmallowStore((state) => state.marshmallows);
   const { fetchMarshmallowsFromStore } = useMarshmallowStore();
 
   const bottomPadding = useMemo(() => {
-    if (listHeight <= 0) return 200;
-    return listHeight * (1 - TARGET_VIEW_RATIO) - ITEM_HEIGHT / 2;
+    if (listHeight <= 0) return FIXED_BOTTOM_PADDING_MIN;
+    return Math.max(
+      FIXED_BOTTOM_PADDING_MIN,
+      listHeight * (1 - TARGET_VIEW_RATIO) - ITEM_HEIGHT / 2,
+    );
   }, [listHeight]);
 
   const pickVariantOnce = (key) => {
@@ -86,12 +90,14 @@ const MarshmallowStick = ({ onClick }) => {
   }, []);
 
   const stickHeight = useMemo(
-    () => ITEM_HEIGHT * marshmallows.length + 500,
-    [marshmallows.length],
+    () => ITEM_HEIGHT * marshmallows.length + FIXED_TOP_PADDING + bottomPadding,
+    [marshmallows.length, bottomPadding],
   );
 
   const scrollToIndexCustom = (index) => {
     if (!listRef.current || listHeight <= 0) return;
+
+    isTapScrollRef.current = true;
 
     const itemCenterY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
     const screenTargetY = listHeight * TARGET_VIEW_RATIO;
@@ -100,7 +106,7 @@ const MarshmallowStick = ({ onClick }) => {
     const contentHeight =
       ITEM_HEIGHT * marshmallows.length +
       FIXED_TOP_PADDING +
-      FIXED_BOTTOM_PADDING;
+      bottomPadding;
     const maxOffset = contentHeight - listHeight;
 
     const finalOffset = Math.max(0, Math.min(targetOffset, maxOffset));
@@ -127,12 +133,19 @@ const MarshmallowStick = ({ onClick }) => {
   }, [stickHeight]);
 
   const handleMomentumScrollEnd = (event) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / ITEM_HEIGHT);
-
-    if (index >= 0 && index < marshmallows.length) {
-      onClick?.(index);
+    if (isTapScrollRef.current) {
+      isTapScrollRef.current = false;
+      return;
     }
+
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const viewportTargetY = offsetY + listHeight * TARGET_VIEW_RATIO;
+    const index = Math.round(
+      (viewportTargetY - FIXED_TOP_PADDING - ITEM_HEIGHT / 2) / ITEM_HEIGHT,
+    );
+    const clampedIndex = Math.max(0, Math.min(index, marshmallows.length - 1));
+
+    onClick?.(clampedIndex);
   };
 
   if (marshmallows.length === 0) return null;
@@ -208,7 +221,7 @@ const MarshmallowStick = ({ onClick }) => {
         contentContainerStyle={{
           paddingHorizontal: 100,
           paddingTop: FIXED_TOP_PADDING,
-          paddingBottom: FIXED_BOTTOM_PADDING,
+          paddingBottom: bottomPadding,
         }}
         onScroll={RNAnimated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
