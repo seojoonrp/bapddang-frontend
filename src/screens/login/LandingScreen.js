@@ -14,9 +14,9 @@ import Colors from "../../constants/colors";
 import GoogleIcon from "../../assets/icons/google.svg";
 import KakaoIcon from "../../assets/icons/kakao.svg";
 import AppleIcon from "../../assets/icons/apple.svg";
-import LottieView from "lottie-react-native";
 import { useAuthStore } from "../../stores/authStore";
 import AgreeBottomSheet from "../../components/common/AgreeBottomSheet";
+import AppLogo from "../../assets/images/logo.svg";
 
 const LandingScreen = () => {
   const navigation = useNavigation();
@@ -62,6 +62,8 @@ const LandingScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <AppLogo width={122} height={211} style={{ marginBottom: 75 }} />
+
       <TouchableOpacity
         style={styles.signupButton}
         onPress={() => navigation.navigate("SignUp")}

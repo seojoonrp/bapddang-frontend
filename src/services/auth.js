@@ -7,10 +7,6 @@ import {
   logout as kakaoLogout,
 } from "@react-native-seoul/kakao-login";
 import api from "../api/api";
-import {
-  EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-} from "@env";
 import { syncUserWeekAndDay } from "./user";
 import { useAuthStore } from "../stores/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -104,9 +100,15 @@ export const initGoogleLogin = () => {
 export const handleGoogleLogin = async () => {
   try {
     await GoogleSignin.hasPlayServices();
-    const { data } = await GoogleSignin.signIn();
+    const response = await GoogleSignin.signIn();
 
-    const result = await api.post("/auth/google", { idToken: data.idToken });
+    if (response.type === "cancelled") {
+      return false;
+    }
+
+    const result = await api.post("/auth/google", {
+      idToken: response.data.idToken,
+    });
     return await processAuthResult(result, "Google");
   } catch (error) {
     throw error;
