@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -30,20 +30,10 @@ const SortSelector = ({ onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(0);
 
-  const selectedRef = useRef(selected);
-  selectedRef.current = selected;
-
-  const wasOpen = useRef(false);
-
-  useEffect(() => {
-    if (wasOpen.current && !isOpen) {
-      onSelect(selectedRef.current);
-    }
-    wasOpen.current = isOpen;
-  }, [isOpen]);
-
   const selectSortOption = (option) => {
     setSelected(option);
+    onSelect(option);
+    setIsOpen(false);
   };
 
   const animatedOverlayStyle = useAnimatedStyle(() => ({

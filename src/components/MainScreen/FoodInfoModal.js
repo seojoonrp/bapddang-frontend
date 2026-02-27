@@ -293,6 +293,7 @@ const styles = StyleSheet.create({
     fontFamily: "NanumSquareEB",
     fontSize: 18,
     color: Colors.burn,
+    letterSpacing: 0.6,
   },
   placeAddress: {
     fontFamily: "NanumSquareB",

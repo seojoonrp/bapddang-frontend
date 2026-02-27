@@ -27,10 +27,13 @@ import LikedCategorySelector from "../components/LikedScreen/LikedCategorySelect
 import { getRelativeTime } from "../utils/date";
 import SortSelector from "../components/LikedScreen/SortSelector";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
+import { useModeStore } from "../stores/modeStore";
 
 const LikedScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  const mode = useModeStore((state) => state.mode);
 
   const [loading, setLoading] = useState(true);
   const [selectedFoodID, setSelectedFoodID] = useState(null);
@@ -68,6 +71,12 @@ const LikedScreen = () => {
     };
     loadLikedFoods();
   }, []);
+
+  useEffect(() => {
+    if (mode === "fast") setActiveTab("푸짐하게");
+    else if (mode === "slow") setActiveTab("건강하게");
+    else setActiveTab("둘 다");
+  }, [mode]);
 
   const filteredItems = useMemo(() => {
     const tabFiltered = displayItems.filter((item) => {

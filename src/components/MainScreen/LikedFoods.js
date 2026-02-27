@@ -51,16 +51,13 @@ const LikedFoods = () => {
     return shuffled;
   };
 
-  const displayItems = useMemo(() => {
-    const shuffledList = shuffleArray(likedItems);
-    return shuffledList.slice(0, 4);
-  }, [likedItems]);
-
   const modeFilteredItems = useMemo(() => {
-    return displayItems.filter(
+    if (loading) return [];
+    const filtered = likedItems.filter(
       (item) => item.food.speed.includes(mode) || item.food.speed === "both",
     );
-  }, [displayItems, mode]);
+    return shuffleArray(filtered).slice(0, 4);
+  }, [likedItems, mode, loading]);
 
   return (
     <View style={styles.container}>
