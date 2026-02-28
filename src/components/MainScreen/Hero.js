@@ -8,19 +8,35 @@ import { useModeStore } from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
 import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import { memo } from "react";
-import Fire from "../../assets/images/fire.svg";
 import Stick from "../../assets/images/stick.svg";
 import LottieView from "lottie-react-native";
 
 const MarshmallowAnimation = memo(() => {
   return (
     <LottieView
-      source={require("../../assets/lottie/marshmallow-rotate.json")}
+      source={require("../../assets/lottie/marshmallow.json")}
       autoPlay
       loop
       cacheComposition={true}
       width={185}
       height={185}
+      speed={0.9}
+    />
+  );
+});
+
+const fireFastSource = require("../../assets/lottie/fire_fast.json");
+const fireSlowSource = require("../../assets/lottie/fire_slow.json");
+
+const FireAnimation = memo(({ mode }) => {
+  return (
+    <LottieView
+      source={mode === "fast" ? fireFastSource : fireSlowSource}
+      autoPlay
+      loop
+      cacheComposition={true}
+      width={47}
+      height={80}
     />
   );
 });
@@ -51,7 +67,7 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         style={[styles.characterContainer, animatedCharacterStyle]}
       >
         <View style={styles.fire}>
-          <Fire width={47} height={80} />
+          <FireAnimation mode={mode} />
         </View>
 
         <View style={styles.stick}>
@@ -84,19 +100,20 @@ const styles = StyleSheet.create({
   },
   fire: {
     position: "absolute",
-    bottom: 0,
-    left: 100,
+    bottom: -5,
+    left: 98,
+    transform: [{ scale: 2.5 }],
   },
   marshmallow: {
     position: "absolute",
-    bottom: 10,
+    bottom: 12,
     left: 35,
-    transform: [{ rotate: "105deg" }],
+    transform: [{ rotate: "102deg" }, { scale: 1.7 }],
   },
   stick: {
     position: "absolute",
-    bottom: 80,
-    left: -180,
+    bottom: 76,
+    left: -190,
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,

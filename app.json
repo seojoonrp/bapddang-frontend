@@ -35,10 +35,9 @@
         ]
       },
       "splash": {
-        "image": "./src/assets/splash-icon.png",
-        "imageWidth": 125,
+        "image": "./src/assets/splash.png",
         "resizeMode": "contain",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FEFDFA"
       }
     },
     "plugins": [
