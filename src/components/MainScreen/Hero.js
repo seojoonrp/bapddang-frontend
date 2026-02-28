@@ -1,8 +1,12 @@
 // src/components/MainScreen/Hero.js
 
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 import Colors from "../../constants/colors";
 import { useModeStore } from "../../stores/modeStore";
 import ModeSwitch from "../ModeSwitch";
@@ -10,6 +14,8 @@ import { useHeroAnimations } from "../../hooks/useHeroAnimations";
 import { memo } from "react";
 import Stick from "../../assets/images/stick.svg";
 import LottieView from "lottie-react-native";
+import SpeechBalloon from "../../assets/images/speech-balloon.svg";
+import { useSpeechBalloon } from "../../hooks/useSpeechBalloon";
 
 const MarshmallowAnimation = memo(() => {
   return (
@@ -43,6 +49,21 @@ const FireAnimation = memo(({ mode }) => {
 
 const Hero = ({ scrollY, scrollThreshold }) => {
   const mode = useModeStore((state) => state.mode);
+  const { text, changeText } = useSpeechBalloon();
+  const balloonScale = useSharedValue(1);
+
+  const balloonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: balloonScale.value }],
+  }));
+
+  const handleBalloonPress = () => {
+    changeText();
+    balloonScale.value = 1.07;
+    balloonScale.value = withSpring(1, {
+      stiffness: 1000,
+      damping: 50,
+    });
+  };
 
   const { containerStyle, textStyle, animatedCharacterStyle } =
     useHeroAnimations(scrollY, scrollThreshold);
@@ -77,6 +98,29 @@ const Hero = ({ scrollY, scrollThreshold }) => {
         <View style={styles.marshmallow}>
           <MarshmallowAnimation />
         </View>
+
+        <Pressable
+          style={styles.speechBalloonContainer}
+          onPress={handleBalloonPress}
+        >
+          <Animated.View
+            style={[styles.speechBalloonInner, balloonAnimatedStyle]}
+          >
+            <SpeechBalloon
+              width={124}
+              height={91.5}
+              color={mode === "fast" ? Colors.nurim : Colors.border_brown}
+            />
+            <Text
+              style={[
+                styles.speechText,
+                { color: mode === "fast" ? Colors.nurim : Colors.border_brown },
+              ]}
+            >
+              {text}
+            </Text>
+          </Animated.View>
+        </Pressable>
       </Animated.View>
     </Animated.View>
   );
@@ -94,6 +138,26 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     zIndex: 10,
   },
+  speechBalloonContainer: {
+    position: "absolute",
+    bottom: 108,
+    left: 196,
+    width: 124,
+    height: 91.5,
+  },
+  speechBalloonInner: {
+    width: 124,
+    height: 91.5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  speechText: {
+    position: "absolute",
+    color: Colors.nurim,
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 13,
+    letterSpacing: -0.4,
+  },
   characterContainer: {
     flex: 1,
     marginLeft: -10,
@@ -101,19 +165,19 @@ const styles = StyleSheet.create({
   fire: {
     position: "absolute",
     bottom: -5,
-    left: 98,
+    left: 90,
     transform: [{ scale: 2.5 }],
   },
   marshmallow: {
     position: "absolute",
     bottom: 12,
-    left: 35,
+    left: 27,
     transform: [{ rotate: "102deg" }, { scale: 1.7 }],
   },
   stick: {
     position: "absolute",
     bottom: 76,
-    left: -190,
+    left: -198,
   },
   absoluteFill: {
     ...StyleSheet.absoluteFillObject,

@@ -1,6 +1,7 @@
 // src/stores/reviewStore.js
 
 import { create } from "zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchReviewsByDay } from "../services/review";
 
 export const useReviewStore = create((set, get) => ({
@@ -34,6 +35,13 @@ export const useReviewStore = create((set, get) => ({
   },
 
   addReviewToStore: (day, newReview) => {
+    if (newReview.rating != null) {
+      AsyncStorage.setItem(
+        "speech_recent_review",
+        JSON.stringify({ rating: newReview.rating, time: Date.now() }),
+      );
+    }
+
     set((state) => ({
       reviewsByDay: {
         ...state.reviewsByDay,

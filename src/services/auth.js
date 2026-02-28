@@ -160,6 +160,8 @@ export const handleAgreeToTerms = async () => {
     const user = useAuthStore.getState().user;
     useAuthStore.getState().updateUser({ ...user, isAgreed: true });
 
+    await AsyncStorage.setItem("speech_first_visit", "true");
+
     return true;
   } catch (error) {
     throw error;

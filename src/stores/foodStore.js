@@ -1,6 +1,7 @@
 // src/stores/foodStore.js
 
 import { create } from "zustand";
+import { setSessionLiked } from "../hooks/useSpeechBalloon";
 
 export const useFoodStore = create((set, get) => ({
   foodsByID: {},
@@ -68,6 +69,11 @@ export const useFoodStore = create((set, get) => ({
     if (!target) return;
 
     const newIsLiked = !target.isLiked;
+
+    if (newIsLiked) {
+      setSessionLiked();
+    }
+
     const updatedFood = {
       ...target,
       isLiked: newIsLiked,
