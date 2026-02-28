@@ -3,6 +3,9 @@
     "name": "밥땡",
     "slug": "bobttaeng",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./src/assets/app-icon.png",
     "scheme": "bobttaeng",
