@@ -80,8 +80,10 @@ const LikedScreen = () => {
 
   const filteredItems = useMemo(() => {
     const tabFiltered = displayItems.filter((item) => {
-      if (activeTab === "푸짐하게") return item.food.speed === "fast";
-      if (activeTab === "건강하게") return item.food.speed === "slow";
+      if (activeTab === "푸짐하게")
+        return item.food.speed === "fast" || item.food.speed === "both";
+      if (activeTab === "건강하게")
+        return item.food.speed === "slow" || item.food.speed === "both";
       return true;
     });
     var categoryFiltered = tabFiltered;
@@ -159,7 +161,11 @@ const LikedScreen = () => {
 
       return (
         <View style={styles.itemContainer}>
-          <View style={[styles.foodRow, isExpanded && styles.foodRowExpanded]}>
+          <TouchableOpacity
+            style={[styles.foodRow, isExpanded && styles.foodRowExpanded]}
+            onPress={() => toggleExpand(item.food.id)}
+            activeOpacity={0.9}
+          >
             <View style={styles.foodImageWrapper}>
               <Image
                 source={{ uri: item.food.imageURL }}
@@ -176,14 +182,10 @@ const LikedScreen = () => {
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.moreButton}
-              onPress={() => toggleExpand(item.food.id)}
-              activeOpacity={0.6}
-            >
+            <View style={styles.moreButton}>
               <Text style={styles.moreIcon}>•••</Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableOpacity>
 
           {isExpanded && (
             <View style={styles.expandedMenuContainer}>

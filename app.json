@@ -23,7 +23,8 @@
             "CFBundleURLSchemes": ["kakaoe12b185c584f7612e5f0d6398ebd1030"]
           }
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["instagram", "kakaomap"]
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [

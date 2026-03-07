@@ -33,7 +33,7 @@ const APP_TERMS_URL =
 const PRIVACY_POLICY_URL =
   "https://tropical-rule-078.notion.site/302c0b55667c80e5ac9ed1cd9e88a9b1?pvs=74";
 
-const INSTAGRAM_ID = "happetite.kr";
+const INSTAGRAM_ID = "bobttaeng_official";
 
 const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
   const navigation = useNavigation();
@@ -63,7 +63,7 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
   const handleWithdrawalPress = () => {
     Alert.alert(
       "회원 탈퇴",
-      "정말  퇴 하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며, 복구할 수 없습니다.",
+      "정말 탈퇴 하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며, 복구할 수 없습니다.",
       [
         { text: "취소", style: "cancel" },
         {
@@ -88,11 +88,9 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
     const appURL = `instagram://user?username=${INSTAGRAM_ID}`;
     const webURL = `https://www.instagram.com/${INSTAGRAM_ID}`;
 
-    const supported = await Linking.canOpenURL(appURL);
-
-    if (supported) {
+    try {
       await Linking.openURL(appURL);
-    } else {
+    } catch {
       await Linking.openURL(webURL);
     }
   };

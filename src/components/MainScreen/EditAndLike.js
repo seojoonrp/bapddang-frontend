@@ -19,6 +19,10 @@ const BUBBLE_HEIGHT = 32.5;
 const EditAndLike = ({ onEdit, onLike, animatedStyle, showTextBubble }) => {
   const { modeColor } = useModeStore();
 
+  const dashedLineAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: withSpring(1 - showTextBubble.value),
+  }));
+
   const bubbleAnimatedStyle = useAnimatedStyle(() => {
     const scale = withSpring(showTextBubble.value, {
       damping: 6,
@@ -35,13 +39,27 @@ const EditAndLike = ({ onEdit, onLike, animatedStyle, showTextBubble }) => {
 
   return (
     <Animated.View style={[styles.container, animatedStyle.editAndLike]}>
-      <TouchableOpacity
-        onPress={onEdit}
-        style={[styles.button, { backgroundColor: modeColor }]}
-        activeOpacity={0.7}
+      <Animated.View
+        style={[
+          styles.dashedLine,
+          dashedLineAnimatedStyle,
+          animatedStyle.dashedLine,
+        ]}
       >
-        <EditIcon width={24} height={24} />
-      </TouchableOpacity>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <View key={i} style={styles.dash} />
+        ))}
+      </Animated.View>
+
+      <View style={styles.editButtonWrapper}>
+        <TouchableOpacity
+          onPress={onEdit}
+          style={[styles.button, { backgroundColor: modeColor }]}
+          activeOpacity={0.7}
+        >
+          <EditIcon width={24} height={24} />
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity
         onPress={onLike}
@@ -70,6 +88,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     zIndex: 10,
+  },
+  editButtonWrapper: {
+    alignItems: "center",
+  },
+  dashedLine: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    height: 24,
+    justifyContent: "space-between",
+  },
+  dash: {
+    width: 1,
+    height: 2.8,
+    backgroundColor: Colors.text_gray,
   },
   button: {
     width: 40,

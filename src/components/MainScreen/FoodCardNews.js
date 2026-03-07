@@ -111,9 +111,7 @@ const FoodCardNews = ({
   const noFoodMessage =
     type === "main"
       ? "오류가 발생했습니다. 다시 시도해주세요."
-      : "선택한 카테고리에 해당되는 " +
-        (mode === "fast" ? "고속" : "저속") +
-        "노화 음식이 없어요.";
+      : "선택한 카테고리와 테마에 해당되는 음식이 없어요.";
 
   const displayData = isLoading ? SKELETON_DATA : foodIDs;
 

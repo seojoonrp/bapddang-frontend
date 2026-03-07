@@ -95,9 +95,9 @@ const Hero = ({ scrollY, scrollThreshold }) => {
           <Stick width={422} height={80} />
         </View>
 
-        <View style={styles.marshmallow}>
+        <Pressable style={styles.marshmallow} onPress={handleBalloonPress}>
           <MarshmallowAnimation />
-        </View>
+        </Pressable>
 
         <Pressable
           style={styles.speechBalloonContainer}
@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     color: Colors.nurim,
     fontFamily: "NanumSquareRoundB",
     fontSize: 13,
+    textAlign: "center",
     letterSpacing: -0.4,
   },
   characterContainer: {

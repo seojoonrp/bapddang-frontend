@@ -7,7 +7,7 @@ const IconBar = ({ onClose }) => {
     <View style={styles.iconBar}>
       <TouchableOpacity onPress={onClose} style={styles.iconLeft}>
         <ChevronIcon width={24} height={24} color={Colors.icon_gray} />
-        <Text style={styles.iconText}>CALENDAR</Text>
+        <Text style={styles.iconText}>BACK</Text>
       </TouchableOpacity>
     </View>
   );

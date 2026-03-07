@@ -15,6 +15,7 @@ import EditAndLike from "../components/MainScreen/EditAndLike";
 import Colors from "../constants/colors";
 import { MAIN_LAYOUT } from "../constants/layout";
 import { useCallback, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "../stores/authStore";
 import { useModeStore } from "../stores/modeStore";
 import ReanimatedModal from "../components/common/ReanimatedModal";
@@ -43,6 +44,16 @@ const MainScreen = () => {
     useMainAnimations(scrollThreshold);
 
   const showTextBubble = useSharedValue(0);
+
+  useEffect(() => {
+    (async () => {
+      const seen = await AsyncStorage.getItem("has_seen_text_bubble");
+      if (!seen) {
+        showTextBubble.value = 1;
+        await AsyncStorage.setItem("has_seen_text_bubble", "true");
+      }
+    })();
+  }, []);
 
   const lastWeekData = useAuthStore((state) => state.lastWeekData);
   const clearLastWeekData = useAuthStore((state) => state.clearLastWeekData);

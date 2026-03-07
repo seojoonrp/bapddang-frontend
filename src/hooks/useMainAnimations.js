@@ -144,6 +144,15 @@ export const useMainAnimations = (scrollThreshold) => {
     ],
   }));
 
+  const animatedDashedLineStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, scrollThreshold * 0.3],
+      [1, 0],
+      Extrapolation.CLAMP,
+    ),
+  }));
+
   const animatedOriginalHandleText = useAnimatedStyle(() => ({
     opacity: interpolate(
       scrollY.value,
@@ -186,6 +195,7 @@ export const useMainAnimations = (scrollThreshold) => {
         bottomSheet: animatedBottomSheetStyle,
         circle: animatedCircleStyle,
         editAndLike: animatedEditAndLikeStyle,
+        dashedLine: animatedDashedLineStyle,
         originalHandleText: animatedOriginalHandleText,
         newHandleText: animatedNewHandleText,
         bottomSheetContent: animatedBottomSheetContent,

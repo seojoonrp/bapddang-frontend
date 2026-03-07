@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import {
   View,
   Text,
@@ -32,15 +32,14 @@ import FoodSelectModal from "../components/DietLogScreen/FoodSelectModal";
 import ReviewCard from "../components/DietLogScreen/ReviewCard";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import UpdateReviewModal from "../components/DietLogScreen/UpdateReviewModal";
-import BackButton from "../components/DietLogScreen/BackButton";
 import BellIcon from "../assets/icons/bell.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
-import Back from "../assets/icons/back.svg";
 import HeartIcon from "../components/svg/HeartIcon";
 import PlusIcon from "../assets/icons/plus.svg";
 import { BlurView } from "expo-blur";
 import PointerIcon from "../assets/icons/pointer.svg";
 import SettingsDrawer from "../components/common/SettingsDrawer";
+import TextBubble from "../assets/images/textbubble-diet.svg";
 
 const HEADER_HEIGHT = 48;
 const SHEET_HANDLE_HEIGHT = 260;
@@ -54,6 +53,26 @@ const MEAL_ORDER = {
   저녁: 3,
   기타: 4,
 };
+
+const TextBubbleComp = memo(() => {
+  return (
+    <View style={{ marginTop: -1, marginRight: 1 }}>
+      <TextBubble width={61} height={33} />
+      <Text
+        style={{
+          position: "absolute",
+          top: 13.7,
+          left: 10.3,
+          fontSize: 12,
+          fontFamily: "NanumSquareRoundB",
+          color: Colors.nurim,
+        }}
+      >
+        기록하기
+      </Text>
+    </View>
+  );
+});
 
 const DietLogScreen = () => {
   const navigation = useNavigation();
@@ -76,6 +95,18 @@ const DietLogScreen = () => {
 
     return {
       transform: [{ translateY }],
+    };
+  });
+  const animatedTextBubble = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, scrollThreshold * 0.5],
+      [1, 0],
+      Extrapolation.CLAMP,
+    );
+    return {
+      opacity,
+      transform: [{ scale: opacity }],
     };
   });
   const animatedReviewCardList = useAnimatedStyle(() => {
@@ -119,8 +150,12 @@ const DietLogScreen = () => {
   const isReviewLoading = useReviewStore((state) => state.isLoading);
   const getReviewsForDay = useReviewStore((state) => state.getReviewsForDay);
   const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
-  const updateReviewInStore = useReviewStore((state) => state.updateReviewInStore);
-  const deleteReviewFromStore = useReviewStore((state) => state.deleteReviewFromStore);
+  const updateReviewInStore = useReviewStore(
+    (state) => state.updateReviewInStore,
+  );
+  const deleteReviewFromStore = useReviewStore(
+    (state) => state.deleteReviewFromStore,
+  );
 
   const sortedDailyReviews = useMemo(() => {
     return [...dailyReviews].sort((a, b) => {
@@ -228,24 +263,30 @@ const DietLogScreen = () => {
   };
 
   // 리뷰 로직 관련
-  const handleUpdateReview = useCallback((reviewID) => {
-    const target = dailyReviews.find((r) => r.id === reviewID);
-    if (!target) {
-      console.log("Review not found for ID:", reviewID);
-      return;
-    }
-    console.log("Editing review with ID:", reviewID);
-    setEditingReview(target);
-    setActiveUpdateModal(true);
-  }, [dailyReviews]);
+  const handleUpdateReview = useCallback(
+    (reviewID) => {
+      const target = dailyReviews.find((r) => r.id === reviewID);
+      if (!target) {
+        console.log("Review not found for ID:", reviewID);
+        return;
+      }
+      console.log("Editing review with ID:", reviewID);
+      setEditingReview(target);
+      setActiveUpdateModal(true);
+    },
+    [dailyReviews],
+  );
 
-  const handleDeleteReview = useCallback((reviewID) => {
-    deleteReviewFromStore(targetAbsoluteDay, reviewID);
-  }, [deleteReviewFromStore, targetAbsoluteDay]);
+  const handleDeleteReview = useCallback(
+    (reviewID) => {
+      deleteReviewFromStore(targetAbsoluteDay, reviewID);
+    },
+    [deleteReviewFromStore, targetAbsoluteDay],
+  );
 
   const handleCreateSuccess = (createdReview) => {
     if (createdReview) {
-      addReviewToStore(targetAbsoluteDay, createdReview);
+      addReviewToStore(createdReview.day ?? targetAbsoluteDay, createdReview);
     }
     setActiveModal("none");
     setSelectedFoods([]);
@@ -317,13 +358,16 @@ const DietLogScreen = () => {
     setShouldReOpen(true);
   };
 
-  const renderReviewItem = useCallback(({ item }) => (
-    <ReviewCard
-      review={item}
-      onEdit={handleUpdateReview}
-      onDelete={handleDeleteReview}
-    />
-  ), [handleUpdateReview, handleDeleteReview]);
+  const renderReviewItem = useCallback(
+    ({ item }) => (
+      <ReviewCard
+        review={item}
+        onEdit={handleUpdateReview}
+        onDelete={handleDeleteReview}
+      />
+    ),
+    [handleUpdateReview, handleDeleteReview],
+  );
 
   return (
     <GestureDetector gesture={panGesture}>
@@ -336,7 +380,12 @@ const DietLogScreen = () => {
           <View style={{ width: "100%", height: insets.top }} />
 
           <View style={styles.headerContent}>
-            <Text style={styles.logoText}>밥땡</Text>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.logoText}>밥땡</Text>
+            </TouchableOpacity>
             <View style={styles.headerIcons}>
               <TouchableOpacity onPress={() => setIsSettingOpen(true)}>
                 <SettingsIcon color={Colors.yellow} width={24} height={24} />
@@ -367,6 +416,10 @@ const DietLogScreen = () => {
           >
             <PlusIcon width={24} height={24} />
           </TouchableOpacity>
+
+          <Animated.View style={animatedTextBubble}>
+            <TextBubbleComp />
+          </Animated.View>
         </Animated.View>
 
         <Animated.View
@@ -554,12 +607,6 @@ const DietLogScreen = () => {
           />
         </Modal>
 
-        <BackButton
-          index={5.5}
-          icon={<Back width={52} height={52} />}
-          onPress={() => navigation.goBack()}
-        />
-
         <SettingsDrawer
           visible={isSettingOpen}
           onClose={() => setIsSettingOpen(false)}
@@ -616,7 +663,7 @@ const styles = StyleSheet.create({
   floatingButtonsContainer: {
     position: "absolute",
     right: 16,
-    bottom: SHEET_HANDLE_HEIGHT + 8,
+    bottom: SHEET_HANDLE_HEIGHT + 12,
     zIndex: 100,
     alignItems: "center",
     gap: 5,

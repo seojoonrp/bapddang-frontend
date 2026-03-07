@@ -2,7 +2,7 @@
 
 import { WebView } from "react-native-webview";
 
-const KakaoMap = ({ keyword, lat, lon, onSelectPlace }) => {
+const KakaoMap = ({ keyword, lat, lon, onSelectPlace, onNoResults }) => {
   const KAKAO_JS_KEY = "643d9b7846899d4a7132b8fb9d74aba3";
 
   const mapHtml = `
@@ -39,7 +39,7 @@ const KakaoMap = ({ keyword, lat, lon, onSelectPlace }) => {
 
             const searchOptions = {
               location: new kakao.maps.LatLng(${lat}, ${lon}),
-              radius: 10000,
+              radius: 5000,
               sort: kakao.maps.services.SortBy.DISTANCE
             }
 
@@ -77,6 +77,7 @@ const KakaoMap = ({ keyword, lat, lon, onSelectPlace }) => {
                 }
               } else {
                 sendLog("Search failed status: " + status);
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'no_results' }));
               }
             }, searchOptions);
           });
@@ -105,6 +106,8 @@ const KakaoMap = ({ keyword, lat, lon, onSelectPlace }) => {
           onSelectPlace(data.place);
         } else if (data.type === "map_click") {
           onSelectPlace(null);
+        } else if (data.type === "no_results" && onNoResults) {
+          onNoResults();
         }
 
         if (data.type === "log") {

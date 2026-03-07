@@ -33,6 +33,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
 
   const { user } = useAuthStore();
   const [location, setLocation] = useState(null);
+  const [locationDenied, setLocationDenied] = useState(false);
 
   const modeColor = useModeStore((state) => state.modeColor);
 
@@ -41,7 +42,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.log("Permission to access location was denied");
-        setLocation({ latitude: 37.4502, longitude: 126.9526 }); // 301동ㅋㅋ
+        setLocationDenied(true);
         return;
       }
 
@@ -69,6 +70,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
 
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [distance, setDistance] = useState("");
+  const [noResults, setNoResults] = useState(false);
   useEffect(() => {
     if (selectedPlace) {
       const d = selectedPlace.distance;
@@ -137,12 +139,19 @@ const FoodInfoModal = ({ foodID, onClose }) => {
           </View>
 
           <View style={styles.mapContainer}>
-            {location ? (
+            {locationDenied ? (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.permissionText}>
+                  지도를 보려면{"\n"}위치 권한을 허용해주세요!
+                </Text>
+              </View>
+            ) : location ? (
               <KakaoMap
                 keyword={food.name}
                 lat={location.latitude}
                 lon={location.longitude}
                 onSelectPlace={setSelectedPlace}
+                onNoResults={() => setNoResults(true)}
               />
             ) : (
               <View style={styles.loadingContainer}>
@@ -167,7 +176,16 @@ const FoodInfoModal = ({ foodID, onClose }) => {
           </View>
 
           <View style={styles.distanceContainer}>
-            {distance !== "" && (
+            {noResults ? (
+              <Text
+                style={[
+                  styles.distanceText,
+                  { color: Colors.text_gray, fontSize: 12 },
+                ]}
+              >
+                5km 이내에 해당 음식을 판매하는 음식점이 없어요.
+              </Text>
+            ) : distance !== "" ? (
               <Animated.View
                 entering={ZoomIn.duration(250)}
                 exiting={ZoomOut.duration(200)}
@@ -184,7 +202,7 @@ const FoodInfoModal = ({ foodID, onClose }) => {
                   떨어진 곳에 있어요!
                 </Text>
               </Animated.View>
-            )}
+            ) : null}
           </View>
         </View>
       </View>
@@ -320,5 +338,15 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     backgroundColor: Colors.background_white,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  permissionText: {
+    fontFamily: "NanumSquareRoundB",
+    fontSize: 13,
+    color: Colors.text_gray,
+    letterSpacing: -0.4,
+    lineHeight: 17,
+    textAlign: "center",
   },
 });
