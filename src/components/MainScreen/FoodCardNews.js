@@ -1,7 +1,8 @@
 // src/components/MainScreen/FoodCardNews.js
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import Animated, {
   useSharedValue,
@@ -13,10 +14,12 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import FoodInfoModal from "./FoodInfoModal";
+import CreateReviewModal from "../DietLogScreen/CreateReviewModal";
 import Colors from "../../constants/colors";
 import Pagination from "../common/Pagination";
 import ReanimatedModal from "../common/ReanimatedModal";
 import { useFoodStore } from "../../stores/foodStore";
+import { useReviewStore } from "../../stores/reviewStore";
 import { useFoodFeed } from "../../hooks/useFoodFeed";
 import LoadingPlaceholer from "../common/LoadingPlaceholer";
 import { useShallow } from "zustand/shallow";
@@ -117,8 +120,11 @@ const FoodCardNews = ({
 
   const sidePadding = (screenWidth - size) / 2;
 
+  const navigation = useNavigation();
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewFoodName, setReviewFoodName] = useState("");
 
   const scrollX = useSharedValue(0);
   const maxScrollX = size * (displayData.length - 1);
@@ -140,6 +146,28 @@ const FoodCardNews = ({
     setSelectedFoodID(foodID);
     setShowInfo(true);
   }, []);
+
+  const handleCreateReview = (name) => {
+    setShowInfo(false);
+    setReviewFoodName(name);
+    setShowReviewModal(true);
+  };
+
+  const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
+
+  const handleReviewSuccess = (created) => {
+    setShowReviewModal(false);
+    setReviewFoodName("");
+    if (created) addReviewToStore(created.day, created);
+    Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.", [
+      { text: "확인", style: "cancel" },
+      {
+        text: "식단기록 화면으로 이동",
+        onPress: () => navigation.navigate("DietLog"),
+      },
+    ]);
+    return true;
+  };
 
   useEffect(() => {
     if (
@@ -287,6 +315,18 @@ const FoodCardNews = ({
         <FoodInfoModal
           foodID={selectedFoodID}
           onClose={() => setShowInfo(false)}
+          onCreateReview={handleCreateReview}
+        />
+      </ReanimatedModal>
+
+      <ReanimatedModal
+        visible={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+      >
+        <CreateReviewModal
+          onClose={() => setShowReviewModal(false)}
+          foodNames={[reviewFoodName]}
+          onCreateSuccess={handleReviewSuccess}
         />
       </ReanimatedModal>
     </View>

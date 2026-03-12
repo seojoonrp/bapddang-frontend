@@ -28,6 +28,7 @@ import { getRelativeTime } from "../utils/date";
 import SortSelector from "../components/LikedScreen/SortSelector";
 import CreateReviewModal from "../components/DietLogScreen/CreateReviewModal";
 import { useModeStore } from "../stores/modeStore";
+import { useReviewStore } from "../stores/reviewStore";
 
 const LikedScreen = () => {
   const navigation = useNavigation();
@@ -109,13 +110,17 @@ const LikedScreen = () => {
 
   const handleCreateReview = (name) => {
     setExpandedFoodID(null);
+    setShowInfo(false);
     setReviewFoodName(name);
     setShowReviewModal(true);
   };
 
-  const handleReviewSuccess = () => {
+  const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
+
+  const handleReviewSuccess = (created) => {
     setShowReviewModal(false);
     setReviewFoodName("");
+    if (created) addReviewToStore(created.day, created);
     Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.", [
       { text: "확인", style: "cancel" },
       {
@@ -278,6 +283,7 @@ const LikedScreen = () => {
         <FoodInfoModal
           foodID={selectedFoodID}
           onClose={() => setShowInfo(false)}
+          onCreateReview={handleCreateReview}
         />
       </ReanimatedModal>
 

@@ -6,6 +6,7 @@ import { useAuthStore } from "../../stores/authStore";
 import Colors from "../../constants/colors";
 import CloseIcon from "../../assets/icons/close-x.svg";
 import HeartIcon from "../../components/svg/HeartIcon";
+import EditIcon from "../../assets/icons/edit.svg";
 import KakaoMap from "../common/KakaoMap";
 import { useEffect, useState } from "react";
 import Animated, {
@@ -23,9 +24,8 @@ import LoadingPlaceholer from "../common/LoadingPlaceholer";
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-const FoodInfoModal = ({ foodID, onClose }) => {
+const FoodInfoModal = ({ foodID, onClose, onCreateReview }) => {
   if (!foodID) return null;
-
   const item = useFoodStore((state) => state.foodsByID[foodID]);
   const toggleLike = useFoodStore((state) => state.toggleLike);
   if (!item) return null;
@@ -84,6 +84,11 @@ const FoodInfoModal = ({ foodID, onClose }) => {
     }
   }, [selectedPlace]);
 
+  const handleCreateReview = () => {
+    onClose();
+    if (onCreateReview) onCreateReview(food.name);
+  };
+
   const openKakaoMap = async () => {
     if (!selectedPlace) return;
 
@@ -112,23 +117,32 @@ const FoodInfoModal = ({ foodID, onClose }) => {
 
           <Text style={styles.foodName}>{food.name}</Text>
 
-          <TouchableOpacity
-            style={styles.likeRow}
-            onPress={onLikePress}
-            activeOpacity={1}
-          >
-            <HeartIcon
-              size={20}
-              fillColor={isLiked ? Colors.point_red : "transparent"}
-              strokeColor={isLiked ? Colors.point_red : Colors.text_gray}
-              strokeWidth={1.5}
-            />
-            <Text
-              style={[styles.likeCountText, isLiked && { color: Colors.burn }]}
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.circleButton, { backgroundColor: modeColor }]}
+              onPress={handleCreateReview}
+              activeOpacity={0.7}
             >
-              {food.likeCount}
-            </Text>
-          </TouchableOpacity>
+              <EditIcon
+                width={19}
+                height={19}
+                color={Colors.background_white}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.circleButton, { backgroundColor: modeColor }]}
+              onPress={onLikePress}
+              activeOpacity={0.7}
+            >
+              <HeartIcon
+                size={20}
+                fillColor={isLiked ? Colors.background_white : "transparent"}
+                strokeColor={Colors.background_white}
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.categoryRow}>
             {food.categories.map((category) => (
@@ -256,17 +270,22 @@ const styles = StyleSheet.create({
     fontSize: 24,
     letterSpacing: -0.2,
   },
-  likeRow: {
+  buttonRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
-    marginTop: -6,
+    gap: 8,
+    marginTop: -2,
+    marginBottom: 4,
   },
-  likeCountText: {
-    fontFamily: "NanumSquareRoundB",
-    fontSize: 14,
-    color: Colors.text_gray,
-    marginTop: 2,
+  circleButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.background_white,
+    justifyContent: "center",
+    alignItems: "center",
+    boxShadow: "0 2px 0 0 #FDEDC0",
   },
   categoryRow: {
     flexDirection: "row",

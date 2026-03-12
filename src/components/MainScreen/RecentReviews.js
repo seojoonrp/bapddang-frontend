@@ -1,6 +1,7 @@
 // src/components/MainScreen/RecentReviews.js
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Colors from "../../constants/colors";
 import CheckIcon from "../../assets/icons/check.svg";
 import RecentReviewCard from "./RecentReviewCard";
@@ -8,10 +9,13 @@ import { useEffect, useState } from "react";
 import { fetchRecentReviews } from "../../services/review";
 import ReanimatedModal from "../common/ReanimatedModal";
 import FoodInfoModal from "./FoodInfoModal";
+import CreateReviewModal from "../DietLogScreen/CreateReviewModal";
 import { useFoodStore } from "../../stores/foodStore";
+import { useReviewStore } from "../../stores/reviewStore";
 import { useModeStore } from "../../stores/modeStore";
 
 const RecentReviews = () => {
+  const navigation = useNavigation();
   const modeColor = useModeStore((state) => state.modeColor);
 
   const [reviewData, setReviewData] = useState([]);
@@ -39,6 +43,30 @@ const RecentReviews = () => {
 
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewFoodName, setReviewFoodName] = useState("");
+
+  const handleCreateReview = (name) => {
+    setShowInfo(false);
+    setReviewFoodName(name);
+    setShowReviewModal(true);
+  };
+
+  const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
+
+  const handleReviewSuccess = (created) => {
+    setShowReviewModal(false);
+    setReviewFoodName("");
+    if (created) addReviewToStore(created.day, created);
+    Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.", [
+      { text: "확인", style: "cancel" },
+      {
+        text: "식단기록 화면으로 이동",
+        onPress: () => navigation.navigate("DietLog"),
+      },
+    ]);
+    return true;
+  };
 
   return (
     <View style={styles.container}>
@@ -69,6 +97,18 @@ const RecentReviews = () => {
         <FoodInfoModal
           foodID={selectedFoodID}
           onClose={() => setShowInfo(false)}
+          onCreateReview={handleCreateReview}
+        />
+      </ReanimatedModal>
+
+      <ReanimatedModal
+        visible={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+      >
+        <CreateReviewModal
+          onClose={() => setShowReviewModal(false)}
+          foodNames={[reviewFoodName]}
+          onCreateSuccess={handleReviewSuccess}
         />
       </ReanimatedModal>
     </View>

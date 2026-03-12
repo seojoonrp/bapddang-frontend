@@ -1,7 +1,14 @@
 // src/components/MainScreen/LikedFoods.js
 
 import { memo, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useShallow } from "zustand/shallow";
 import { useModeStore } from "../../stores/modeStore";
@@ -10,8 +17,10 @@ import { fetchLikedFoods } from "../../services/like";
 import Colors from "../../constants/colors";
 import HeartIcon from "../../components/svg/HeartIcon";
 import AllIcon from "../../assets/images/liked-all.svg";
+import { useReviewStore } from "../../stores/reviewStore";
 import ReanimatedModal from "../common/ReanimatedModal";
 import FoodInfoModal from "./FoodInfoModal";
+import CreateReviewModal from "../DietLogScreen/CreateReviewModal";
 
 const LikedFoods = () => {
   const navigation = useNavigation();
@@ -21,6 +30,30 @@ const LikedFoods = () => {
 
   const [selectedFoodID, setSelectedFoodID] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewFoodName, setReviewFoodName] = useState("");
+
+  const handleCreateReview = (name) => {
+    setShowInfo(false);
+    setReviewFoodName(name);
+    setShowReviewModal(true);
+  };
+
+  const addReviewToStore = useReviewStore((state) => state.addReviewToStore);
+
+  const handleReviewSuccess = (created) => {
+    setShowReviewModal(false);
+    setReviewFoodName("");
+    if (created) addReviewToStore(created.day, created);
+    Alert.alert("등록 완료", "식단이 성공적으로 등록되었습니다.", [
+      { text: "확인", style: "cancel" },
+      {
+        text: "식단기록 화면으로 이동",
+        onPress: () => navigation.navigate("DietLog"),
+      },
+    ]);
+    return true;
+  };
 
   const likedItems = useFoodStore(useShallow(selectLikedFoodItems));
   const setLikedFoods = useFoodStore((state) => state.setLikedFoods);
@@ -136,6 +169,18 @@ const LikedFoods = () => {
         <FoodInfoModal
           foodID={selectedFoodID}
           onClose={() => setShowInfo(false)}
+          onCreateReview={handleCreateReview}
+        />
+      </ReanimatedModal>
+
+      <ReanimatedModal
+        visible={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+      >
+        <CreateReviewModal
+          onClose={() => setShowReviewModal(false)}
+          foodNames={[reviewFoodName]}
+          onCreateSuccess={handleReviewSuccess}
         />
       </ReanimatedModal>
     </View>
