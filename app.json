@@ -24,11 +24,15 @@
           }
         ],
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["instagram", "kakaomap"]
+        "NSCameraUsageDescription": "[밥땡]은 프로필 사진 등록 및 맛집 리뷰 작성을 위해 카메라 접근 권한이 필요합니다. 예: 직접 찍은 음식 사진을 리뷰에 바로 등록할 수 있습니다.",
+        "NSPhotoLibraryUsageDescription": "[밥땡]은 맛집 리뷰 작성을 위해 앨범에 저장된 사진을 선택하고 업로드하는 권한이 필요합니다. 예: 갤러리에 저장된 음식 사진을 리뷰에 첨부할 수 있습니다.",
+        "NSLocationWhenInUseUsageDescription": "[밥땡]은 현재 위치를 기반으로 주변 맛집을 추천하고 식당까지의 거리를 계산하기 위해 위치 정보가 필요합니다. 예: 내 주변 10km 이내의 식당 찾기.",
+        "LSApplicationQueriesSchemes": ["kakaomap", "nmap"]
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
           {
+            "NSPrivacyAccessedAPICategoryUserDefaults": "CA92.1",
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
             "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
           },

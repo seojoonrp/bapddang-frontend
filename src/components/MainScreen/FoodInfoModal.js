@@ -1,6 +1,13 @@
 // src/components/MainScreen/FoodInfoModal.js
 
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { handleLike, handleUnlike } from "../../services/like";
 import { useAuthStore } from "../../stores/authStore";
 import Colors from "../../constants/colors";
@@ -95,12 +102,28 @@ const FoodInfoModal = ({ foodID, onClose, onCreateReview }) => {
     const { place_name, x, y } = selectedPlace;
     const url = `kakaomap://search?q=${encodeURIComponent(place_name)}&lookMode=1`;
     const webUrl = `https://map.kakao.com/link/search/${encodeURIComponent(place_name)}`;
-
     try {
       await Linking.openURL(url);
     } catch (error) {
       Linking.openURL(webUrl);
     }
+  };
+
+  const openAppleMap = (place_name, x, y) => {
+    const url = `maps://?q=${encodeURIComponent(place_name)}&ll=${y},${x}`;
+    Linking.openURL(url);
+  };
+
+  const openMap = () => {
+    if (!selectedPlace) return;
+
+    const { place_name, x, y } = selectedPlace;
+
+    Alert.alert("지도 앱 선택", "어떤 지도로 열까요?", [
+      { text: "카카오맵", onPress: () => openKakaoMap(place_name) },
+      { text: "Apple 지도", onPress: () => openAppleMap(place_name, x, y) },
+      { text: "취소", style: "cancel" },
+    ]);
   };
 
   return (
@@ -178,7 +201,7 @@ const FoodInfoModal = ({ foodID, onClose, onCreateReview }) => {
                 entering={ZoomInEasyDown.duration(250)}
                 exiting={ZoomOutEasyDown.duration(200)}
                 style={styles.placeInfoContainer}
-                onPress={openKakaoMap}
+                onPress={openMap}
                 activeOpacity={0.75}
               >
                 <Text style={styles.placeName}>{selectedPlace.place_name}</Text>
