@@ -2,11 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({
-  // 배포 서버
-  baseURL: "https://43.201.22.91.sslip.io/api/v1",
-
-  // 로컬 서버 (ngrok)
-  // baseURL: "http://172.30.1.28:8080/api/v1",
+  baseURL: "https://3.37.35.78.sslip.io/api/v1",
 
   timeout: 7000,
 });
