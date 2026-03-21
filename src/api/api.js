@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({
-  baseURL: "https://3.37.35.78.sslip.io/api/v1",
+  baseURL: "https://api.bapddang.com/api/v1",
 
   timeout: 7000,
 });
