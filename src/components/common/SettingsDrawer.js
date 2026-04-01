@@ -218,7 +218,7 @@ const SettingsDrawer = ({ visible, onClose, onNavigate }) => {
               <View style={styles.footer}>
                 <View style={styles.versionContainer}>
                   <Text style={styles.footerText}>앱 버전</Text>
-                  <Text style={styles.versionText}>v.1.0.0</Text>
+                  <Text style={styles.versionText}>v.1.0.1</Text>
                 </View>
                 <Pressable
                   style={styles.footerLink}
