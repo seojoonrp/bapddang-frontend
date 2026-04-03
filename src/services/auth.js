@@ -2,10 +2,10 @@
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import {
-  login as kakaoLogin,
-  logout as kakaoLogout,
-} from "@react-native-seoul/kakao-login";
+// import {
+//   login as kakaoLogin,
+//   logout as kakaoLogout,
+// } from "@react-native-seoul/kakao-login";
 import api from "../api/api";
 import { syncUserWeekAndDay } from "./user";
 import { useAuthStore } from "../stores/authStore";
@@ -115,18 +115,18 @@ export const handleGoogleLogin = async () => {
   }
 };
 
-export const handleKakaoLogin = async () => {
-  try {
-    const token = await kakaoLogin();
-
-    const result = await api.post("/auth/kakao", {
-      accessToken: token.accessToken,
-    });
-    return await processAuthResult(result, "Kakao");
-  } catch (error) {
-    throw error;
-  }
-};
+// export const handleKakaoLogin = async () => {
+//   try {
+//     const token = await kakaoLogin();
+//
+//     const result = await api.post("/auth/kakao", {
+//       accessToken: token.accessToken,
+//     });
+//     return await processAuthResult(result, "Kakao");
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 export const handleAppleLogin = async () => {
   try {
@@ -175,9 +175,10 @@ export const handleLogout = async () => {
 
     if (loginMethod === "google") {
       await GoogleSignin.signOut();
-    } else if (loginMethod === "kakao") {
-      await kakaoLogout();
     }
+    // else if (loginMethod === "kakao") {
+    //   await kakaoLogout();
+    // }
 
     await useAuthStore.getState().setLogout();
 

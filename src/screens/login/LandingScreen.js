@@ -8,11 +8,11 @@ import {
   handleAgreeToTerms,
   handleAppleLogin,
   handleGoogleLogin,
-  handleKakaoLogin,
+  // handleKakaoLogin,
 } from "../../services/auth";
 import Colors from "../../constants/colors";
 import GoogleIcon from "../../assets/icons/google.svg";
-import KakaoIcon from "../../assets/icons/kakao.svg";
+// import KakaoIcon from "../../assets/icons/kakao.svg";
 import AppleIcon from "../../assets/icons/apple.svg";
 import { useAuthStore } from "../../stores/authStore";
 import AgreeBottomSheet from "../../components/common/AgreeBottomSheet";
@@ -92,7 +92,7 @@ const LandingScreen = () => {
         >
           <GoogleIcon width={22} height={22} />
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.socialButton,
             { backgroundColor: Colors.kakao_yellow },
@@ -101,7 +101,7 @@ const LandingScreen = () => {
           activeOpacity={0.7}
         >
           <KakaoIcon width={24} height={24} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           style={[styles.socialButton, { backgroundColor: "black" }]}
           onPress={() => onSocialLogin(handleAppleLogin)}

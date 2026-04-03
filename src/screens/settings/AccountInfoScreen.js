@@ -11,8 +11,8 @@ const AccountInfoScreen = () => {
   const formatLoginMethod = (method) => {
     if (!method) return "제공되지 않음";
     switch (method) {
-      case "kakao":
-        return "카카오";
+      // case "kakao":
+      //   return "카카오";
       case "apple":
         return "Apple";
       case "google":
